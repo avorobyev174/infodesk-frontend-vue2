@@ -384,7 +384,8 @@
         provide: function () {
 	        return {
 		        formatDate: this.formatDate,
-		        getEmployeeTitle: this.getEmployeeTitle
+		        getEmployeeTitle: this.getEmployeeTitle,
+		        getMeterTypeTitle: this.getMeterTypeTitle
 	        }
         },
 		methods: {
@@ -438,19 +439,19 @@
 			},
 
 			getAccuracyClassTitle(accuracyClass) {
-				return this.accuracyClasses.find(type => accuracyClass === type.value).text
+				return this.accuracyClasses.find(accClass => accuracyClass === accClass.value).text
 			},
 
 			getConditionTitle(condition) {
-				return this.conditions.find(type => condition === type.value).text
+				return this.conditions.find(cond => condition === cond.value).text
 			},
 
 			getLocationTitle(location) {
-				return this.locations.find(type => location === type.value).text
+				return this.locations.find(loc => location === loc.value).text
 			},
 
 			getOwnerTitle(owner) {
-				return this.owners.find(type => owner === type.value).text
+				return this.owners.find(own => owner === own.value).text
 			},
 
 			getEmployeeTitle(employee) {

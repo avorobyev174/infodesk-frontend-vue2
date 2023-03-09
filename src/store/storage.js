@@ -51,6 +51,11 @@ export const storage = {
 		owners: [
 			{ text: 'МЭК', value: 0 },
 			{ text: 'Потребитель', value: 1 }
+		],
+		lvStates: [
+			{ text: 'отсутствует',  value: 0 },
+			{ text: 'не работает', value: 1 },
+			{ text: 'работает', value: 2 }
 		]
 	}),
 	getters: {
@@ -83,6 +88,9 @@ export const storage = {
 		},
 		getLogs(state) {
 			return state.logs
+		},
+		getLVStates(state) {
+			return state.lvStates
 		},
 	},
 	mutations: {
@@ -175,8 +183,7 @@ export const storage = {
 				const response = await axios.get(
 					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/logs/${ GUID }`,
 					{ headers: {'authorization': $cookies.get('auth_token')} })
-				
-				console.log(response.data)
+					
 				commit('setLogs', response.data)
 			} finally {
 				commit('setLogLoading', false)

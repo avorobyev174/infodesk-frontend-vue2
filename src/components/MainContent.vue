@@ -40,7 +40,7 @@
         width: 100%;
         height: 100%;
         opacity: 0.25;
-        background: url("../assets/1616710999_32-p-belii-abstraktnii-fon-34.png");
+        background: url("../assets/background.png");
         background-size: cover;
     }
 </style>

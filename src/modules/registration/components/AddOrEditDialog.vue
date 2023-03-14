@@ -206,29 +206,28 @@
             componentTitle: 'Диалог добавления/редактирования',
             serialNumberRules: [
                 v => !!v || 'Обязательно к заполнению',
-                v => (v && v.length >= 8) || 'Должно быть не меньше 8 символов',
-                /*v => (v && !(new RegExp('[^0-9]', 'g').test(String(v)))) || 'Должны присутствовать только цифры'*/
+                v => v && String(v).length >= 8 || 'Должно быть не меньше 8 символов',
             ],
             iccDynamicRules: [],
             parentDynamicRules: [],
             iccRules: [
                 v => !!v || 'Обязательно к заполнению',
-                v => (v && (v == parseInt(v))) || 'Должно быть целым числом',
-                v => (v && String(v).length <= 20) || 'Должно быть меньше 20 символов'
+                v => v && parseFloat(v) % 1 === 0 || 'Должно быть целым числом',
+                v => v && String(v).length <= 20 || 'Должно быть меньше 20 символов'
             ],
 	        gatewayDynamicRules: [],
 	        gateWayRules: [
 		        v => !!v || 'Обязательно к заполнению',
-		        v => (v && (v == parseInt(v))) || 'Должно быть целым числом',
-		        v => (v && String(v).length >= 6) || 'Должно быть меньше 6 символов'
+		        v => v && parseFloat(v) % 1 === 0 || 'Должно быть целым числом',
+		        v => v && String(v).length >= 6 || 'Должно быть меньше 6 символов'
 	        ],
             portRules: [
                 v => !!v || 'Обязательно к заполнению',
-                v => (v && (v == parseInt(v))) || 'Должно быть целым числом',
-                v => (v && (v >= 0)) || 'Должно быть больше или равно нулю',
+                v => v && parseFloat(v) % 1 === 0 || 'Должно быть целым числом',
+                v => v && v >= 0 || 'Должно быть больше или равно нулю',
             ],
             contactRules: [
-                v => v === null || v === '' ? true : (v && (v == parseInt(v))) || 'Должно быть целым числом'
+                v => v === null || v === '' ? true : v && parseFloat(v) % 1 === 0 || 'Должно быть целым числом'
             ],
 	        parentRules: [
 		        v => !!v || 'Должен быть выбран родитель',
@@ -316,7 +315,7 @@
 		            }
 	            }
 	            this.isChildMirC04 = [20].includes(type)
-	            this.hasGateway = [23, 31].includes(type)
+	            this.hasGateway = [23, 31, 33].includes(type)
             },
 
 	        meterParentChanged(parentId) {
@@ -372,6 +371,8 @@
                         	contact = 16; break;
 	                    case 23:
 	                    case 31:
+	                    case 33:
+	                    case 3:
 	                    	contact = serialNumber.substr(-5); break;
 	                    case 30: contact = parseInt(serialNumber.substr(-4)) + 1000; break;
                         default:

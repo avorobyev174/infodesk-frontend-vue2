@@ -187,7 +187,6 @@
 <script>
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex'
 import ButtonWithTooltip from "../utils-components/ButtonWithTooltip"
-import SimpleTooltipForTable from "./components/SimpleTooltipForTable"
 import SaveDataToExcelDialog from "./components/SaveDataToExcelDialog"
 import ActionColumn from "./components/ActionColumn"
 import MarkMeterDialog from "./components/MarkMeterDialog"
@@ -208,7 +207,6 @@ export default {
     RefreshDataFromStekToPyramidDialog,
     ExcelMenu,
     buttonWithTooltip: ButtonWithTooltip,
-    simpleTooltipForTable: SimpleTooltipForTable,
     saveDataToExcelDialog: SaveDataToExcelDialog,
     actionColumn: ActionColumn,
     markMeterDialog: MarkMeterDialog,

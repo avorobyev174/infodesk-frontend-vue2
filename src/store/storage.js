@@ -15,9 +15,9 @@ export const storage = {
 			{ text: 'Проверка(УИТ)', value: 2 },
 			{ text: 'Ремонт(завод)', value: 3 },
 			{ text: 'Монтаж', value: 4 },
-			{ text: 'Списан', value: 5 },
+			{ text: 'Списание', value: 5 },
 			{ text: 'Поверка', value: 6 },
-			{ text: 'Объект', value: 7 },
+			/*{ text: 'Объект', value: 7 },*/
 			{ text: 'Окно выдачи потребителю', value: 8 },
 			{ text: 'Программирование(УИТ)', value: 9 },
 		],
@@ -32,7 +32,7 @@ export const storage = {
 			{ text: 'Регистрация', value: 7 },
 			{ text: 'Редактирование', value: 8},
 			{ text: 'Прием на склад', value: 9 },
-			{ text: 'Установка на объект', value: 10 },
+			/*{ text: 'Установка на объект', value: 10 },*/
 			{ text: 'Выдача потребителю', value: 11 },
 			{ text: 'Выдача на программирование', value: 12 }
 		],
@@ -149,8 +149,8 @@ export const storage = {
 			const response = await axios.get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meter-types`,
 				{ headers: {'authorization': $cookies.get('auth_token')} })
-				
-			commit('setMeterTypes', response.data)
+			
+			commit('setMeterTypes', response.data.map(type => { return { title: type.TYPE_NAME, index: type.TYPE_INDEX } }))
 		},
 		
 		async fetchEmployees({ state, commit }) {
@@ -185,6 +185,20 @@ export const storage = {
 					{ headers: {'authorization': $cookies.get('auth_token')} })
 					
 				commit('setLogs', response.data)
+			} finally {
+				commit('setLogLoading', false)
+			}
+		},
+		
+		async checkMeterInDB({ state, commit }, { serialNumber, type }) {
+			try {
+				commit('setLogLoading', true)
+				const response = await axios.post(
+					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter`,
+					{ serialNumber, type },
+					{ headers: {'authorization': $cookies.get('auth_token')} })
+				
+				return response.data
 			} finally {
 				commit('setLogLoading', false)
 			}

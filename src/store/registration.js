@@ -39,8 +39,9 @@ export const registration = {
             { text: 'Энергомера CE308 S34.746.OG.QYUVLFZ GS01 SPDS 3', value: 28 },
             { text: 'Энергомера CE308 S31.543.OAG.SYUVJLFZ GS01 SPDS', value: 29 },
             { text: 'РОТЕК РТМ-01 D2D3Y-31Y20-O21IS', value: 30 },
-            { text: 'МИРТЕК-232-РУ-W32', value: 31 },
+            { text: 'МИРТЕК-232-РУ-W32-A1R1', value: 31 },
             { text: 'Энергомера CE308 S31.503.OAG.SYUVJLFZ GS01 SPDS', value: 32 },
+            { text: 'МИРТЕК-232-РУ-W32-A0,5R1', value: 33 },
         ],
         status: [
             { text: 'Действующий', value: 2 },

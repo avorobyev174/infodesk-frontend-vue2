@@ -86,7 +86,8 @@
                     <div class="header-filter-wrapper header-filter-type-wrapper p-1 pr-2">
                         <v-combobox
                             :items="types"
-                            item-text="TYPE_NAME"
+                            item-text="title"
+                            item-value="index"
                             label="Выберите тип"
                             class="p-3 pt-5 pb-0"
                             v-model="filterByType"
@@ -147,6 +148,11 @@
                         clearable
                         class="search-text-input"
                     />
+                    <v-spacer></v-spacer>
+                    <main-menu
+                        class="pr-2"
+                        @acceptOrIssue="$refs.acceptOrIssueDialog.open()"
+                    ></main-menu>
                 </v-toolbar>
             </template>
 
@@ -184,19 +190,26 @@
             </template>
         </v-data-table>
         <log-table></log-table>
+        <accept-or-issue-dialog
+            ref="acceptOrIssueDialog"
+        ></accept-or-issue-dialog>
     </v-card>
 </template>
 
 <script>
 	import ActionColumn from "../registration/components/ActionColumn"
-    import LogTable from "./LogTable";
-	import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
+    import LogTable from "./LogTable"
+	import MainMenu from "./components/MainMenu"
+    import AcceptOrIssueDialog from "./components/AcceptOrIssueDialog"
+    import {mapActions, mapGetters, mapMutations, mapState} from "vuex"
 
 	export default {
 		name: "Storage",
 		components: {
-			actionColumn: ActionColumn,
-			logTable: LogTable,
+			MainMenu,
+			ActionColumn,
+			LogTable,
+            AcceptOrIssueDialog
 		},
 		data: () => ({
 			options: {},
@@ -398,13 +411,12 @@
                 'fetchEmployees',
 				'fetchLogs'
             ]),
-
+            //Обработка куки
 			setCookies() {
 				if (this.getCookies)
 					this.settings.forEach(setting => this.checkAndSetCookieValue(setting))
 			},
 
-			//Обработка куки
 			checkAndSetCookieValue(settings) {
 				const cookieName = `${this.moduleName}_${settings}`
 				if (!$cookies.get(cookieName)) {
@@ -429,13 +441,18 @@
 				this.fetchEmployees()
 			},
 
-            async initializeMeters() {
-	            this.totalMeters = await this.fetchMetersPerPage(this.options)
-	            //this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
+            initializeMeters() {
+	            this.fetchMetersPerPage(this.options).then(
+	            	result => {
+			            this.totalMeters = result
+			            //this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
+                    },
+                    e => this.showNotificationStandardError(e)
+                )
             },
 
 			getMeterTypeTitle(meterType) {
-				return this.types.find(type => meterType === type.TYPE_INDEX).TYPE_NAME
+				return this.types.find(type => meterType === type.index).title
 			},
 
 			getAccuracyClassTitle(accuracyClass) {
@@ -469,13 +486,11 @@
             },
 
 			async doFilter(inputSource) {
-				switch (inputSource) {
-					case `serialNumber`: this.$refs.filterBySerialNumberMenu.save(); break;
+				if (inputSource === 'serialNumber') {
+					this.$refs.filterBySerialNumberMenu.save()
 				}
 
                 this.checkAllFilters()
-
-				console.log(this.filters)
 
                 if (!Object.keys(this.filters).length) {
 	                await this.initializeMeters()
@@ -494,7 +509,7 @@
                     : delete this.filters['serialNumber']
 
 	            this.filterByType.length
-		            ? this.filters['types'] = this.filterByType.map(type => type.TYPE_INDEX)
+		            ? this.filters['types'] = this.filterByType.map(type => type.index)
 	                : delete this.filters['types']
 
 
@@ -505,8 +520,10 @@
 
 			initializeLogs(item, row) {
 				row.select(true)
-
-				this.fetchLogs(item.GUID)
+				this.fetchLogs(item.GUID).then(
+					result => {},
+					e => this.showNotificationStandardError(e)
+				)
             },
 
 			formatDate(dateToFormat) {
@@ -530,10 +547,6 @@
 <style scoped>
     .meter-table {
         border-radius: 0 !important;
-    }
-
-    tr.v-data-table__selected {
-        background: #7d92f5 !important;
     }
 
     .table-small-cell {

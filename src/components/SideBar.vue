@@ -68,6 +68,7 @@
           modules: [
               { title: 'Регистрация', icon: 'mdi-meter-electric-outline', url: '/storage', name: 'storage'},
               { title: 'Программирование', icon: 'mdi-desktop-classic', url: '/registration', name: 'registration'},
+              { title: 'Перепрограммирование', icon: 'mdi-progress-wrench', url: '/repair', name: 'repair'},
               { title: 'Поиск', icon: 'mdi-card-search-outline', url: '/search', name: 'search'},
               { title: 'Графики', icon: 'mdi-chart-bar', url: '/charts', name: 'charts'},
               { title: 'Отчеты', icon: 'mdi-file-excel', url: '/reports', name: 'reports'},

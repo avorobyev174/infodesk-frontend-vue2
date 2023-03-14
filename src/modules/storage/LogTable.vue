@@ -148,11 +148,6 @@
 				lvStates: 'storage/getLVStates'
 			}),
 		},
-        props: {
-	        meterGuid: {
-		        type: String
-	        }
-        },
 		inject: ['showNotification', 'showNotificationStandardError', 'formatDate', 'getEmployeeTitle', 'getMeterTypeTitle'],
 		methods: {
 			...mapActions('storage', [

@@ -68,22 +68,22 @@ export const registration = {
     }),
     getters: {
         getMeters(state) {
-            return state.meters;
+            return state.meters
         },
         getPhases(state) {
-            return state.phases;
+            return state.phases
         },
         getTypes(state) {
-            return state.types;
+            return state.types
         },
         getStatus(state) {
-            return state.status;
+            return state.status
         },
         getSmsStatus(state) {
-            return state.smsStatus;
+            return state.smsStatus
         },
         getIpAddress(state) {
-            return state.ipAddress;
+            return state.ipAddress
         },
        
     },

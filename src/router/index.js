@@ -1,19 +1,20 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Registration from '../modules/registration/MeterRegistration.vue'
-import Charts from "../modules/Charts";
-import Search from "../modules/Search";
-import Map from "../modules/map/Map";
-import Meters from "../modules/Meters";
-import Login from "../modules/Login";
-import PageNotFound from "../modules/PageNotFound";
-import Profile from "../profile/Profile";
-import Alpha from "../modules/alpha/Alpha";
-import TestUtils from "../modules/test-utils/TestUtils";
-import Reports from "../modules/reports/Reports";
-import Welcome from "../modules/Welcome";
-import Admin from "../modules/Admin";
-import Storage from "../modules/storage/Storage";
+import Charts from "../modules/Charts"
+import Search from "../modules/Search"
+import Map from "../modules/map/Map"
+import Meters from "../modules/Meters"
+import Login from "../modules/Login"
+import PageNotFound from "../modules/PageNotFound"
+import Profile from "../profile/Profile"
+import Alpha from "../modules/alpha/Alpha"
+import TestUtils from "../modules/test-utils/TestUtils"
+import Reports from "../modules/reports/Reports"
+import Welcome from "../modules/Welcome"
+import Admin from "../modules/Admin"
+import Storage from "../modules/storage/Storage"
+import Repair from "../modules/repair/Repair"
 
 Vue.use(VueRouter)
 
@@ -82,6 +83,11 @@ const routes = [
     path: '/storage',
     name: 'Storage',
     component: Storage
+  },
+  {
+    path: '/repair',
+    name: 'Repair',
+    component: Repair
   },
   {
     path: "*",

@@ -26,10 +26,6 @@
                 <span>Идет загрузка счетчиков...</span>
             </template>
 
-            <template v-slot:no-data>
-                <p class="pt-4">Нет данных...</p>
-            </template>
-
             <template v-slot:header.SERIAL_NUMBER="{ header }">
                 {{ header.text }}
                 <v-menu
@@ -402,14 +398,13 @@
 	        }
         },
 		methods: {
-			...mapMutations('storage', ['setMeters']),
 			...mapMutations(['setFavoriteModuleColor']),
 			...mapActions('storage', [
                 'filter',
                 'fetchMeterTypes',
                 'fetchMetersPerPage',
                 'fetchEmployees',
-				'fetchLogs'
+				'fetchLogs',
             ]),
             //Обработка куки
 			setCookies() {

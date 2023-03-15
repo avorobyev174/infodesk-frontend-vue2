@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios, {post} from "axios"
 
 export const storage = {
 	state: () => ({
@@ -201,6 +201,34 @@ export const storage = {
 				return response.data
 			} finally {
 				commit('setLogLoading', false)
+			}
+		},
+		
+		async updateMeter({ state, commit }, { GUID, serialNumber, acceptedPerson }) {
+			try {
+				commit('setLoading', true)
+				const response = await post(
+					this.state.serverUrl + `/api/${ this.state.repair.serverModuleName }/update-empty-meter`,
+					{ GUID, serialNumber, acceptedPerson },
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
+				
+				return response.data[0]
+			} finally {
+				commit('setLoading', false)
+			}
+		},
+		
+		async createLog({ state, commit }, { meters, operationType, newLocation, issuingPerson, acceptedPerson, comment }) {
+			try {
+				commit('setLoading', true)
+				const response = await post(
+					this.state.serverUrl + `/api/${ this.state.repair.serverModuleName }/create-log`,
+					{ meters, operationType, newLocation, issuingPerson, acceptedPerson, comment },
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
+				
+				return response.data[0]
+			} finally {
+				commit('setLoading', false)
 			}
 		},
 	},

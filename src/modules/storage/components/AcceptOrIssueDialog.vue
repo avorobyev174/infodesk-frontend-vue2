@@ -12,7 +12,7 @@
         >
             <v-card class="p-2">
                 <v-card-title>
-                    <span class="m-auto text-h5">Диалог приема/выдачи</span>
+                    <span class="m-auto text-h5 pb-2">{{ dialogTitle }}</span>
                 </v-card-title>
                 <div class="dialog-wrapper">
                     <v-card-text class="pt-4">
@@ -21,7 +21,6 @@
                             :items="operationTypeDirection"
                             item-text="text"
                             item-value="value"
-                            @change="locationDirectionChanged()"
                             label="Тип операции"
                             required
                         />
@@ -31,7 +30,6 @@
                             item-text="text"
                             item-value="value"
                             label="Направление"
-                            :rules="directionRules"
                         />
                         <v-text-field
                             v-model="issuingPerson"
@@ -61,7 +59,6 @@
                                 class="pl-1 pt-2 pb-0 pr-3"
                                 v-model="type"
                                 outlined
-                                @change="locationDirectionChanged"
                             >
                             </v-combobox>
                             <v-text-field
@@ -75,58 +72,56 @@
                             </v-text-field>
                             <v-btn-toggle
                             >
-                                <v-btn>
-                                    <v-icon @click="meterAddButtonOnClick" :color="colorGreen" large>mdi-plus-thick</v-icon>
+                                <v-btn @click="meterAddButtonOnClick">
+                                    <v-icon :color="colorGreen" large>mdi-plus-thick</v-icon>
                                 </v-btn>
-                                <v-btn>
-                                    <v-icon @click="meterCloseButtonOnClick" :color="colorRed" large>mdi-minus-thick</v-icon>
+                                <v-btn @click="meterCloseButtonOnClick">
+                                    <v-icon :color="colorRed" large>mdi-minus-thick</v-icon>
                                 </v-btn>
-                                <v-btn>
-                                    <v-icon @click="scannerActiveOnClick" :color="scannerButtonColor" large>mdi-barcode-scan</v-icon>
+                                <v-btn @click="scannerActiveOnClick">
+                                    <v-icon :color="scannerButtonColor" large>mdi-barcode-scan</v-icon>
                                 </v-btn>
                             </v-btn-toggle>
                         </div>
-                        <v-simple-table
+                        <v-data-table
                             fixed-header
                             height="300px"
                             class="meter-table pl-1"
+                            :items="meters"
+                            single-select
+                            item-key="serialNumber"
+                            :headers="headers"
+                            hide-default-footer
                         >
-                            <template v-slot:default>
-                                <thead>
-                                <tr>
-                                    <th class="text-center type-column">Тип</th>
-                                    <th class="text-center">Серийный номер</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr
-                                    v-for="(item, i) in meters"
-                                    :key="item.serial_number"
-                                    @click="meterTableRowOnClick(i)"
-                                    :class="{ selected: selected === i }"
-                                >
-                                    <td>{{ item.type }}</td>
-                                    <td>{{ item.serialNumber }}</td>
-                                </tr>
-                                </tbody>
+                            <template v-slot:no-data>
+                                <p class="pt-4">Пока нет данных...</p>
                             </template>
-                        </v-simple-table>
-
+                            <template v-slot:item.status="{ item }">
+                                <v-icon
+                                    size="25"
+                                    class="ma-2"
+                                    :color="colorGrey"
+                                >
+                                    mdi-checkbox-blank-circle-outline
+                                </v-icon>
+                            </template>
+                        </v-data-table>
+                        <p class="meter-count">Количество счетчиков в таблице: {{ meters.length }}</p>
                     </div>
                 </div>
-                <v-card-actions>
+                <v-card-actions class="pt-4">
                     <v-spacer></v-spacer>
                     <v-btn
-                            color="primary"
-                            text
-                            @click="close"
+                        color="primary"
+                        text
+                        @click="close"
                     >
                         Отмена
                     </v-btn>
                     <v-btn
-                            color="primary"
-                            text
-                            type="submit"
+                        color="primary"
+                        text
+                        type="submit"
                     >
                         {{ buttonTitle }}
                     </v-btn>
@@ -145,16 +140,47 @@
 
         },
         data: () => ({
+            headers: [
+	            {
+		            text: 'Тип',
+		            align: 'center',
+		            value: 'type',
+		            sortable: false,
+		            cellClass: 'table-header-size',
+                    width: '200px'
+	            },
+	            {
+		            text: 'Серийный номер',
+		            align: 'center',
+		            value: 'serialNumber',
+		            sortable: false,
+		            cellClass: 'table-header-size',
+	            },
+	            {
+		            text: 'Статус',
+		            align: 'center',
+		            value: 'status',
+		            sortable: false,
+		            cellClass: 'table-header-size',
+		            width: '180px'
+	            },
+            ],
+            metersWithLetters: [66, 111, 119, 120],
             scannerButtonColor: '',
             scannerActive: false,
             dialogModel: false,
             activateScanner: true,
-            currentLocation: '',
-            needIssuingPerson: true,
+            currentLocation: 0,
+            currentLocationTitle: '',
+            needAcceptedPerson: true,
 	        issuingPerson: '',
+	        issuingPersonStaffId: '',
 	        acceptedPerson: '',
+	        acceptedPersonStaffId: '',
             comment: '',
+            locations: [],
             buttonTitle: 'Принять',
+            dialogTitle: 'Диалог приема',
             formValid: true,
             operationTypeDirection: [{ text: 'Прием', value: 0 }, { text: 'Выдача', value: 1 }],
             currentTypeDirection: 0,
@@ -165,11 +191,6 @@
 		        v => !!v || 'Обязательно к заполнению',
 		        v => v && !v.match('[^0-9]') || 'Должны присутствовать только цифры'
 	        ],
-            directionRules: [ v => !!v || 'Обязательно к заполнению' ],
-	        /*serialNumberRules: [
-		        v => v && String(v).length >= 6 || 'Должно быть не меньше 6 символов',
-		        v => v && parseFloat(v) % 1 === 0 || 'Должно быть целым числом'
-	        ],*/
 	        selected: 0,
             meters:  [],
             type: { index: 12, title: 'NP71L.1-1-3' },
@@ -177,8 +198,15 @@
         }),
         mounted() {
             this.scannerButtonColor = this.colorGrey
+	        this.locations = this.defaultLocations.slice(0, 1)
         },
-	    inject: ['showNotification', 'showNotificationComponentError', 'showNotificationStandardError', 'getMeterTypeTitle'],
+	    inject: [
+	    	'showNotification',
+            'showNotificationComponentError',
+            'showNotificationStandardError',
+            'getMeterTypeTitle',
+            'getEmployeeTitle',
+        ],
 	    computed: {
 		    ...mapState({
 			    loading: state => state.storage.meterLoading,
@@ -190,24 +218,50 @@
 			    colorGold: state => state.colorGold,
 		    }),
             ...mapGetters({
-                locations: 'storage/getLocations',
+                defaultLocations: 'storage/getLocations',
                 types: 'storage/getMeterTypes',
             }),
         },
         watch: {
 	        currentTypeDirection(newVal) {
                 this.buttonTitle = newVal === 0 ? 'Принять' : 'Выдать'
+                this.dialogTitle = newVal === 0 ? 'Диалог приема' : 'Диалог выдачи'
+
+		        this.locations = !newVal
+                    ? this.defaultLocations.slice(0, 1)
+                    : this.locations = this.defaultLocations.slice(1)
+
+		        this.currentLocation = newVal
             },
+
 	        scannerActive(newVal) {
 	        	this.scannerButtonColor = newVal ? this.colorBlue : this.colorGrey
+            },
+
+	        currentLocation(newLocation) {
+		        switch (newLocation) {
+			        case 5: this.needIssuingPerson = false; break;
+			        case 9:  this.newLocation = 0; break;
+			        case 11:  this.newLocation = 8; break;
+			        case 12:  this.newLocation = 9; break;
+			        default: this.newLocation = newLocation
+		        }
+
+		        this.currentLocationTitle = this.getMeterLocationTitle(this.newLocation)
             }
         },
         methods: {
 	        ...mapActions('storage', [
 		        'checkMeterInDB',
+                'createLog'
 	        ]),
-        	locationDirectionChanged() {
-		        //console.log(this.type)
+
+	        getMeterLocationTitle(location) {
+		        return this.locations.find(loc => location === loc.value).text
+	        },
+
+	        operationTypeDirectionOnChange() {
+
             },
 
 	        meterAddButtonOnClick() {
@@ -224,8 +278,8 @@
                     return
                 }
 
-	            if (![111, 66].includes(this.type.index)) {
-		            this.serialNumber = parseInt(this.serialNumber) //удаление нулей в начале для всех типов}
+	            if (!this.metersWithLetters.includes(this.type.index)) {
+		            this.serialNumber = parseInt(this.serialNumber).toString()
 	            } else if (this.serialNumber.indexOf('-') !== -1) {
 		            this.serialNumber = this.serialNumber.slice(1)
 	            }
@@ -237,22 +291,24 @@
                     return
                 }
 
-	            const res = await this.checkMeterInDB({ type: this.type.index, serialNumber: this.serialNumber })
-	            console.log(res)
-                if (!res.length) {
-	                this.showNotification(`Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
-                                                    и серийным номером ${ this.serialNumber } не найден в базе данных,
-                                                    выбрать пустой счетчик и присвоить ему серийный номер`,
-                                                    this.colorBlue)
+	            try {
+		            const res = await this.checkMeterInDB({ type: this.type.index, serialNumber: this.serialNumber })
 
+		            if (!res.length) {
+			            return this.showNotification(
+			            	        `Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
+                                          и серийным номером ${ this.serialNumber } не найден в базе данных`,
+                                          this.colorRed)
+		            }
 
+                    this.meters.push({ type: this.type.title, serialNumber: this.serialNumber, status: 0 })
 
-                } else {
-                	this.meters.push({ type: this.type.title, serialNumber: this.serialNumber })
-                    this.needIssuingPerson = res.METER_LOCATION !== 3 //Списание(завод)
                     this.serialNumber = ''
-	                this.$refs.form.resetValidation()
-                }
+                    this.$refs.form.resetValidation()
+
+                } catch (e) {
+                    this.showNotificationStandardError(e)
+	            }
             },
 
 	        meterTableRowOnClick(i) {
@@ -271,14 +327,46 @@
 
             close() {
                 this.dialogModel = false
+	            this.serialNumber = ''
+	            this.currentLocation = ''
+                this.needAcceptedPerson = true
+                this.issuingPerson = ''
+                this.acceptedPerson = ''
+                this.comment = ''
             },
 
-            accept() {
+            async accept() {
                 if (!this.$refs.form.validate()) {
                     return
                 }
 
-                this.close()
+	            this.issuingPersonStaffId = this.getEmployeeTitle(this.issuingPerson)
+                if (this.needAcceptedPerson) {
+	                this.acceptedPersonStaffId = this.getEmployeeTitle(this.acceptedPerson)
+                } else {
+	                this.acceptedPersonStaffId = 999999999999999
+                }
+
+	            if (!this.meters.length) {
+		            return this.showNotification(
+		            	`Для выполнения операции укажите заполните таблицу счетчиков`, this.colorBlue)
+	            }
+
+	            try {
+		            this.close()
+
+		            const res = await this.createLog({
+                        meters: this.meters,
+                        location: this.currentLocation,
+                        newLocation: this.newLocation,
+                        issuingPersonStaffId: this.issuingPersonStaffId,
+			            acceptedPersonStaffId: this.acceptedPersonStaffId,
+                        comment: this.comment
+		            })
+
+                } catch (e) {
+		            this.showNotificationStandardError(e)
+	            }
             }
         }
     }
@@ -317,15 +405,14 @@
         opacity: 0 !important;
     }
 
-    .selected {
-        background-color: #f5f5f5;
+    .meter-count {
+        font-size: 12px !important;
+        text-align: right;
+        font-weight: bold;
+        color: rgba(0, 0, 0, 0.7);
     }
 
-    .meter-table th {
+    .v-data-table::v-deep th {
         font-size: 14px !important;
     }
-
-    /*.type-column {
-        width: 36%;
-    }*/
 </style>

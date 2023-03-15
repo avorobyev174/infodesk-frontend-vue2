@@ -12,6 +12,7 @@ import { testUtils } from "@/store/test-utils"
 import { reports } from "@/store/reports"
 import { search } from "@/store/search"
 import { storage } from "@/store/storage"
+import { repair } from "@/store/repair"
 
 import router from '../router/index.js'
 
@@ -105,6 +106,7 @@ export default new Vuex.Store({
     testUtils,
     search,
     reports,
-    storage
+    storage,
+    repair
   }
 })

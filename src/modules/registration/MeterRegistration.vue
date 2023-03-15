@@ -171,6 +171,32 @@
         <v-chip v-if="item.in_pyramid === 0" :color="colorGrey">Не загружен</v-chip>
         <v-chip v-else :color="colorGreen">Загружен</v-chip>
       </template>
+      <template v-slot:item.prog_value="{ item }">
+          <v-icon
+            v-if="item.prog_value === 0"
+            size="25"
+            class="ma-2"
+            :color="colorGrey"
+          >
+            mdi-checkbox-blank-circle-outline
+          </v-icon>
+        <v-icon
+          v-else-if="item.prog_value === 1"
+          size="25"
+          class="ma-2"
+          :color="colorBlue"
+        >
+          mdi-checkbox-marked-circle-outline
+        </v-icon>
+        <v-icon
+          v-else
+          size="25"
+          class="ma-2"
+          :color="colorGreen"
+        >
+          mdi-checkbox-marked-circle-plus-outline
+        </v-icon>
+      </template>
 
       <!-- Когда нет данных -->
       <template v-slot:no-data>
@@ -254,7 +280,8 @@ export default {
       { text: 'Почта', value: 'customer_email', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 18 },
       { text: 'Смс', value: 'sms_status', align: 'center', cellClass: 'table-small-cell', index: 19 },
       { text: 'Шлюз', value: 'gateway', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 20 },
-      { text: 'Действия', value: 'actions', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 21 },
+      { text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center', cellClass: 'table-small-cell', index: 21},
+      { text: 'Действия', value: 'actions', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 22 },
     ],
   }),
   inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
@@ -331,7 +358,13 @@ export default {
   methods: {
     ...mapMutations('registration', ['setMeters']),
     ...mapMutations(['setFavoriteModuleColor']),
-    ...mapActions('registration', ['fetchMeters', 'fetchBrokenMeters', 'getNonActiveInPyramidMeters', 'removeMeterPyramidLoadValue', 'addMeterPyramidLoadValue']),
+    ...mapActions('registration', [
+      'fetchMeters',
+      'fetchBrokenMeters',
+      'getNonActiveInPyramidMeters',
+      'removeMeterPyramidLoadValue',
+      'addMeterPyramidLoadValue'
+    ]),
 
     setCookies() {
       if (this.getCookies)

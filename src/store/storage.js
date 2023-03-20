@@ -1,8 +1,9 @@
-import axios, {post} from "axios"
+import { get, post } from "axios"
 
 export const storage = {
 	state: () => ({
 		meters: [],
+		searchMetersView: [],
 		meterLoading: false,
 		logLoading: false,
 		serverModuleName: 'meter-storage',
@@ -22,17 +23,17 @@ export const storage = {
 			{ text: 'Программирование(УИТ)', value: 9 },
 		],
 		operations: [
-			{ text: 'Регистрация(без с.н.)', value: 0 },
+			{ text: 'Регистрация(без с.н.)', value: 0, notAcceptOrIssueOperation: true },
 			{ text: 'Выдача в ремонт(УИТ)', value: 1 },
 			{ text: 'Выдача на проверку(УИТ)', value: 2 },
 			{ text: 'Выдача на ремонт(завод)', value: 3 },
 			{ text: 'Выдача на монтаж', value: 4 },
 			{ text: 'Списание', value: 5 },
 			{ text: 'Выдача на поверку', value: 6 },
-			{ text: 'Регистрация', value: 7 },
-			{ text: 'Редактирование', value: 8},
+			{ text: 'Регистрация', value: 7, notAcceptOrIssueOperation: true  },
+			{ text: 'Редактирование', value: 8, notAcceptOrIssueOperation: true },
 			{ text: 'Прием на склад', value: 9 },
-			/*{ text: 'Установка на объект', value: 10 },*/
+			{ text: 'Установка на объект', value: 10, notAcceptOrIssueOperation: true  },
 			{ text: 'Выдача потребителю', value: 11 },
 			{ text: 'Выдача на программирование', value: 12 }
 		],
@@ -61,6 +62,9 @@ export const storage = {
 	getters: {
 		getMeters(state) {
 			return state.meters
+		},
+		getSearchMetersView(state) {
+			return state.searchMetersView
 		},
 		getMeterTypes(state) {
 			return state.meterTypes
@@ -97,6 +101,9 @@ export const storage = {
 		setMeters(state, meters) {
 			state.meters = meters
 		},
+		setSearchMetersView(state, meters) {
+			state.searchMetersView = meters
+		},
 		setMeterLoading(state, bool) {
 			state.meterLoading = bool
 		},
@@ -118,11 +125,12 @@ export const storage = {
 			console.log('fetchMeters')
 			try {
 				commit('setMeterLoading', true)
-				const response = await axios.get(
+				const response = await get(
 					this.state.serverUrl + `/api/${this.state.storage.serverModuleName}/meters`,
 					{ headers: {'authorization': $cookies.get('auth_token')} })
 				
 				commit('setMeters', response.data)
+				console.log(response.data)
 				return response.data
 			} finally {
 				commit('setMeterLoading', false)
@@ -132,7 +140,7 @@ export const storage = {
 		async fetchMetersPerPage({ state, commit }, options) {
 			try {
 				commit('setMeterLoading', true)
-				const response = await axios.post(
+				const response = await post(
 					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meters`,
 					{ options },
 					{ headers: {'authorization': $cookies.get('auth_token')} })
@@ -146,7 +154,7 @@ export const storage = {
 		},
 		
 		async fetchMeterTypes({ state, commit }) {
-			const response = await axios.get(
+			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meter-types`,
 				{ headers: {'authorization': $cookies.get('auth_token')} })
 			
@@ -154,7 +162,7 @@ export const storage = {
 		},
 		
 		async fetchEmployees({ state, commit }) {
-			const response = await axios.get(
+			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/employees`,
 				{ headers: {'authorization': $cookies.get('auth_token')} })
 			
@@ -164,7 +172,7 @@ export const storage = {
 		async filter({ state, commit }, { filters, options }) {
 			try {
 				commit('setMeterLoading', true)
-				const response = await axios.post(
+				const response = await post(
 					this.state.serverUrl +
 					`/api/${ this.state.storage.serverModuleName }/filter`,
 					{ filters, options },
@@ -180,7 +188,7 @@ export const storage = {
 		async fetchLogs({ state, commit }, GUID) {
 			try {
 				commit('setLogLoading', true)
-				const response = await axios.get(
+				const response = await get(
 					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/logs/${ GUID }`,
 					{ headers: {'authorization': $cookies.get('auth_token')} })
 					
@@ -191,24 +199,19 @@ export const storage = {
 		},
 		
 		async checkMeterInDB({ state, commit }, { serialNumber, type }) {
-			try {
-				commit('setLogLoading', true)
-				const response = await axios.post(
-					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter`,
-					{ serialNumber, type },
-					{ headers: {'authorization': $cookies.get('auth_token')} })
-				
-				return response.data
-			} finally {
-				commit('setLogLoading', false)
-			}
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter`,
+				{ serialNumber, type },
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+			
+			return response.data
 		},
 		
 		async updateMeter({ state, commit }, { GUID, serialNumber, acceptedPerson }) {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.repair.serverModuleName }/update-empty-meter`,
+					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/update-empty-meter`,
 					{ GUID, serialNumber, acceptedPerson },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
@@ -218,18 +221,13 @@ export const storage = {
 			}
 		},
 		
-		async createLog({ state, commit }, { meters, operationType, newLocation, issuingPerson, acceptedPerson, comment }) {
-			try {
-				commit('setLoading', true)
-				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.repair.serverModuleName }/create-log`,
-					{ meters, operationType, newLocation, issuingPerson, acceptedPerson, comment },
-					{ headers: { 'authorization': $cookies.get('auth_token') } })
-				
-				return response.data[0]
-			} finally {
-				commit('setLoading', false)
-			}
+		async createLog({ state, commit }, { meters, operationType, newLocation, issuingPersonStaffId, acceptedPersonStaffId, comment }) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/create-log`,
+				{ meters, operationType, newLocation, issuingPersonStaffId, acceptedPersonStaffId, comment },
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return response.data
 		},
 	},
 	namespaced: true

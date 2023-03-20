@@ -1,7 +1,6 @@
 <template>
     <v-card>
         <v-data-table
-            :search="search"
             :loading="loading"
             sort-by="id"
             height="43vh"
@@ -12,18 +11,28 @@
             :footer-props="{
                 showFirstLastPage: true,
                 'items-per-page-text':'счетчиков на странице',
-                'items-per-page-options': [100, 500, 1000]
+                'items-per-page-options': [100, 250, 500, 1000]
             }"
             loading-text="Идет загрузка счетчиков..."
             fixed-header
             :headers="selectedHeaders"
-            :items="meters"
+            :items="isSearchMeterView ? searchMetersView : meters"
             :options.sync="options"
             :server-items-length="totalMeters"
             @click:row="initializeLogs"
         >
             <template v-slot:no-results>
                 <span>Идет загрузка счетчиков...</span>
+            </template>
+
+            <template v-slot:no-data>
+                <p class="pt-4">Нет данных...</p>
+                <v-btn
+                    color="primary"
+                    @click="initializeMeters"
+                >
+                    Перезагрузить
+                </v-btn>
             </template>
 
             <template v-slot:header.SERIAL_NUMBER="{ header }">
@@ -135,14 +144,16 @@
                     flat
                     height="70px"
                 >
-                    <!-- Поиск -->
                     <v-text-field
                         v-model="search"
                         append-icon="mdi-magnify"
                         label="Поиск"
+                        type="text"
                         hide-details
                         clearable
                         class="search-text-input"
+                        @keydown.enter="doSearchOnEnter"
+                        @click:clear="searchOnClear"
                     />
                     <v-spacer></v-spacer>
                     <main-menu
@@ -172,18 +183,9 @@
                 {{ formatDate(item.CALIBRATION_DATE) }}
             </template>
             <template v-slot:item.CURRENT_OWNER="{ item }">
-                {{ getEmployeeTitle(item.CURRENT_OWNER) }}
+                {{ getEmployeeTitleByStaffId(item.CURRENT_OWNER) }}
             </template>
-            <!-- Когда нет данных -->
-            <template v-slot:no-data>
-                <p class="pt-4">Нет данных...</p>
-                <v-btn
-                    color="primary"
-                    @click="initializeMeters"
-                >
-                    Перезагрузить
-                </v-btn>
-            </template>
+
         </v-data-table>
         <log-table></log-table>
         <accept-or-issue-dialog
@@ -213,6 +215,7 @@
 			filterByType: [],
 			filterByLocation: [],
             search: '',
+            isSearchMeterView: false,
 			moduleName: 'meter_storage',
 			disableColumnActions: false,
 			selectedHeaders: [],
@@ -223,8 +226,8 @@
                     value: 'ID',
                     sortable: true,
                     index: 0,
-					width: '80px'
-                },
+					width: '80px',
+				},
 				{
 					text: 'Тип',
                     value: 'METER_TYPE',
@@ -316,6 +319,7 @@
 			filterByLocationColor: 'grey',
 			totalMeters: 0,
             filters: {},
+            searchMeters: []
 		}),
 		created() {
 			this.setCookies()
@@ -353,15 +357,20 @@
 				},
 				deep: true,
 			},
-			filterBySerialNumber: function(newVal, oldVal) {
+			filterBySerialNumber: function(newVal) {
 				!newVal ? this.filterBySerialNumberColor = 'grey' : this.filterBySerialNumberColor = 'blue'
             },
-			filterByType: function(newVal, oldVal) {
+			filterByType: function(newVal) {
 				!newVal.length ? this.filterByTypeColor = 'grey' : this.filterByTypeColor = 'blue'
 			},
-			filterByLocation: function(newVal, oldVal) {
+			filterByLocation: function(newVal) {
 				this.filterByLocationColor = !newVal.length ? 'grey' :'blue'
-			}
+			},
+            search: function(newVal) {
+	            if (!newVal) {
+		            this.searchOnClear()
+	            }
+            },
         },
 		computed: {
 			...mapState({
@@ -376,6 +385,7 @@
 			...mapGetters({
 				getCookies: 'getCookies',
 				meters: 'storage/getMeters',
+				searchMetersView: 'storage/getSearchMetersView',
 				activeModules: 'getActiveModules',
 				types: 'storage/getMeterTypes',
 				accuracyClasses: 'storage/getAccuracyClasses',
@@ -393,12 +403,15 @@
         provide: function () {
 	        return {
 		        formatDate: this.formatDate,
-		        getEmployeeTitle: this.getEmployeeTitle,
-		        getMeterTypeTitle: this.getMeterTypeTitle
+		        getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
+		        getMeterTypeTitle: this.getMeterTypeTitle,
+		        getEmployeeStaffIdByCard: this.getEmployeeStaffIdByCard,
+		        getEmployeeTitleByCard: this.getEmployeeTitleByCard,
 	        }
         },
 		methods: {
-			...mapMutations(['setFavoriteModuleColor']),
+			...mapMutations(['setFavoriteModuleColor', 'setMeters']),
+			...mapMutations('storage', ['setMeters', 'setSearchMetersView']),
 			...mapActions('storage', [
                 'filter',
                 'fetchMeterTypes',
@@ -428,6 +441,29 @@
 				this.selectedHeaders = this.headers.filter(header => columns.includes(header.index))
 			},
 
+            doSearchOnEnter() {
+				if (!this.search) {
+					return
+				}
+
+				this.isSearchMeterView = true
+
+	            const searchedMeters = this.meters.filter(meter => {
+		            return String(meter.ID).includes(this.search) ||
+			            String(meter.SERIAL_NUMBER).includes(this.search) ||
+			            String(meter.PASSPORT_NUMBER).includes(this.search)
+	            })
+
+	            this.setSearchMetersView(searchedMeters)
+                this.totalMeters = this.searchMetersView.length
+            },
+
+            searchOnClear() {
+				if (this.isSearchMeterView) {
+					this.initializeMeters()
+				}
+            },
+
             initializeTypes() {
                 this.fetchMeterTypes()
             },
@@ -437,6 +473,7 @@
 			},
 
             initializeMeters() {
+				this.isSearchMeterView = false
 	            this.fetchMetersPerPage(this.options).then(
 	            	result => {
 			            this.totalMeters = result
@@ -466,13 +503,32 @@
 				return this.owners.find(own => owner === own.value).text
 			},
 
-			getEmployeeTitle(employee) {
-				if (employee === 0)
-					return 'отсутствует'
-				const emp = this.employees.find(emp => employee === emp.STAFF_ID)
+			getEmployeeTitleByStaffId(employeeStaffId) {
+				if (employeeStaffId === 0)
+					return 'Отсутствует'
+				const emp = this.employees.find(emp => employeeStaffId === emp.STAFF_ID)
 				return emp ?
                     `${ emp.EMPLOYEE_LAST_NAME } ${ emp.EMPLOYEE_FIRST_NAME[0] }. ${ emp.EMPLOYEE_MIDDLE_NAME[0] }.`
-                    : employee
+                    : employeeStaffId
+			},
+
+			getEmployeeStaffIdByCard(employeeCard) {
+				if (!employeeCard)
+					return 'Неизвестный сотрудник'
+				const emp = this.employees.find(emp => parseInt(employeeCard) === emp.CARD_NUMBER)
+
+				return emp ?
+					emp.STAFF_ID
+					: 'Неизвестный сотрудник'
+			},
+
+			getEmployeeTitleByCard(employeeCard) {
+				if (!employeeCard)
+					return 'Неизвестный сотрудник'
+				const emp = this.employees.find(emp => parseInt(employeeCard) === emp.CARD_NUMBER)
+				return emp ?
+					`${ emp.EMPLOYEE_LAST_NAME } ${ emp.EMPLOYEE_FIRST_NAME[0] }. ${ emp.EMPLOYEE_MIDDLE_NAME[0] }.`
+					: 'Неизвестный сотрудник'
 			},
 
             serialNumberClearOnClick() {
@@ -533,7 +589,7 @@
 				day = day.length < 2 ? day.padStart(2, '0') : day
 				month = month.length < 2 ? month.padStart(2, '0') : month
 
-				return `${day}.${month}.${year}`
+				return `${ day }.${ month }.${ year }`
 			},
 		},
 	}

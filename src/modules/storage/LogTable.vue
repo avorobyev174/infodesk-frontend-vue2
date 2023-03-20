@@ -27,10 +27,10 @@
             {{ getOperationTitle(item.OPER_TYPE) }}
         </template>
         <template v-slot:item.ISSUING_PERSON="{ item }">
-            {{ getEmployeeTitle(item.ISSUING_PERSON) }}
+            {{ getEmployeeTitleByStaffId(item.ISSUING_PERSON) }}
         </template>
         <template v-slot:item.ACCEPTED_PERSON="{ item }">
-            {{ getEmployeeTitle(item.ACCEPTED_PERSON) }}
+            {{ getEmployeeTitleByStaffId(item.ACCEPTED_PERSON) }}
         </template>
         <template v-slot:item.UPDATE_FIELD="{ item }">
             <div v-if="item.OPER_TYPE === 1 || item.OPER_TYPE === 2 || item.OPER_TYPE === 10 ">
@@ -148,7 +148,7 @@
 				lvStates: 'storage/getLVStates'
 			}),
 		},
-		inject: ['showNotification', 'showNotificationStandardError', 'formatDate', 'getEmployeeTitle', 'getMeterTypeTitle'],
+		inject: ['showNotification', 'showNotificationStandardError', 'formatDate', 'getEmployeeTitleByStaffId', 'getMeterTypeTitle'],
 		methods: {
 			...mapActions('storage', [
 				'fetchLogs'

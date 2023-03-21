@@ -349,6 +349,7 @@
 
 	        this.initializeTypes()
             this.initializeEmployees()
+            this.initializeParseOptions()
         },
 		watch: {
 			options: {
@@ -407,6 +408,7 @@
 		        getMeterTypeTitle: this.getMeterTypeTitle,
 		        getEmployeeStaffIdByCard: this.getEmployeeStaffIdByCard,
 		        getEmployeeTitleByCard: this.getEmployeeTitleByCard,
+		        getMeterLocationTitle: this.getMeterLocationTitle,
 	        }
         },
 		methods: {
@@ -418,6 +420,7 @@
                 'fetchMetersPerPage',
                 'fetchEmployees',
 				'fetchLogs',
+				'fetchParseOptions',
             ]),
             //Обработка куки
 			setCookies() {
@@ -472,6 +475,10 @@
 				this.fetchEmployees()
 			},
 
+			initializeParseOptions() {
+				this.fetchParseOptions()
+			},
+
             initializeMeters() {
 				this.isSearchMeterView = false
 	            this.fetchMetersPerPage(this.options).then(
@@ -496,6 +503,10 @@
 			},
 
 			getLocationTitle(location) {
+				return this.locations.find(loc => location === loc.value).text
+			},
+
+			getMeterLocationTitle(location) {
 				return this.locations.find(loc => location === loc.value).text
 			},
 

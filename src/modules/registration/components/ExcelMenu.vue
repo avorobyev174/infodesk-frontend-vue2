@@ -57,7 +57,12 @@
     .active {
         display: none;
     }
+
     .hidden {
         display: flex;
+    }
+
+    .v-list-item__icon:first-child {
+        margin-right: 10px !important;
     }
 </style>

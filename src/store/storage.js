@@ -57,6 +57,22 @@ export const storage = {
 			{ text: 'отсутствует',  value: 0 },
 			{ text: 'не работает', value: 1 },
 			{ text: 'работает', value: 2 }
+		],
+		options: [],
+		parseOptionsTODO: [
+			{ 1: { firstChar: 0, lastChar: 7 } },
+			{ 'Меркурий': { firstChar: 3, lastChar: 10 } },
+			{ 'Нева': { firstChar: 0, lastChar: { firstChar: 4, lastChar: 12 } } },
+			{ 'АГАТ': { firstChar: 0, lastChar: 5 } },
+			{ 'Маршрутизатор': { firstChar: 0, lastChar: 12 } },
+			{ 'ЦЭ': { firstChar: 0, lastChar: 6 } },
+			{ 'СОИ': { firstChar: 0, lastChar: 14 } },
+			{ 'СО': { firstChar: 0, lastChar: 6 } },
+			{ 'ЕМ': { firstChar: 0, lastChar: 4 } },
+			{ 'МИР': { firstChar: 0, lastChar: 13 } },
+			{ 'ЭНЕРГОМЕРА': { firstChar: 1, lastChar: 14 } },
+			{ 'ЭНЕРГОМЕРА2': { firstChar: 0, lastChar: 15 } },
+			{ 'МИРТЕК': { firstChar: 0, lastChar: 12 } },
 		]
 	}),
 	getters: {
@@ -96,6 +112,9 @@ export const storage = {
 		getLVStates(state) {
 			return state.lvStates
 		},
+		getOptions(state) {
+			return state.options
+		},
 	},
 	mutations: {
 		setMeters(state, meters) {
@@ -119,14 +138,16 @@ export const storage = {
 		setLogs(state, logs) {
 			state.logs = logs
 		},
+		setOptions(state, options) {
+			state.options = options
+		}
 	},
 	actions: {
 		async fetchMeters({ state, commit }) {
-			console.log('fetchMeters')
 			try {
 				commit('setMeterLoading', true)
 				const response = await get(
-					this.state.serverUrl + `/api/${this.state.storage.serverModuleName}/meters`,
+					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meters`,
 					{ headers: {'authorization': $cookies.get('auth_token')} })
 				
 				commit('setMeters', response.data)
@@ -158,7 +179,11 @@ export const storage = {
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meter-types`,
 				{ headers: {'authorization': $cookies.get('auth_token')} })
 			
-			commit('setMeterTypes', response.data.map(type => { return { title: type.TYPE_NAME, index: type.TYPE_INDEX } }))
+			commit('setMeterTypes',
+				response
+					.data
+					.map(type => { return { title: type.TYPE_NAME, index: type.TYPE_INDEX, option: type.MNF_ID } })
+					.sort((a, b) => a.title > b.title))
 		},
 		
 		async fetchEmployees({ state, commit }) {
@@ -229,6 +254,25 @@ export const storage = {
 			
 			return response.data
 		},
+		
+		async fetchParseOptions({ state, commit }) {
+			const response = await get(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/parse-options`,
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+			
+			commit('setOptions', response.data)
+		},
+		
+		parseSerialNumber({ state, commit }, { parseOption, serialNumber }) {
+			const option = this.state.storage.options.find(option => parseOption === option.ID)
+			if (option && option.PARSE_OPTION) {
+				return option.PARSE_OPTION.split(',').reduce((sum, cur) => {
+					return sum += serialNumber[cur]
+				}, '')
+			} else {
+				return serialNumber
+			}
+		}
 	},
 	namespaced: true
 }

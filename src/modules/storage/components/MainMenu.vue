@@ -44,9 +44,9 @@
         name: "MainMenu",
         data: () => ({
             actions: [
-                {id: 1, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-tray-arrow-up', color: 'primary', disabled: false},
-               /* {id: 2, title: 'Добавить', onClick: 'addOrEdit', icon: 'mdi-plus-box', color: 'primary', disabled: false},
-                {id: 3, title: 'Актуализировать данные из РТК', onClick: 'actualizeFromRTC', icon: 'mdi-database-import', color: 'primary', disabled: false},
+	            { id: 1, title: 'Регистрация', onClick: 'register', icon: 'mdi-plus-thick', color: 'primary', disabled: false },
+                { id: 2, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', disabled: false },
+	            /*{id: 3, title: 'Актуализировать данные из РТК', onClick: 'actualizeFromRTC', icon: 'mdi-database-import', color: 'primary', disabled: false},
                 {id: 4, title: 'Групповая отправка смс', onClick: 'groupSmsSend', icon: 'mdi-email-arrow-right', color: 'primary', disabled: false},
                 {id: 5, title: 'Получить все статусы смс после групповой отправки', onClick: 'groupSmsStatusCheck', icon: 'mdi-email-check', color: 'primary', disabled: false},
                 {id: 6, title: 'Актуализировать данные из СТЭКа', onClick: 'actualizeFromStek', icon: 'mdi-database-import', color: 'primary', disabled: false},
@@ -80,5 +80,9 @@
     }
     .hidden {
         display: flex;
+    }
+
+    .v-list-item__icon:first-child {
+        margin-right: 10px !important;
     }
 </style>

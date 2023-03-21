@@ -11,6 +11,7 @@
             v-model="formValid"
             lazy-validation
             @submit.prevent="accept"
+            @keypress.enter.native.prevent
         >
             <v-card class="p-2">
                 <v-card-title>
@@ -29,6 +30,7 @@
                             item-value="value"
                             label="Тип операции"
                             :disabled="formSubmit"
+                            @change="operationTypeOnChange"
                         />
                         <v-text-field
                             v-model="issuingPerson"
@@ -82,6 +84,7 @@
                                 clearable
                                 outlined
                                 :disabled="formSubmit"
+                                @keypress.enter="parseSerialNumberOnEnterPress"
                             >
                             </v-text-field>
                             <v-btn-toggle
@@ -100,7 +103,7 @@
                         <v-data-table
                             fixed-header
                             height="300px"
-                            class="meter-table pl-1"
+                            class="meter-add-table pl-1"
                             :items="meters"
                             single-select
                             item-key="serialNumber"
@@ -111,33 +114,10 @@
                             :loading="loading"
                         >
                             <template v-slot:no-data>
-                                <p class="pt-4">Пока нет данных...</p>
+                                <p class="pt-4">Нет данных</p>
                             </template>
-                            <template v-slot:item.status="{ item }">
-                                <v-icon
-                                    size="25"
-                                    class="ma-2"
-                                    :color="colorGrey"
-                                    v-if="!item.status"
-                                >
-                                    mdi-checkbox-blank-circle-outline
-                                </v-icon>
-                                <v-icon
-                                    size="25"
-                                    class="ma-2"
-                                    :color="colorGreen"
-                                    v-else-if="item.status === 1"
-                                >
-                                    mdi-checkbox-marked-circle-outline
-                                </v-icon>
-                                <v-icon
-                                    size="25"
-                                    class="ma-2"
-                                    :color="colorRed"
-                                    v-else-if="item.status === 2"
-                                >
-                                    mdi-close-circle-outline
-                                </v-icon>
+                            <template v-slot:no-results>
+                                <p class="pt-4">Нет данных</p>
                             </template>
                             <template v-slot:item.type="{ item }">
                                {{ getMeterTypeTitle(item.type) }}
@@ -145,7 +125,26 @@
                             <template v-slot:item.oldLocation="{ item }">
                                 <v-chip small tag="span" :color="resultOldLocationColor"> {{ getMeterLocationTitle(item.oldLocation) }}</v-chip>
                                 <span> &#10132; </span>
-                                <v-chip small tag="span" :color="resultSuccessCountColor"> {{ getMeterLocationTitle(newLocation) }}</v-chip>
+                                <v-chip
+                                    v-if="!checkIfMeterLocationValid(item)"
+                                    small
+                                    tag="span"
+                                    :color="resultSuccessCountColor">
+                                        {{ getMeterLocationTitle(newLocation)}}
+                                    <v-icon right small v-if="item.status === 1">
+                                        mdi-check-circle-outline
+                                    </v-icon>
+                                </v-chip>
+                                <v-chip
+                                    v-else
+                                    small
+                                    tag="span"
+                                    :color="colorRed">
+                                        {{ getMeterLocationTitle(newLocation) }}
+                                    <v-icon right small v-if="item.status === 2">
+                                        mdi-close-circle-outline
+                                    </v-icon>
+                                </v-chip>
                             </template>
                         </v-data-table>
                     </div>
@@ -172,6 +171,14 @@
                         v-if="formSubmit"
                         color="primary"
                         text
+                        @click="clear"
+                    >
+                        Очистить
+                    </v-btn>
+                    <v-btn
+                        v-if="formSubmit"
+                        color="primary"
+                        text
                         @click="close"
                     >
                         Закрыть
@@ -192,6 +199,9 @@
         },
         data: () => ({
 	        loading: false,
+            //данные формы по умолчанию
+
+	        //данные таблицы по умолчанию
             meterTotalSuccess: '',
 	        resultSuccessCountColor: 'grey',
 	        resultOldLocationColor: 'green',
@@ -202,6 +212,7 @@
 		            value: 'type',
 		            sortable: false,
 		            cellClass: 'table-header-size',
+                    width: '40%'
 	            },
 	            {
 		            text: 'Серийный номер',
@@ -209,20 +220,15 @@
 		            value: 'serialNumber',
 		            sortable: false,
 		            cellClass: 'table-header-size',
+		            width: '30%'
 	            },
 	            {
-		            text: 'Местоположение',
+		            text: 'Операция',
 		            align: 'center',
 		            value: 'oldLocation',
 		            sortable: false,
 		            cellClass: 'table-header-size',
-	            },
-	            {
-		            text: 'Статус',
-		            align: 'center',
-		            value: 'status',
-		            sortable: false,
-		            cellClass: 'table-header-size',
+
 	            },
             ],
             metersWithLetters: [ 66, 111, 119, 120 ],
@@ -231,7 +237,6 @@
             scannerActive: false,
             dialogModel: false,
             activateScanner: true,
-            currentOperation: 1,
 	        issuingPerson: '',
 	        issuingPersonStaffId: '',
 	        issuingPersonLabel: 'Отдающий сотрудник',
@@ -254,22 +259,16 @@
 		        v => v && !String(v).match('[^0-9]') || 'Должны присутствовать только цифры'
 	        ],
             meters:  [],
-            type: { index: 12, title: 'NP71L.1-1-3' },
-            serialNumber: ''
+            type: { index: 121, title: 'AIU5' },
+            serialNumber: '',
+	        currentOperation: 9,
+	        newLocation: 0
         }),
         mounted() {
             this.dialogOperations = this.operations.filter(oper => !oper.notAcceptOrIssueOperation)
         },
         created() {
-	        this.meters = [
-		        { type: 0, serialNumber: '99999999', status: 0, oldLocation: 0, guid: 'd5139944-7943-438a-d761-ea12ebc5dad0' },
-		        { type: 0, serialNumber: '88888888', status: 0, oldLocation: 0, guid: 'a0b693ea-3aca-d91b-47c6-114838363d55' }
-	        ]
-	        this.issuingPerson = 7556760
-	        this.acceptedPerson = 7556760
-            this.newLocation = 1
-	        this.comment = '123'
-	        this.meterTotalSuccess =  this.meters.length
+
         },
 	    inject: [
 	    	'showNotification',
@@ -294,6 +293,7 @@
                 locations: 'storage/getLocations',
                 types: 'storage/getMeterTypes',
 	            operations: 'storage/getOperations',
+	            options: 'storage/getOptions',
             }),
         },
 	    watch: {
@@ -309,20 +309,39 @@
 			        case 11:  this.newLocation = 8; break;
 			        case 12:  this.newLocation = 9; break;
 		        }
-		        console.log(this.newLocation)
-                this.meters = this.meters.slice()
             }
         },
         methods: {
 	        ...mapActions('storage', [
 		        'checkMeterInDB',
-                'createLog'
+                'createLog',
+                'parseSerialNumber'
 	        ]),
 
-	        getMeterLocationTitle(location) {
-		        return this.locations.find(loc => location === loc.value).text
+            scannerActiveOnClick() {
+		        this.scannerActive = !this.scannerActive
 	        },
 
+            checkIfMeterLocationValid(meter) {
+	            return meter.oldLocation === 0 && this.newLocation === 0 ||
+                       meter.oldLocation !== 0 && this.newLocation !== 0
+            },
+
+	        async parseSerialNumberOnEnterPress() {
+		        if (this.scannerActive && this.options) {
+			        const parseOption = this.types.find(type => this.type.index === type.index)
+			        if (parseOption && parseOption.option) {
+				        this.serialNumber = await this.parseSerialNumber({
+					        parseOption: parseOption.option,
+					        serialNumber: this.serialNumber
+				        })
+
+                        await this.checkMeterAndInsert()
+			        }
+		        }
+	        },
+
+	        //события формы
 	        issuingPersonOnFocusOut() {
 		        this.issuingPersonLabel= this.getEmployeeTitleByCard(parseInt(this.issuingPerson))
 	        },
@@ -363,72 +382,13 @@
                 }
             },
 
-            async checkMeterAndInsert() {
-	        	if (!this.serialNumber) {
-			        this.showNotification(`Серийный номер не должен быть пустым`, this.colorOrange)
-                    return
-                }
-
-	        	//Проверка на счетчики с буквами в серийных номерах и минусом в начале
-	            if (!this.metersWithLetters.includes(this.type.index)) {
-		            this.serialNumber = parseInt(this.serialNumber).toString()
-	            } else if (this.serialNumber.indexOf('-') !== -1) {
-		            this.serialNumber = this.serialNumber.slice(1)
-	            }
-
-	            if (this.meters.find(meter => meter.serialNumber === this.serialNumber && meter.type === this.type)) {
-	            	this.showNotification(`Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
-                                                    и серийным номером ${ this.serialNumber } уже добавлен в таблицу`)
-		            //$("#wrong").trigger('play');
-                    return
-                }
-
-	            try {
-	            	this.loading = true
-		            const res = await this.checkMeterInDB({ type: this.type.index, serialNumber: this.serialNumber })
-
-		            if (!res.length) {
-			            return this.showNotification(
-			            	        `Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
-                                          и серийным номером ${ this.serialNumber } не найден в базе данных`,
-                                          this.colorRed)
-		            }
-
-
-                    const oldLocation = res[0].METER_LOCATION
-                    const guid = res[0].GUID
-
-                    if (oldLocation === 0 && this.newLocation === 0 || this.newLocation !== 0 && this.oldLocation !== 0) {
-	                    return this.showNotification(
-		                    `Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
-                                          и серийным номером ${ this.serialNumber } не возможно сменить местоположение на
-                                          ${ this.getMeterLocationTitle(this.newLocation) },
-                                          проверьте правильность выбора операции`,
-		                    this.colorOrange)
-                    }
-
-                    this.meters.push({
-                        type: this.type.index,
-                        serialNumber: this.serialNumber,
-                        status: 0,
-                        oldLocation,
-	                    guid,
-                    })
-                    this.meterTotalSuccess = this.meters.length
-
-                    this.serialNumber = ''
-                    this.$refs.form.resetValidation()
-
-                } catch (e) {
-                    this.showNotificationStandardError(e)
-	            } finally {
-		            this.loading = false
-	            }
+	        operationTypeOnChange() {
+	        	this.meters.map(meter => {
+	        		return this.checkIfMeterLocationValid(meter)
+				        ? { ...meter, status: 2 }
+			            : meter
+	        	})
             },
-
-	        scannerActiveOnClick() {
-		        this.scannerActive = !this.scannerActive
-	        },
 
             open() {
 	            this.dialogModel = true
@@ -437,7 +397,8 @@
             close() {
                 this.dialogModel = false
 	            this.serialNumber = ''
-	            this.currentOperation = 1
+	            this.currentOperation = 9
+	            this.newLocation = 0
                 this.needAcceptedPerson = true
                 this.issuingPerson = ''
                 this.acceptedPerson = ''
@@ -454,35 +415,99 @@
 		        row.select(true)
 	        },
 
+	        clear() {
+		        this.serialNumber = ''
+		        this.needAcceptedPerson = true
+		        this.issuingPerson = 7556760
+		        this.acceptedPerson = 7556760
+		        this.comment = ''
+		        this.meters = []
+		        this.formSubmit = false
+		        this.acceptedPersonLabel = 'Принимающий сотрудник'
+		        this.issuingPersonLabel = 'Отдающий сотрудник'
+		        this.$refs.form.resetValidation()
+            },
+
+            //главные функции
+	        async checkMeterAndInsert() {
+		        if (!this.serialNumber) {
+			        this.showNotification(`Серийный номер не должен быть пустым`, this.colorOrange)
+			        return
+		        }
+
+		        //Проверка на счетчики с буквами в серийных номерах и минусом в начале
+		        if (!this.metersWithLetters.includes(this.type.index)) {
+			        this.serialNumber = parseInt(this.serialNumber).toString()
+		        } else if (this.serialNumber.indexOf('-') !== -1) {
+			        this.serialNumber = this.serialNumber.slice(1)
+		        }
+
+		        if (this.meters.find(meter => meter.serialNumber === this.serialNumber && meter.type === this.type)) {
+			        this.showNotification(`Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
+                                                    и серийным номером ${ this.serialNumber } уже добавлен в таблицу`)
+			        //$("#wrong").trigger('play');
+			        return
+		        }
+
+		        try {
+			        this.loading = true
+
+			        const res = await this.checkMeterInDB({ type: this.type.index, serialNumber: this.serialNumber })
+			        if (!res.length) {
+				        return this.showNotification(
+					        `Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
+                                          и серийным номером ${ this.serialNumber } не найден в базе данных`,
+					        this.colorRed)
+			        }
+
+			        const oldLocation = res[0].METER_LOCATION
+			        const guid = res[0].GUID
+
+			        this.meters.push({
+				        type: this.type.index,
+				        serialNumber: this.serialNumber,
+				        status: 0,
+				        oldLocation,
+				        guid,
+			        })
+			        this.meterTotalSuccess = this.meters.length
+
+			        this.serialNumber = ''
+			        this.$refs.form.resetValidation()
+		        } catch (e) {
+			        this.showNotificationStandardError(e)
+		        } finally {
+			        this.loading = false
+		        }
+	        },
+
 	        async accept() {
                 if (!this.$refs.form.validate()) {
                     return
                 }
 
-	            this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
-                if (this.needAcceptedPerson) {
-	                this.acceptedPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.acceptedPerson))
-                } else {
-	                this.acceptedPersonStaffId = 999999999999999
-                }
+		        if (!this.meters.length) {
+			        return this.showNotification(
+				        `Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
+		        }
+
+		        this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
+		        if (this.needAcceptedPerson) {
+			        this.acceptedPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.acceptedPerson))
+		        } else {
+			        this.acceptedPersonStaffId = 999999999999999
+		        }
 
 		        if (isNaN(this.issuingPersonStaffId) || isNaN(this.acceptedPersonStaffId)) {
 			        return this.showNotification(
-			        	'Операция не возможна с неизвестным сотрудником', this.colorOrange)
+				        'Операция с неизвестным сотрудником не возможна', this.colorOrange)
 		        }
 
-	            if (!this.meters.length) {
-		            return this.showNotification(
-		            	`Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
-	            }
-
-	            switch (this.currentOperation) {
-		            case 5: this.needAcceptedPerson = false; break;
-		            case 9:  this.newLocation = 0; break;
-		            case 11:  this.newLocation = 8; break;
-		            case 12:  this.newLocation = 9; break;
-		            default: this.newLocation = this.currentOperation
-	            }
+                if (this.meters.every(meter => this.checkIfMeterLocationValid(meter))) {
+	                return this.showNotification(
+		                'Не возможно произвести операцию, выбрана запрещенная схема смены местоположения',
+                        this.colorOrange)
+                }
 
 	            try {
 		            this.formSubmit = true
@@ -496,7 +521,6 @@
 			            acceptedPersonStaffId: this.acceptedPersonStaffId,
                         comment: this.comment
 		            })
-
 
                     if (!res) {
 	                    this.showNotificationStandardError('Что то пошло не так при приеме/выдаче')
@@ -514,10 +538,12 @@
 	                        this.showNotification('Операция выполнена с ошибками', this.colorOrange)
 	                        this.resultSuccessCountColor = this.colorOrange
                         }
+
 	                    this.resultOldLocationColor = this.colorGrey
 	                    this.meterTotalSuccess = `${ successCount }/${ totalCount }`
                     }
                 } catch (e) {
+		            console.log(e)
 		            this.showNotificationStandardError(e)
 	            } finally {
 		            this.loading = false
@@ -569,5 +595,10 @@
 
     .v-data-table::v-deep th {
         font-size: 14px !important;
+    }
+
+    .custom-placeholder-color input::placeholder {
+        color: red !important;
+        opacity: 1;
     }
 </style>

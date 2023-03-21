@@ -16,8 +16,8 @@
             <v-card class="p-2">
                 <v-card-title>
                     <span class="m-auto text-h5 pb-2">Диалог приема/выдачи
-                        <v-chip label v-if="meters.length" :color="resultSuccessCountColor">
-                            {{ meterTotalSuccess }}
+                        <v-chip label v-if="meters.length" :color="resultColor">
+                            {{ meterCount }}
                         </v-chip>
                     </span>
                 </v-card-title>
@@ -30,7 +30,6 @@
                             item-value="value"
                             label="Тип операции"
                             :disabled="formSubmit"
-                            @change="operationTypeOnChange"
                         />
                         <v-text-field
                             v-model="issuingPerson"
@@ -63,91 +62,16 @@
                         ></v-text-field>
                     </v-card-text>
                     <v-divider vertical></v-divider>
-                    <div class="pr-3">
-                        <div class="add-panel">
-                            <v-combobox
-                                :items="types"
-                                item-text="title"
-                                item-value="index"
-                                label="Тип"
-                                class="pl-1 pt-2 pb-0 pr-3"
-                                v-model="type"
-                                outlined
-                                :disabled="formSubmit"
-                            >
-                            </v-combobox>
-                            <v-text-field
-                                class="pt-2 pb-0 pr-3"
-                                type="text"
-                                label="Серийный номер"
-                                v-model="serialNumber"
-                                clearable
-                                outlined
-                                :disabled="formSubmit"
-                                @keypress.enter="parseSerialNumberOnEnterPress"
-                            >
-                            </v-text-field>
-                            <v-btn-toggle
-                            >
-                                <v-btn @click="meterAddButtonOnClick" :disabled="formSubmit">
-                                    <v-icon :color="colorGreen" large>mdi-plus-thick</v-icon>
-                                </v-btn>
-                                <v-btn @click="meterDeleteButtonOnClick" :disabled="formSubmit">
-                                    <v-icon :color="colorRed" large>mdi-minus-thick</v-icon>
-                                </v-btn>
-                                <v-btn @click="scannerActiveOnClick" :disabled="formSubmit">
-                                    <v-icon :color="scannerButtonColor" large>mdi-barcode-scan</v-icon>
-                                </v-btn>
-                            </v-btn-toggle>
-                        </div>
-                        <v-data-table
-                            fixed-header
-                            height="300px"
-                            class="meter-add-table pl-1"
-                            :items="meters"
-                            single-select
-                            item-key="serialNumber"
-                            :headers="headers"
-                            hide-default-footer
-                            @click:row="selectRow"
-                            loading-text="Идет поиск счетчика..."
-                            :loading="loading"
-                        >
-                            <template v-slot:no-data>
-                                <p class="pt-4">Нет данных</p>
-                            </template>
-                            <template v-slot:no-results>
-                                <p class="pt-4">Нет данных</p>
-                            </template>
-                            <template v-slot:item.type="{ item }">
-                               {{ getMeterTypeTitle(item.type) }}
-                            </template>
-                            <template v-slot:item.oldLocation="{ item }">
-                                <v-chip small tag="span" :color="resultOldLocationColor"> {{ getMeterLocationTitle(item.oldLocation) }}</v-chip>
-                                <span> &#10132; </span>
-                                <v-chip
-                                    v-if="!checkIfMeterLocationValid(item)"
-                                    small
-                                    tag="span"
-                                    :color="resultSuccessCountColor">
-                                        {{ getMeterLocationTitle(newLocation)}}
-                                    <v-icon right small v-if="item.status === 1">
-                                        mdi-check-circle-outline
-                                    </v-icon>
-                                </v-chip>
-                                <v-chip
-                                    v-else
-                                    small
-                                    tag="span"
-                                    :color="colorRed">
-                                        {{ getMeterLocationTitle(newLocation) }}
-                                    <v-icon right small v-if="item.status === 2">
-                                        mdi-close-circle-outline
-                                    </v-icon>
-                                </v-chip>
-                            </template>
-                        </v-data-table>
-                    </div>
+                    <add-meter-view
+                        :form-submit="formSubmit"
+                        :meters="meters"
+                        :new-location="newLocation"
+                        ref="addMeterTable"
+                        @onResetValidation="resetValidation"
+                        @onMeterCountUpdate="meterCountUpdate"
+                        :resultColor="resultColor"
+                        :oldLocationColor="oldLocationColor"
+                    ></add-meter-view>
                 </div>
                 <v-card-actions class="pt-4">
                     <v-spacer></v-spacer>
@@ -190,53 +114,20 @@
 </template>
 
 <script>
-    import {mapActions, mapGetters, mapState} from "vuex"
+    import { mapActions, mapGetters, mapState } from "vuex"
+    import AddMeterView from "./AddMeterView";
 
     export default {
         name: "AcceptOrIssueDialog",
         components: {
-
+	        AddMeterView
         },
         data: () => ({
-	        loading: false,
-            //данные формы по умолчанию
-
-	        //данные таблицы по умолчанию
-            meterTotalSuccess: '',
-	        resultSuccessCountColor: 'grey',
-	        resultOldLocationColor: 'green',
-            headers: [
-	            {
-		            text: 'Тип',
-		            align: 'center',
-		            value: 'type',
-		            sortable: false,
-		            cellClass: 'table-header-size',
-                    width: '40%'
-	            },
-	            {
-		            text: 'Серийный номер',
-		            align: 'center',
-		            value: 'serialNumber',
-		            sortable: false,
-		            cellClass: 'table-header-size',
-		            width: '30%'
-	            },
-	            {
-		            text: 'Операция',
-		            align: 'center',
-		            value: 'oldLocation',
-		            sortable: false,
-		            cellClass: 'table-header-size',
-
-	            },
-            ],
-            metersWithLetters: [ 66, 111, 119, 120 ],
-            scannerButtonColor: 'grey',
+	        oldLocationColor: 'green',
+	        resultColor: 'grey',
+            meterCount: '',
             dialogOperations: [],
-            scannerActive: false,
             dialogModel: false,
-            activateScanner: true,
 	        issuingPerson: '',
 	        issuingPersonStaffId: '',
 	        issuingPersonLabel: 'Отдающий сотрудник',
@@ -245,9 +136,6 @@
 	        acceptedPersonStaffId: '',
 	        acceptedPersonLabel: 'Принимающий сотрудник',
             comment: '',
-	        selectedMeterIndex: 0,
-            buttonTitle: 'Принять',
-            dialogTitle: 'Диалог приема',
             formValid: true,
             formSubmit: false,
             cardActive: false,
@@ -259,13 +147,11 @@
 		        v => v && !String(v).match('[^0-9]') || 'Должны присутствовать только цифры'
 	        ],
             meters:  [],
-            type: { index: 121, title: 'AIU5' },
-            serialNumber: '',
 	        currentOperation: 9,
 	        newLocation: 0
         }),
         mounted() {
-            this.dialogOperations = this.operations.filter(oper => !oper.notAcceptOrIssueOperation)
+            this.dialogOperations = this.operations.filter(operation => !operation.notAcceptOrIssueOperation)
         },
         created() {
 
@@ -291,16 +177,15 @@
 		    }),
             ...mapGetters({
                 locations: 'storage/getLocations',
-                types: 'storage/getMeterTypes',
 	            operations: 'storage/getOperations',
-	            options: 'storage/getOptions',
             }),
         },
+        provide: function () {
+	        return {
+		        checkIfMeterLocationValid: this.checkIfMeterLocationValid
+	        }
+        },
 	    watch: {
-	        scannerActive(newVal) {
-	        	this.scannerButtonColor = newVal ? this.colorBlue : this.colorGrey
-            },
-
 	        currentOperation(operation) {
 		        this.newLocation = operation
 		        switch (operation) {
@@ -313,33 +198,8 @@
         },
         methods: {
 	        ...mapActions('storage', [
-		        'checkMeterInDB',
                 'createLog',
-                'parseSerialNumber'
 	        ]),
-
-            scannerActiveOnClick() {
-		        this.scannerActive = !this.scannerActive
-	        },
-
-            checkIfMeterLocationValid(meter) {
-	            return meter.oldLocation === 0 && this.newLocation === 0 ||
-                       meter.oldLocation !== 0 && this.newLocation !== 0
-            },
-
-	        async parseSerialNumberOnEnterPress() {
-		        if (this.scannerActive && this.options) {
-			        const parseOption = this.types.find(type => this.type.index === type.index)
-			        if (parseOption && parseOption.option) {
-				        this.serialNumber = await this.parseSerialNumber({
-					        parseOption: parseOption.option,
-					        serialNumber: this.serialNumber
-				        })
-
-                        await this.checkMeterAndInsert()
-			        }
-		        }
-	        },
 
 	        //события формы
 	        issuingPersonOnFocusOut() {
@@ -361,33 +221,12 @@
 		        return !this.cardActive
             },
 
-	        meterAddButtonOnClick() {
-	        	if (!this.formSubmit) {
-			        this.checkMeterAndInsert()
-		        } else {
-			        this.showNotification(
-				        'Операция уже завершена, редактирование списка не доступно',
-				        this.colorBlue)
-                }
-            },
+	        checkIfMeterLocationValid(meter) {
+		       	return meter.oldLocation !== 0 || this.newLocation !== 0
+	        },
 
-	        meterDeleteButtonOnClick() {
-	        	if (!this.formSubmit) {
-			        this.meters.splice(this.selectedMeterIndex, 1)
-			        this.meterTotalSuccess = this.meters.length
-		        } else {
-			        this.showNotification(
-				        'Операция уже завершена, редактирование списка не доступно',
-				        this.colorBlue)
-                }
-            },
-
-	        operationTypeOnChange() {
-	        	this.meters.map(meter => {
-	        		return this.checkIfMeterLocationValid(meter)
-				        ? { ...meter, status: 2 }
-			            : meter
-	        	})
+	        meterCountUpdate(count) {
+	            this.meterCount = count
             },
 
             open() {
@@ -396,90 +235,30 @@
 
             close() {
                 this.dialogModel = false
-	            this.serialNumber = ''
-	            this.currentOperation = 9
-	            this.newLocation = 0
-                this.needAcceptedPerson = true
-                this.issuingPerson = ''
-                this.acceptedPerson = ''
-                this.comment = ''
-                this.meters = []
-                this.formSubmit = false
-                this.acceptedPersonLabel = 'Принимающий сотрудник'
-                this.issuingPersonLabel = 'Отдающий сотрудник'
-	            this.$refs.form.resetValidation()
+                this.clear()
             },
 
-	        selectRow(item, row) {
-	        	this.selectedMeterIndex = row.index
-		        row.select(true)
-	        },
-
 	        clear() {
-		        this.serialNumber = ''
+	        	this.meterCount = ''
+		        this.currentOperation = 9
+		        this.newLocation = 0
 		        this.needAcceptedPerson = true
-		        this.issuingPerson = 7556760
-		        this.acceptedPerson = 7556760
+		        this.issuingPerson = ''
+		        this.acceptedPerson = ''
 		        this.comment = ''
+                this.resultColor = this.colorGrey
+                this.oldLocationColor = this.colorGreen
 		        this.meters = []
 		        this.formSubmit = false
 		        this.acceptedPersonLabel = 'Принимающий сотрудник'
 		        this.issuingPersonLabel = 'Отдающий сотрудник'
-		        this.$refs.form.resetValidation()
+		        this.resetValidation()
+		        this.$refs.addMeterTable.serialNumberClear()
             },
 
-            //главные функции
-	        async checkMeterAndInsert() {
-		        if (!this.serialNumber) {
-			        this.showNotification(`Серийный номер не должен быть пустым`, this.colorOrange)
-			        return
-		        }
-
-		        //Проверка на счетчики с буквами в серийных номерах и минусом в начале
-		        if (!this.metersWithLetters.includes(this.type.index)) {
-			        this.serialNumber = parseInt(this.serialNumber).toString()
-		        } else if (this.serialNumber.indexOf('-') !== -1) {
-			        this.serialNumber = this.serialNumber.slice(1)
-		        }
-
-		        if (this.meters.find(meter => meter.serialNumber === this.serialNumber && meter.type === this.type)) {
-			        this.showNotification(`Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
-                                                    и серийным номером ${ this.serialNumber } уже добавлен в таблицу`)
-			        //$("#wrong").trigger('play');
-			        return
-		        }
-
-		        try {
-			        this.loading = true
-
-			        const res = await this.checkMeterInDB({ type: this.type.index, serialNumber: this.serialNumber })
-			        if (!res.length) {
-				        return this.showNotification(
-					        `Счетчик с типом ${ this.getMeterTypeTitle(this.type.index) }
-                                          и серийным номером ${ this.serialNumber } не найден в базе данных`,
-					        this.colorRed)
-			        }
-
-			        const oldLocation = res[0].METER_LOCATION
-			        const guid = res[0].GUID
-
-			        this.meters.push({
-				        type: this.type.index,
-				        serialNumber: this.serialNumber,
-				        status: 0,
-				        oldLocation,
-				        guid,
-			        })
-			        this.meterTotalSuccess = this.meters.length
-
-			        this.serialNumber = ''
-			        this.$refs.form.resetValidation()
-		        } catch (e) {
-			        this.showNotificationStandardError(e)
-		        } finally {
-			        this.loading = false
-		        }
-	        },
+            resetValidation() {
+	            this.$refs.form.resetValidation()
+            },
 
 	        async accept() {
                 if (!this.$refs.form.validate()) {
@@ -503,15 +282,15 @@
 				        'Операция с неизвестным сотрудником не возможна', this.colorOrange)
 		        }
 
-                if (this.meters.every(meter => this.checkIfMeterLocationValid(meter))) {
+                if (!this.meters.every(meter => this.checkIfMeterLocationValid(meter))) {
 	                return this.showNotification(
-		                'Не возможно произвести операцию, выбрана запрещенная схема смены местоположения',
+		                'Не возможно произвести операцию, в таблице выбрана запрещенная схема смены местоположения',
                         this.colorOrange)
                 }
 
 	            try {
 		            this.formSubmit = true
-		            this.loading = true
+		            this.$refs.addMeterTable.setLoading(true)
 
 		            const res = await this.createLog({
                         meters: this.meters,
@@ -533,20 +312,20 @@
 
                         if (this.meters.every(meter => meter.status === 1)) {
 	                        this.showNotification('Операция выполнена успешно', this.colorGreen)
-                            this.resultSuccessCountColor = this.colorGreen
+                            this.resultColor = this.colorGreen
                         } else {
 	                        this.showNotification('Операция выполнена с ошибками', this.colorOrange)
-	                        this.resultSuccessCountColor = this.colorOrange
+	                        this.resultColor = this.colorOrange
                         }
 
-	                    this.resultOldLocationColor = this.colorGrey
-	                    this.meterTotalSuccess = `${ successCount }/${ totalCount }`
+	                    this.oldLocationColor = this.colorGrey
+	                    this.meterCount = `${ successCount }/${ totalCount }`
                     }
                 } catch (e) {
 		            console.log(e)
 		            this.showNotificationStandardError(e)
 	            } finally {
-		            this.loading = false
+		            this.$refs.addMeterTable.setLoading(false)
 	            }
             }
         }
@@ -559,46 +338,5 @@
         grid-template-columns: 350px 10px 1fr;
         grid-template-rows: 1fr;
         justify-content: start;
-    }
-
-    .add-panel {
-        display: flex;
-        align-items: flex-start;
-    }
-
-    .v-btn-toggle {
-        padding-top: 8px;
-    }
-
-    .v-btn-toggle button {
-        height: 56px !important;
-    }
-
-    .theme--light.v-btn-toggle:not(.v-btn-toggle--group) .v-btn.v-btn {
-        border-color: rgba(0, 0, 0, 0.42) !important;
-    }
-
-    .theme--light.v-btn--active:hover::before, .theme--light.v-btn--active::before {
-         opacity: 0 !important;
-    }
-
-    .theme--light.v-icon:focus::after {
-        opacity: 0 !important;
-    }
-
-    .meter-count {
-        font-size: 12px !important;
-        text-align: right;
-        font-weight: 500;
-        color: rgba(0, 0, 0, 0.7);
-    }
-
-    .v-data-table::v-deep th {
-        font-size: 14px !important;
-    }
-
-    .custom-placeholder-color input::placeholder {
-        color: red !important;
-        opacity: 1;
     }
 </style>

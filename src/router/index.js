@@ -30,8 +30,8 @@ const routes = [
     component: Charts
   },
   {
-    path: '/registration',
-    name: 'Registration',
+    path: '/programming',
+    name: 'Programming',
     component: Registration
   },
   {

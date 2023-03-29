@@ -41,6 +41,10 @@ export const storage = {
 			{ text: 'Новый', value: 0},
 			{ text: 'Б/у', value: 1}
 		],
+		intervals: [
+			{ text: '10', value: 10 },
+			{ text: '16', value: 16 }
+		],
 		customerTypes: [
 			{ text: 'Физ. лицо', value: 0 },
 			{ text: 'Юр. лицо', value: 1 }
@@ -93,6 +97,9 @@ export const storage = {
 		},
 		getConditions(state) {
 			return state.conditions
+		},
+		getIntervals(state) {
+			return state.intervals
 		},
 		getOperations(state) {
 			return state.operations
@@ -204,6 +211,7 @@ export const storage = {
 					{ headers: {'authorization': $cookies.get('auth_token')} })
 				
 				commit('setMeters', response.data.rows)
+				console.log(response.data)
 				return response.data.total
 			} finally {
 				commit('setMeterLoading', false)
@@ -232,24 +240,94 @@ export const storage = {
 			return response.data
 		},
 		
-		async updateMeter({ state, commit }, { GUID, serialNumber, acceptedPerson }) {
-			try {
-				commit('setLoading', true)
-				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/update-empty-meter`,
-					{ GUID, serialNumber, acceptedPerson },
-					{ headers: { 'authorization': $cookies.get('auth_token') } })
-				
-				return response.data[0]
-			} finally {
-				commit('setLoading', false)
-			}
+		async registration({ state, commit },
+		                   {
+		                   	   meters,
+			                   accuracyClass,
+			                   condition,
+			                   issuingPersonStaffId,
+			                   acceptedPersonStaffId,
+			                   interval,
+			                   owner,
+			                   calibration,
+			                   passportNumber,
+			                   comment
+		                   }) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/registration`,
+				{
+					meters,
+					accuracyClass,
+					condition,
+					acceptedPersonStaffId,
+					issuingPersonStaffId,
+					interval,
+					owner,
+					calibration,
+					passportNumber,
+					comment
+				},
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return response.data
 		},
 		
-		async createLog({ state, commit }, { meters, operationType, newLocation, issuingPersonStaffId, acceptedPersonStaffId, comment }) {
+		async editMeter({ state, commit },
+		                   {
+			                   type,
+			                   editorStaffId,
+			                   serialNumber,
+			                   accuracyClass,
+			                   condition,
+			                   interval,
+			                   owner,
+			                   calibration,
+			                   comment,
+			                   passportNumber,
+			                   guid,
+			                   updateField
+		                   }) {
+			
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/edit`,
+				{
+					type,
+					serialNumber,
+					accuracyClass,
+					condition,
+					editorStaffId,
+					interval,
+					owner,
+					calibration,
+					passportNumber,
+					comment,
+					guid,
+					updateField
+				},
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return response.data
+		},
+		
+		async createLog({ state, commit },
+		                {
+		                	meters,
+			                operationType,
+			                newLocation,
+			                issuingPersonStaffId,
+			                acceptedPersonStaffId,
+			                comment
+		                }) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/create-log`,
-				{ meters, operationType, newLocation, issuingPersonStaffId, acceptedPersonStaffId, comment },
+				{
+					meters,
+					operationType,
+					newLocation,
+					issuingPersonStaffId,
+					acceptedPersonStaffId,
+					comment
+				},
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
@@ -272,7 +350,22 @@ export const storage = {
 			} else {
 				return serialNumber
 			}
-		}
+		},
+		
+		async deleteMeter({ state, commit }, { guid, editorStaffId, meter }) {
+			try {
+				commit('setMeterLoading', true)
+				const response = await post(
+					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/delete`,
+					{ guid, editorStaffId, meter },
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
+				
+				return response.data
+			} finally {
+				commit('setMeterLoading', false)
+			}
+		},
+		
 	},
 	namespaced: true
 }

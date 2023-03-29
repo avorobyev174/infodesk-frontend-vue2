@@ -7,7 +7,7 @@
             class="elevation-1 meter-table"
             single-select
             item-key="ID"
-            :items-per-page="100"
+            :items-per-page="500"
             :footer-props="{
                 showFirstLastPage: true,
                 'items-per-page-text':'счетчиков на странице',
@@ -27,12 +27,6 @@
 
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
-                <v-btn
-                    color="primary"
-                    @click="initializeMeters"
-                >
-                    Перезагрузить
-                </v-btn>
             </template>
 
             <template v-slot:header.SERIAL_NUMBER="{ header }">
@@ -159,6 +153,8 @@
                     <main-menu
                         class="pr-2"
                         @acceptOrIssue="$refs.acceptOrIssueDialog.open()"
+                        @register="$refs.registerDialog.open(false)"
+                        @showHideColums="$refs.showHideColumnsDialog.open()"
                     ></main-menu>
                 </v-toolbar>
             </template>
@@ -185,29 +181,59 @@
             <template v-slot:item.CURRENT_OWNER="{ item }">
                 {{ getEmployeeTitleByStaffId(item.CURRENT_OWNER) }}
             </template>
-
+            <template v-slot:item.actions="{ item }">
+                <action-column
+                    ref="actionColumn"
+                    @edit="$refs.editDialog.edit(item)"
+                    @delete="$refs.editDialog.delete(item)"
+                    :actions="actions"
+                    :disabledActions="disableColumnActions"
+                />
+            </template>
         </v-data-table>
         <log-table></log-table>
         <accept-or-issue-dialog
             ref="acceptOrIssueDialog"
         ></accept-or-issue-dialog>
+        <register-dialog
+            ref="registerDialog"
+            :meters="meters"
+        ></register-dialog>
+        <edit-dialog
+            ref="editDialog"
+            :meters="meters"
+        ></edit-dialog>
+        <show-hide-columns-dialog
+            ref="showHideColumnsDialog"
+            :headers="headers"
+            :selectedHeaders="selectedHeaders"
+            @changeColumns="changeColumnsVisibility"
+            module-name="storage"
+        >
+        </show-hide-columns-dialog>
     </v-card>
 </template>
 
 <script>
-	import ActionColumn from "../registration/components/ActionColumn"
     import LogTable from "./LogTable"
 	import MainMenu from "./components/MainMenu"
     import AcceptOrIssueDialog from "./components/AcceptOrIssueDialog"
-    import {mapActions, mapGetters, mapMutations, mapState} from "vuex"
+    import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+	import RegisterDialog from "./components/RegisterDialog"
+	import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
+    import ActionColumn from "../utils-components/ActionColumn"
+    import EditDialog from "./components/EditDialog"
 
 	export default {
 		name: "Storage",
 		components: {
+			RegisterDialog,
 			MainMenu,
-			ActionColumn,
 			LogTable,
-            AcceptOrIssueDialog
+            AcceptOrIssueDialog,
+			ShowHideColumnsDialog,
+			ActionColumn,
+			EditDialog
 		},
 		data: () => ({
 			options: {},
@@ -312,6 +338,14 @@
 					cellClass: 'table-small-cell',
 					index: 10
 				},
+				{
+					text: 'Действия',
+                    value: 'actions',
+                    sortable: false,
+                    align: 'center',
+                    cellClass: 'table-small-cell',
+                    index: 11
+                },
 			],
 			settings: ['columns'],
 			filterBySerialNumberColor: 'grey',
@@ -319,7 +353,8 @@
 			filterByLocationColor: 'grey',
 			totalMeters: 0,
             filters: {},
-            searchMeters: []
+            searchMeters: [],
+			actions: []
 		}),
 		created() {
 			this.setCookies()
@@ -329,6 +364,7 @@
 				: this.selectedHeaders = this.headers
 
 			const isFavorite = $cookies.get('common_favorite_module')
+			//const currentUserStaffId = $cookies.get('common_favorite_module')
 
 			isFavorite === '/storage'
 				? this.setFavoriteModuleColor(this.colorGold)
@@ -345,6 +381,12 @@
 		        const route = this.$route.name === 'Storage'
 		        if (window.event.keyCode === 18 && route)
 			        this.initializeMeters()
+	        }
+
+	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
+
+	        if (this.staffId === 49480) {
+		        this.actions.push({ title: 'Удалить', action: 'delete', icon: 'mdi-delete' })
 	        }
 
 	        this.initializeTypes()
@@ -395,6 +437,8 @@
 				locations: 'storage/getLocations',
 				owners: 'storage/getOwners',
 				employees: 'storage/getEmployees',
+				roles: 'storage/getRoles',
+				staffId: 'getStaffId',
 			}),
 			showHeaders() {
 				return this.headers.filter(header => this.selectedHeaders.includes(header))
@@ -406,9 +450,15 @@
 		        formatDate: this.formatDate,
 		        getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
 		        getMeterTypeTitle: this.getMeterTypeTitle,
+		        getOwnerTitle: this.getOwnerTitle,
+		        getAccuracyClassTitle: this.getAccuracyClassTitle,
+		        getConditionTitle: this.getConditionTitle,
 		        getEmployeeStaffIdByCard: this.getEmployeeStaffIdByCard,
 		        getEmployeeTitleByCard: this.getEmployeeTitleByCard,
 		        getMeterLocationTitle: this.getMeterLocationTitle,
+		        getEmployeeCardByStaffId: this.getEmployeeCardByStaffId,
+		        initializeMeters: this.initializeMeters,
+		        resetFilters: this.resetFilters,
 	        }
         },
 		methods: {
@@ -424,18 +474,20 @@
             ]),
             //Обработка куки
 			setCookies() {
-				if (this.getCookies)
+				if (this.getCookies) {
 					this.settings.forEach(setting => this.checkAndSetCookieValue(setting))
+				}
 			},
 
 			checkAndSetCookieValue(settings) {
-				const cookieName = `${this.moduleName}_${settings}`
+				const cookieName = `${ this.moduleName }_${ settings }`
 				if (!$cookies.get(cookieName)) {
-					const module = this.getCookies[this.moduleName]
+					const module = this.getCookies[ this.moduleName ]
 					if (module) {
 						const cookie = module.find(cookie => cookie.settings === settings)
-						if (cookie)
+						if (cookie) {
 							$cookies.set(cookieName, cookie.value, '4h')
+						}
 					}
 				}
 			},
@@ -479,19 +531,18 @@
 				this.fetchParseOptions()
 			},
 
-            initializeMeters() {
+            async initializeMeters() {
 				this.isSearchMeterView = false
-	            this.fetchMetersPerPage(this.options).then(
-	            	result => {
-			            this.totalMeters = result
-			            //this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
-                    },
-                    e => this.showNotificationStandardError(e)
-                )
+                try {
+	                this.totalMeters = await this.fetchMetersPerPage(this.options)
+                } catch (e) {
+	                this.showNotificationStandardError(e)
+                }
             },
 
 			getMeterTypeTitle(meterType) {
-				return this.types.find(type => meterType === type.index).title
+				const type = this.types.find(type => meterType === type.index)
+                return type ? type.title : meterType
 			},
 
 			getAccuracyClassTitle(accuracyClass) {
@@ -533,6 +584,16 @@
 					: 'Неизвестный сотрудник'
 			},
 
+			getEmployeeCardByStaffId(staffId) {
+				if (!staffId)
+					return 'Неизвестный сотрудник'
+				const emp = this.employees.find(emp => staffId === emp.STAFF_ID)
+
+				return emp ?
+					emp.CARD_NUMBER
+					: 'Неизвестный сотрудник'
+			},
+
 			getEmployeeTitleByCard(employeeCard) {
 				if (!employeeCard)
 					return 'Неизвестный сотрудник'
@@ -565,6 +626,12 @@
                 }
 			},
 
+			resetFilters() {
+				this.filterBySerialNumber = ''
+				this.filterByType = []
+				this.filterByLocation = []
+            },
+
             checkAllFilters() {
 	            this.filterBySerialNumber
 		            ? this.filters['serialNumber'] = this.filterBySerialNumber
@@ -580,12 +647,13 @@
                     : delete this.filters['locations']
             },
 
-			initializeLogs(item, row) {
+			async initializeLogs(item, row) {
 				row.select(true)
-				this.fetchLogs(item.GUID).then(
-					result => {},
-					e => this.showNotificationStandardError(e)
-				)
+                try {
+					await this.fetchLogs(item.GUID)
+                } catch (e) {
+	                this.showNotificationStandardError(e)
+                }
             },
 
 			formatDate(dateToFormat) {

@@ -46,31 +46,9 @@
             actions: [
 	            { id: 1, title: 'Регистрация', onClick: 'register', icon: 'mdi-plus-thick', color: 'primary', disabled: false },
                 { id: 2, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', disabled: false },
-	            /*{id: 3, title: 'Актуализировать данные из РТК', onClick: 'actualizeFromRTC', icon: 'mdi-database-import', color: 'primary', disabled: false},
-                {id: 4, title: 'Групповая отправка смс', onClick: 'groupSmsSend', icon: 'mdi-email-arrow-right', color: 'primary', disabled: false},
-                {id: 5, title: 'Получить все статусы смс после групповой отправки', onClick: 'groupSmsStatusCheck', icon: 'mdi-email-check', color: 'primary', disabled: false},
-                {id: 6, title: 'Актуализировать данные из СТЭКа', onClick: 'actualizeFromStek', icon: 'mdi-database-import', color: 'primary', disabled: false},
-                {id: 8, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', disabled: false},
-                //{id: 9, title: 'Показать/Скрыть загруженные в Пирамиду', localOnClick: 'showHidePyramidMeters', icon: 'mdi-pyramid', color: 'primary', disabled: false, show: true},
-                {id: 10, title: 'Показать список утилизированных', onClick: 'showBrokenMeters', icon: 'mdi-alert-remove', color: 'primary', disabled: false, show: true},*/
+	            { id: 3, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', disabled: false },
             ],
         }),
-        methods: {
-            localFuncCall(action) {
-                switch(action.id) {
-                    //case 9: this.showHidePyramidMeters(action); break
-                }
-            },
-
-            /*showHidePyramidMeters(action) {
-                this.actions = this.actions.map(a => {
-                    if (a.id !== 9 && a.id !== 8 && a.id !== 1) return {...a, disabled: action.show}
-                    if (a.id === 9) return {...a, show: !a.show}
-                    return a
-                })
-                this.$emit('showHidePyramidMeters')
-            }*/
-        }
     }
 </script>
 

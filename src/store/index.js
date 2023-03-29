@@ -19,6 +19,8 @@ import router from '../router/index.js'
 export default new Vuex.Store({
   state: {
       sideBarState: true,
+      staffId: 0,
+      roles: null,
       activeModules: [],
       isUserLogin: false,
       colorRed: 'red lighten-1',
@@ -47,6 +49,12 @@ export default new Vuex.Store({
       },
       getFavoriteModuleColor(state) {
         return state.favoriteModuleColor
+      },
+      getStaffId(state) {
+          return state.staffId
+      },
+      getRoles(state) {
+          return state.roles
       }
   },
 
@@ -65,13 +73,19 @@ export default new Vuex.Store({
       },
       setFavoriteModuleColor(state, color) {
         state.favoriteModuleColor = color
-      }
+      },
+      setStaffId(state, staffId) {
+          state.staffId = staffId
+      },
+      setRoles(state, roles) {
+          state.roles = roles
+      },
   },
 
   actions: {
     async loginUser({state, commit}, { authToken, roleToken, cookies }) {
       $cookies.set('auth_token', authToken, '4h')
-      $cookies.set('role_token', roleToken)
+      $cookies.set('role_token', roleToken, '4h')
 
       commit('login', true)
       commit('setCookies', cookies)

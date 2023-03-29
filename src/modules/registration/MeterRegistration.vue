@@ -73,6 +73,7 @@
             :headers="headers"
             :selectedHeaders="selectedHeaders"
             @changeColumns="changeColumnsVisibility"
+            moduleName="programming"
           />
           <!-- Диалог добавления/изменения -->
           <add-or-edit-dialog
@@ -143,6 +144,7 @@
             @addPyramidLoadValue="dialogAddPyramidLoadValueOpen(item)"
             @actualizeDataFromStek="$refs.actualizeDataFromStekDialog.actualizeSingleData(item)"
             :disabledActions="disableColumnActions"
+            :actions="actions"
         />
       </template>
 
@@ -214,14 +216,14 @@
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex'
 import ButtonWithTooltip from "../utils-components/ButtonWithTooltip"
 import SaveDataToExcelDialog from "./components/SaveDataToExcelDialog"
-import ActionColumn from "./components/ActionColumn"
+import ActionColumn from "../utils-components/ActionColumn"
 import MarkMeterDialog from "./components/MarkMeterDialog"
 import ActualizeDataFromStekDialog from "./components/ActualizeDataFromStekDialog"
 import AddOrEditDialog from "./components/AddOrEditDialog"
 import ActualizeDataFromRTCDialog from "./components/ActualizeDataFromRTCDialog"
 import SingleAndGroupSmsSendDialog from "./components/SingleAndGroupSmsSendDialog"
 import MainMenu from "./components/MainMenu"
-import ShowHideColumnsDialog from "./components/ShowHideColumnsDialog"
+import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
 import ExcelMenu from "./components/ExcelMenu"
 import RefreshDataFromStekToPyramidDialog from "./components/RefreshDataFromStekToPyramidDialog"
 import SimpleDialog from "../utils-components/SimpleDialog"
@@ -237,7 +239,7 @@ export default {
     actionColumn: ActionColumn,
     markMeterDialog: MarkMeterDialog,
     actualizeDataFromStekDialog: ActualizeDataFromStekDialog,
-    addOrEditDialog: AddOrEditDialog,
+    AddOrEditDialog,
     actualizeDataFromRTCDialog: ActualizeDataFromRTCDialog,
     singleAndGroupSmsSendDialog: SingleAndGroupSmsSendDialog,
     mainMenu: MainMenu,
@@ -283,6 +285,16 @@ export default {
       { text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center', cellClass: 'table-small-cell', index: 21},
       { text: 'Действия', value: 'actions', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 22 },
     ],
+    actions: [
+      { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' },
+      { title: 'Удалить', action: 'delete', icon: 'mdi-delete' },
+      { title: 'Отправить смс', action: 'smsSend', icon: 'mdi-email-arrow-right' },
+      { title: 'Узнать статус смс', action: 'smsCheckStatus', icon: 'mdi-email-check' },
+      { title: 'Списать', action: 'marked', icon: 'mdi-alert-remove'},
+      { title: 'Установить признак загрузки в пирамиду', action: 'addPyramidLoadValue', icon: 'mdi-pyramid' },
+      { title: 'Убрать признак загрузки в пирамиду', action: 'removePyramidLoadValue', icon: 'mdi-pyramid-off' },
+      { title: 'Актуализировать данные из СТЕКа', action: 'actualizeDataFromStek', icon: 'mdi-database-import' },
+    ]
   }),
   inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
   provide: function () {
@@ -325,7 +337,7 @@ export default {
       : this.selectedHeaders = this.headers
 
     const isFavorite = $cookies.get('common_favorite_module')
-    if (isFavorite === '/registration') {
+    if (isFavorite === '/programming') {
       this.setFavoriteModuleColor(this.colorGold)
     } else {
       this.setFavoriteModuleColor('')
@@ -344,7 +356,7 @@ export default {
     )
 
     document.onkeydown = () => {
-      const route = this.$route.name === 'Registration'
+      const route = this.$route.name === 'Programming'
       if (window.event.keyCode == 107 &&
               this.$refs &&
               this.$refs.addOrEditDialog &&

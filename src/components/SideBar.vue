@@ -60,14 +60,14 @@
 </template>
 
 <script>
-  import {mapGetters} from "vuex";
+  import {mapGetters, mapState} from "vuex";
   import jwt from "jsonwebtoken";
 
   export default {
       data: () => ({
           modules: [
-              { title: 'Регистрация', icon: 'mdi-meter-electric-outline', url: '/storage', name: 'storage'},
-              { title: 'Программирование', icon: 'mdi-desktop-classic', url: '/registration', name: 'registration'},
+              { title: 'Склад', icon: 'mdi-meter-electric-outline', url: '/storage', name: 'storage'},
+              { title: 'Программирование', icon: 'mdi-desktop-classic', url: '/programming', name: 'programming'},
               { title: 'ОРБ', icon: 'mdi-progress-pencil', url: '/repair', name: 'repair'},
               { title: 'Поиск', icon: 'mdi-card-search-outline', url: '/search', name: 'search'},
               { title: 'Графики', icon: 'mdi-chart-bar', url: '/charts', name: 'charts'},
@@ -79,15 +79,34 @@
           availableModules: [],
           drawer: true,
       }),
+      inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
+      computed: {
+        ...mapState({
+          colorBlue: state => state.colorBlue,
+          colorRed: state => state.colorRed,
+          colorGreen: state => state.colorGreen,
+          colorOrange: state => state.colorOrange,
+          colorGrey: state => state.colorGrey,
+          colorGold: state => state.colorGold,
+        }),
+      },
       created() {
-        //console.log(process.env)
-        const activeModulesFromRole = jwt.verify($cookies.get('role_token'), process.env.VUE_APP_ROLE_KEY)
-        const modulesArr = activeModulesFromRole.role.access_modules.split(',').map(m => m.trim())
-        //console.log(modulesArr)
+        const options = jwt.verify($cookies.get('role_token'), process.env.VUE_APP_ROLE_KEY)
+        console.log(options)
+        if (!options)
+          return this.showNotification('Не получены настройки доступа с сервера', this.colorRed)
+        const modulesArr = options.access_modules.split(',').map(m => m.trim())
+        const staffId = options.staff_id
+        const roles = JSON.parse(options.roles)
         if (modulesArr.length) {
           this.availableModules = this.modules.filter(i => modulesArr.includes(i.name))
-          //console.log(this.availableModules)
           this.$store.commit('setActiveModules', this.availableModules)
+        }
+        if (staffId) {
+          this.$store.commit('setStaffId', staffId)
+        }
+        if (roles) {
+          this.$store.commit('setRoles', roles)
         }
       },
       mounted() {

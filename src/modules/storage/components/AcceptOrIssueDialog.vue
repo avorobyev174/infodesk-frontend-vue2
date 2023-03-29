@@ -15,8 +15,8 @@
         >
             <v-card class="p-2">
                 <v-card-title>
-                    <span class="m-auto text-h5 pb-2">Диалог приема/выдачи
-                        <v-chip label v-if="meters.length" :color="resultColor">
+                    <span class="m-auto text-h5 pb-2">Прием/выдача
+                        <v-chip label v-if="replaceMeters.length" :color="resultColor">
                             {{ meterCount }}
                         </v-chip>
                     </span>
@@ -36,9 +36,7 @@
                             :label="issuingPersonLabel"
                             required
                             :rules="personRules"
-                            @focusout="issuingPersonOnFocusOut"
-                            @keypress="personOnKeyPress"
-                            @keydown="personOnKeyDown"
+                            @focusout="this.issuingPersonOnFocusOut"
                             type="number"
                             hide-spin-buttons
                             :disabled="formSubmit"
@@ -48,9 +46,7 @@
                             :label="acceptedPersonLabel"
                             required
                             :rules="personRules"
-                            @focusout="acceptedPersonOnFocusOut"
-                            @keypress="personOnKeyPress"
-                            @keydown="personOnKeyDown"
+                            @focusout="this.acceptedPersonOnFocusOut"
                             type="number"
                             hide-spin-buttons
                             :disabled="formSubmit"
@@ -64,10 +60,10 @@
                     <v-divider vertical></v-divider>
                     <add-meter-view
                         :form-submit="formSubmit"
-                        :meters="meters"
+                        :meters="replaceMeters"
                         :new-location="newLocation"
                         ref="addMeterTable"
-                        @onResetValidation="resetValidation"
+                        @onResetValidation="this.resetValidation"
                         @onMeterCountUpdate="meterCountUpdate"
                         :resultColor="resultColor"
                         :oldLocationColor="oldLocationColor"
@@ -131,40 +127,35 @@
 	        issuingPerson: '',
 	        issuingPersonStaffId: '',
 	        issuingPersonLabel: 'Отдающий сотрудник',
-	        needAcceptedPerson: true,
 	        acceptedPerson: '',
 	        acceptedPersonStaffId: '',
 	        acceptedPersonLabel: 'Принимающий сотрудник',
             comment: '',
             formValid: true,
             formSubmit: false,
-            cardActive: false,
-            contactRules: [
-                v => v && parseFloat(v) % 1 === 0 || 'Должно быть целым числом'
-            ],
 	        personRules: [
 		        v => !!v || 'Обязательно к заполнению',
 		        v => v && !String(v).match('[^0-9]') || 'Должны присутствовать только цифры'
 	        ],
-            meters:  [],
+            replaceMeters:  [],
 	        currentOperation: 9,
 	        newLocation: 0
         }),
         mounted() {
             this.dialogOperations = this.operations.filter(operation => !operation.notAcceptOrIssueOperation)
-        },
-        created() {
-
+            this.acceptedPerson = this.getEmployeeCardByStaffId(this.staffId)
+            this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
         },
 	    inject: [
 	    	'showNotification',
             'showNotificationComponentError',
             'showNotificationStandardError',
             'showNotificationError',
-            'getMeterTypeTitle',
-            'getEmployeeTitleByStaffId',
             'getEmployeeStaffIdByCard',
-            'getEmployeeTitleByCard'
+            'getEmployeeTitleByCard',
+            'getEmployeeCardByStaffId',
+            'initializeMeters',
+            'resetFilters'
         ],
 	    computed: {
 		    ...mapState({
@@ -178,30 +169,46 @@
             ...mapGetters({
                 locations: 'storage/getLocations',
 	            operations: 'storage/getOperations',
+	            staffId: 'getStaffId',
             }),
-        },
-        provide: function () {
-	        return {
-		        checkIfMeterLocationValid: this.checkIfMeterLocationValid
-	        }
         },
 	    watch: {
 	        currentOperation(operation) {
 		        this.newLocation = operation
 		        switch (operation) {
-			        case 5: this.needAcceptedPerson = false; break;
-			        case 9:  this.newLocation = 0; break;
-			        case 11:  this.newLocation = 8; break;
-			        case 12:  this.newLocation = 9; break;
+			        //case 5: this.needAcceptedPerson = false; break
+			        case 9:	this.newLocation = 0; break
+			        case 11:  this.newLocation = 8; break
+			        case 12:  this.newLocation = 9; break
 		        }
-            }
+		        //this.changeDefaultPerson(operation)
+		        this.resetValidation()
+            },
+		    dialogModel: function (newVal) {
+			    if (newVal) {
+				    this.changeDefaultPerson(this.currentOperation)
+			    }
+		    }
         },
         methods: {
 	        ...mapActions('storage', [
                 'createLog',
 	        ]),
 
-	        //события формы
+            changeDefaultPerson(currentOperation) {
+	            if (currentOperation !== 9) {
+		            this.issuingPerson = ''
+		            this.issuingPersonLabel = 'Принимающий сотрудник'
+		            this.acceptedPerson = this.getEmployeeCardByStaffId(this.staffId)
+		            this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
+	            } else {
+		            this.acceptedPerson = ''
+		            this.acceptedPersonLabel = 'Отдающий сотрудник'
+		            this.issuingPerson = this.getEmployeeCardByStaffId(this.staffId)
+		            this.issuingPersonLabel = this.getEmployeeTitleByCard(this.issuingPerson)
+	            }
+            },
+
 	        issuingPersonOnFocusOut() {
 		        this.issuingPersonLabel= this.getEmployeeTitleByCard(parseInt(this.issuingPerson))
 	        },
@@ -210,19 +217,9 @@
 		        this.acceptedPersonLabel= this.getEmployeeTitleByCard(parseInt(this.acceptedPerson))
 	        },
 
-	        personOnKeyDown(evt) {
-		        if (evt.keyCode === 231) {
-			        this.cardActive = true
-		        }
-            },
-
-	        personOnKeyPress() {
-                this.cardActive = !this.cardActive
-		        return !this.cardActive
-            },
-
 	        checkIfMeterLocationValid(meter) {
-		       	return meter.oldLocation !== 0 || this.newLocation !== 0
+		        return (meter.oldLocation === 0 && this.newLocation !== 0)
+			        || (meter.oldLocation !== 0 && this.newLocation === 0)
 	        },
 
 	        meterCountUpdate(count) {
@@ -242,13 +239,12 @@
 	        	this.meterCount = ''
 		        this.currentOperation = 9
 		        this.newLocation = 0
-		        this.needAcceptedPerson = true
 		        this.issuingPerson = ''
 		        this.acceptedPerson = ''
 		        this.comment = ''
                 this.resultColor = this.colorGrey
                 this.oldLocationColor = this.colorGreen
-		        this.meters = []
+		        this.replaceMeters = []
 		        this.formSubmit = false
 		        this.acceptedPersonLabel = 'Принимающий сотрудник'
 		        this.issuingPersonLabel = 'Отдающий сотрудник'
@@ -265,24 +261,20 @@
                     return
                 }
 
-		        if (!this.meters.length) {
+		        if (!this.replaceMeters.length) {
 			        return this.showNotification(
 				        `Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
 		        }
 
 		        this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
-		        if (this.needAcceptedPerson) {
-			        this.acceptedPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.acceptedPerson))
-		        } else {
-			        this.acceptedPersonStaffId = 999999999999999
-		        }
+                this.acceptedPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.acceptedPerson))
 
 		        if (isNaN(this.issuingPersonStaffId) || isNaN(this.acceptedPersonStaffId)) {
 			        return this.showNotification(
-				        'Операция с неизвестным сотрудником не возможна', this.colorOrange)
+				        'Операция с неизвестным сотрудником невозможна', this.colorOrange)
 		        }
 
-                if (!this.meters.every(meter => this.checkIfMeterLocationValid(meter))) {
+                if (!this.replaceMeters.every(meter => this.checkIfMeterLocationValid(meter))) {
 	                return this.showNotification(
 		                'Не возможно произвести операцию, в таблице выбрана запрещенная схема смены местоположения',
                         this.colorOrange)
@@ -293,7 +285,7 @@
 		            this.$refs.addMeterTable.setLoading(true)
 
 		            const res = await this.createLog({
-                        meters: this.meters,
+                        meters: this.replaceMeters,
                         operationType: this.currentOperation,
                         newLocation: this.newLocation,
                         issuingPersonStaffId: this.issuingPersonStaffId,
@@ -304,13 +296,18 @@
                     if (!res) {
 	                    this.showNotificationStandardError('Что то пошло не так при приеме/выдаче')
                     } else {
-                    	this.meters.map(meter => {
-		                    meter.status = res.find(updMeter => updMeter.guid === meter.guid).success ? 1 : 2
+	                    let successCount = 0
+                    	this.replaceMeters.map(addMeter => {
+		                    const updatedMeter = res.find(meter => meter.guid === addMeter.guid)
+		                    if (updatedMeter && updatedMeter.success) {
+			                    successCount++
+			                    addMeter.status = 1
+		                    } else {
+			                    addMeter.status = 2
+		                    }
 	                    })
-                        const successCount = this.meters.filter(meter => meter.status === 1).length
-                        const totalCount = this.meters.length
 
-                        if (this.meters.every(meter => meter.status === 1)) {
+                        if (this.replaceMeters.length === successCount) {
 	                        this.showNotification('Операция выполнена успешно', this.colorGreen)
                             this.resultColor = this.colorGreen
                         } else {
@@ -318,11 +315,12 @@
 	                        this.resultColor = this.colorOrange
                         }
 
+                        this.resetFilters()
+	                    this.initializeMeters()
 	                    this.oldLocationColor = this.colorGrey
-	                    this.meterCount = `${ successCount }/${ totalCount }`
+	                    this.meterCount = `${ successCount }/${  this.replaceMeters.length }`
                     }
                 } catch (e) {
-		            console.log(e)
 		            this.showNotificationStandardError(e)
 	            } finally {
 		            this.$refs.addMeterTable.setLoading(false)
@@ -338,5 +336,8 @@
         grid-template-columns: 350px 10px 1fr;
         grid-template-rows: 1fr;
         justify-content: start;
+    }
+    ::v-deep .v-data-table__empty-wrapper {
+        display: none;
     }
 </style>

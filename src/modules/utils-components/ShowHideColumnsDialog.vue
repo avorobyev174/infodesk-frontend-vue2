@@ -39,7 +39,7 @@
 </template>
 
 <script>
-    import {mapActions, mapState} from "vuex";
+    import { mapActions, mapState } from "vuex";
 
     export default {
         name: "ShowHideColumnsDialog",
@@ -48,14 +48,18 @@
             columns: []
         }),
         props: {
-          headers: {
+            headers: {
               type: Array,
               required: true
-          },
-          selectedHeaders: {
+            },
+            selectedHeaders: {
               type: Array,
               required: true
-          }
+            },
+            moduleName: {
+	            type: String,
+	            required: true
+            }
         },
         inject: ['showNotification', 'showNotificationError'],
         computed: {
@@ -68,16 +72,30 @@
                 this.dialogModel = true
             },
             save() {
-                $cookies.set('meter_registration_columns', this.columns, '4h')
+            	if (this.moduleName === 'programming') {
+		            $cookies.set('meter_registration_columns', this.columns, '4h')
 
-                this.saveSettings(this.columns).then(
-                    response =>  {
-                        this.showNotification(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены', this.colorGreen)
-                        this.dialogModel = false
-                    },
-                    e => this.showNotificationError('Ошибка при обновлении или создании настроек колонок', e)
-                )
-                this.$emit('changeColumns', this.columns)
+		            this.saveSettings(this.columns).then(
+			            response =>  {
+				            this.showNotification(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены', this.colorGreen)
+				            this.dialogModel = false
+			            },
+			            e => this.showNotificationError('Ошибка при обновлении или создании настроек колонок', e)
+		            )
+		            this.$emit('changeColumns', this.columns)
+                }
+	            if (this.moduleName === 'storage') {
+		            $cookies.set('meter_storage_columns', this.columns, '4h')
+
+		            this.saveSettings(this.columns).then(
+			            response =>  {
+				            this.showNotification(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены', this.colorGreen)
+				            this.dialogModel = false
+			            },
+			            e => this.showNotificationError('Ошибка при обновлении или создании настроек колонок', e)
+		            )
+		            this.$emit('changeColumns', this.columns)
+	            }
             }
         }
     }

@@ -148,7 +148,7 @@
 				lvStates: 'storage/getLVStates'
 			}),
 		},
-		inject: ['showNotification', 'showNotificationStandardError', 'formatDate', 'getEmployeeTitleByStaffId', 'getMeterTypeTitle'],
+		inject: ['showNotification', 'showNotificationStandardError', 'getEmployeeTitleByStaffId', 'getMeterTypeTitle'],
 		methods: {
 			...mapActions('storage', [
 				'fetchLogs'
@@ -195,8 +195,8 @@
 							break;
 						case 'PassportNumber':
 							name = 'Номер паспорта';
-							oldValue = oldValue === '0' ? 'отсутствует' : oldValue;
-							newValue = newValue === '0' ? 'отсутствует' : newValue;
+							oldValue = oldValue === '0' || oldValue === 'null' ? 'отсутствует' : oldValue;
+							newValue = newValue === '0' || newValue === 'null' ? 'отсутствует' : newValue;
 							break;
 						case 'Condition':
 							name = 'Состояние';
@@ -205,8 +205,8 @@
 							break;
 						case 'CalibrationDate':
 							name = 'Дата поверки';
-							oldValue = !oldValue ? 'отсутствует' : oldValue;
-							newValue = !newValue ? 'отсутствует' : newValue;
+							oldValue = oldValue === 'null' ? 'отсутствует' : this.formatDate(oldValue, true);
+							newValue = newValue === 'null' ? 'отсутствует' : this.formatDate(newValue, true);
 							break;
 						case 'CalibrationInterval':
 							name = 'Межповерочный интервал';
@@ -259,7 +259,28 @@
 				}
 
 				return updateMaterialsFields
-			}
+			},
+
+			formatDate(dateToFormat, withoutTime) {
+				if (!dateToFormat)
+					return 'отсутствует'
+
+				const date = new Date(dateToFormat)
+				let day = String(date.getDate())
+				let month = String(date.getMonth() + 1)
+				const year = date.getFullYear()
+				const hours = date.getHours()
+				const minutes = date.getMinutes()
+				const seconds = date.getSeconds()
+
+				day = day.length < 2 ? day.padStart(2, '0') : day
+				month = month.length < 2 ? month.padStart(2, '0') : month
+                if (withoutTime) {
+	                return `${day}.${month}.${year}`
+                } else {
+	                return `${ day }.${ month }.${ year } ${ hours }:${ minutes }:${ seconds }`
+                }
+			},
 		}
 	}
 </script>

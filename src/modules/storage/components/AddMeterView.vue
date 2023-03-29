@@ -48,6 +48,7 @@
             @click:row="selectRow"
             loading-text="Идет поиск счетчика..."
             :loading="loading"
+            :items-per-page="200"
         >
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных</p>
@@ -59,14 +60,24 @@
                 {{ getMeterTypeTitle(item.type) }}
             </template>
             <template v-slot:item.oldLocation="{ item }">
-                <v-chip small tag="span" :color="oldLocationColor"> {{ getMeterLocationTitle(item.oldLocation) }}</v-chip>
-                <span> &#10132; </span>
                 <v-chip
                     small
                     tag="span"
-                    :color="checkIfMeterLocationValid(item) ? resultColor : colorRed">
+                    :color="oldLocationColor"
+                >
+                    {{ getMeterLocationTitle(item.oldLocation) }}
+                    <v-icon right small v-show="isRegister && oldLocationColor === colorGreen">`
+                        mdi-check-circle-outline
+                    </v-icon>
+                </v-chip>
+                <span v-show="!isRegister"> &#10132; </span>
+                <v-chip
+                    v-show="!isRegister"
+                    small
+                    tag="span"
+                    :color="checkLocation(item) ? resultColor : colorRed">
                     {{ getMeterLocationTitle(newLocation) }}
-                    <v-icon right small v-if="item.status === 1">
+                    <v-icon right small v-if="item.status === 1">`
                         mdi-check-circle-outline
                     </v-icon>
                     <v-icon right small v-if="item.status === 2">
@@ -102,7 +113,7 @@
 			        cellClass: 'table-header-size',
 		        },
 		        {
-			        text: 'Операция',
+			        text: 'Направление',
 			        align: 'center',
 			        value: 'oldLocation',
 			        sortable: false,
@@ -118,6 +129,9 @@
 	        metersWithLetters: [ 66, 111, 119, 120 ],
         }),
         props: {
+			isRegister: {
+				type: Boolean
+            },
 	        newLocation: {
 	        	type: Number,
                 required: true
@@ -136,7 +150,7 @@
             },
 	        oldLocationColor: {
 		        type: String,
-		        required: true
+		        required: false
 	        }
         },
 		inject: [
@@ -144,7 +158,6 @@
 			'getMeterTypeTitle',
 			'showNotification',
 			'showNotificationStandardError',
-            'checkIfMeterLocationValid'
 		],
 		watch: {
 			scannerActive(newVal) {
@@ -170,6 +183,11 @@
 		        'parseSerialNumber',
 		        'checkMeterInDB',
 	        ]),
+
+	        checkLocation(meter) {
+		        return (meter.oldLocation === 0 && this.newLocation !== 0)
+                    || (meter.oldLocation !== 0 && this.newLocation === 0)
+	        },
 
             setLoading(loading) {
 	        	this.loading = loading
@@ -224,7 +242,7 @@
 	        	this.serialNumber = ''
             },
 
-	        async checkMeterAndInsert() {
+	        async checkMeterAndInsert(isRegister) {
 		        if (!this.serialNumber) {
 			        this.showNotification(`Серийный номер не должен быть пустым`, this.colorOrange)
 			        return
@@ -235,7 +253,7 @@
 		        //Проверка на счетчики с буквами в серийных номерах и минусом в начале
 		        if (!this.metersWithLetters.includes(meterType)) {
 			        this.serialNumber = parseInt(this.serialNumber).toString()
-		        } else if (this.serialNumber.indexOf('-') !== -1) {
+		        } else if (this.serialNumber.startsWith('-')) {
 			        this.serialNumber = this.serialNumber.slice(1)
 		        }
 
@@ -251,23 +269,38 @@
 			        this.loading = true
 
 			        const res = await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
-			        if (!res.length) {
-				        return this.showNotification(
-					        `Счетчик с типом ${ this.getMeterTypeTitle(meterType) }
-                                          и серийным номером ${ this.serialNumber } не найден в базе данных`,
-                                          this.colorOrange)
-			        }
 
-			        const oldLocation = res[0].METER_LOCATION
-			        const guid = res[0].GUID
+			        if (this.isRegister) {
+				        if (res.length) {
+					        return this.showNotification(
+						        `Счетчик с типом ${this.getMeterTypeTitle(meterType)}
+                                          и серийным номером ${this.serialNumber} уже найден в базе данных`,
+						        this.colorBlue)
+				        }
+				        this.meters.unshift({
+					        type: meterType,
+					        serialNumber: this.serialNumber,
+					        status: 0,
+					        oldLocation: 0
+				        })
+			        } else {
+				        if (!res.length) {
+					        return this.showNotification(
+						        `Счетчик с типом ${this.getMeterTypeTitle(meterType)}
+                                          и серийным номером ${this.serialNumber} не найден в базе данных`,
+						        this.colorOrange)
+				        }
+				        const oldLocation = res[0].METER_LOCATION
+				        const guid = res[0].GUID
+				        this.meters.unshift({
+					        type: meterType,
+					        serialNumber: this.serialNumber,
+					        status: 0,
+					        oldLocation,
+					        guid,
+				        })
+                    }
 
-			        this.meters.push({
-				        type: meterType,
-				        serialNumber: this.serialNumber,
-				        status: 0,
-				        oldLocation,
-				        guid,
-			        })
                     this.$emit('onMeterCountUpdate', this.meters.length)
 
 			        this.serialNumber = ''

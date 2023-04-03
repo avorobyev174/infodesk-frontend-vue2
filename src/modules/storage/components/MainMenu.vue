@@ -22,8 +22,8 @@
             <v-list-item
                 v-for="(action, i) in actions"
                 :key="i"
-                @click="action.onClick ? $emit(action.onClick) : localFuncCall(action)"
-                :class="action.disabled ? 'active' : 'hidden'"
+                @click="$emit(action.onClick)"
+                v-show="action.visible"
             >
                 <v-list-item-icon>
                     <v-icon
@@ -40,16 +40,36 @@
 </template>
 
 <script>
-    export default {
+	import {mapGetters, mapState} from "vuex"
+
+	export default {
         name: "MainMenu",
         data: () => ({
             actions: [
-	            { id: 1, title: 'Регистрация', onClick: 'register', icon: 'mdi-plus-thick', color: 'primary', disabled: false },
-                { id: 2, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', disabled: false },
-	            { id: 3, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', disabled: false },
+	            { id: 1, title: 'Регистрация', onClick: 'register', icon: 'mdi-plus-thick', color: 'primary', visible: true },
+                { id: 2, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
+	            { id: 3, title: 'Регистрация маршрутизатора', onClick: 'routeRegister', icon: 'mdi-plus-thick', color: 'primary', visible: true },
+	            { id: 4, title: 'Прием/Выдача маршрутизатора', onClick: 'routeAcceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
+	            { id: 5, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', visible: true },
             ],
         }),
-    }
+		computed: {
+			...mapGetters({
+				roles: 'getRoles',
+				staffId: 'getStaffId',
+			}),
+		},
+        mounted() {
+	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'keeper') {
+		        this.actions[2].visible = false
+		        this.actions[3].visible = false
+	        }
+	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'repairer') {
+		        this.actions[0].visible = false
+		        this.actions[1].visible = false
+	        }
+        }
+	}
 </script>
 
 <style scoped>

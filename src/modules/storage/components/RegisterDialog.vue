@@ -51,7 +51,7 @@
                         @onResetValidation="resetValidation"
                         @onMeterCountUpdate="meterCountUpdate"
                         :resultColor="resultColor"
-                        :is-register="true"
+                        is-register
                         :oldLocationColor="oldLocationColor"
                     ></add-meter-view>
                 </div>
@@ -198,11 +198,10 @@
 
                 if (!this.regMeters.length) {
                     return this.showNotification(
-                        `Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
+                        `Для выполнения операции заполните таблицу`, this.colorOrange)
                 }
 
                 this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
-		        console.log(this.staffId)
                 this.acceptedPersonStaffId = this.staffId
 
                 if (isNaN(this.issuingPersonStaffId) || isNaN(this.acceptedPersonStaffId)) {
@@ -221,7 +220,7 @@
                         acceptedPersonStaffId: this.acceptedPersonStaffId,
                         ...meterData
                     })
-                    //console.log(res)
+
                     if (!res.length) {
                         this.showNotificationStandardError('Что то пошло не так при регистрации')
                     } else {

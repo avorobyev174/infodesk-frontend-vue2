@@ -24,10 +24,10 @@ export const storage = {
 		],
 		operations: [
 			{ text: 'Регистрация(без с.н.)', value: 0, notAcceptOrIssueOperation: true },
-			{ text: 'Выдача в ремонт(УИТ)', value: 1 },
+			{ text: 'Выдача в ремонт(УИТ)', value: 1, routerOperation: true },
 			{ text: 'Выдача на проверку(УИТ)', value: 2 },
-			{ text: 'Выдача на ремонт(завод)', value: 3 },
-			{ text: 'Выдача на монтаж', value: 4 },
+			{ text: 'Выдача на ремонт(завод)', value: 3, routerOperation: true },
+			{ text: 'Выдача на монтаж', value: 4, routerOperation: true },
 			{ text: 'Списание', value: 5 },
 			{ text: 'Выдача на поверку', value: 6 },
 			{ text: 'Регистрация', value: 7, notAcceptOrIssueOperation: true  },
@@ -201,7 +201,7 @@ export const storage = {
 			commit('setEmployees', response.data)
 		},
 		
-		async filter({ state, commit }, { filters, options }) {
+		async meterFilter({ state, commit }, { filters, options }) {
 			try {
 				commit('setMeterLoading', true)
 				const response = await post(
@@ -251,7 +251,8 @@ export const storage = {
 			                   owner,
 			                   calibration,
 			                   passportNumber,
-			                   comment
+			                   comment,
+			                   isRouter
 		                   }) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/registration`,
@@ -265,7 +266,8 @@ export const storage = {
 					owner,
 					calibration,
 					passportNumber,
-					comment
+					comment,
+					isRouter
 				},
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
@@ -309,7 +311,7 @@ export const storage = {
 			return response.data
 		},
 		
-		async createLog({ state, commit },
+		async createAcceptOrIssueLog({ state, commit },
 		                {
 		                	meters,
 			                operationType,
@@ -319,7 +321,7 @@ export const storage = {
 			                comment
 		                }) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/create-log`,
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/create-accept-or-issue-log`,
 				{
 					meters,
 					operationType,

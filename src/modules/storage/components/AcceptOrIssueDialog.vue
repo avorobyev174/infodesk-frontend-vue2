@@ -63,6 +63,7 @@
                         :meters="replaceMeters"
                         :new-location="newLocation"
                         ref="addMeterTable"
+                        is-router
                         @onResetValidation="this.resetValidation"
                         @onMeterCountUpdate="meterCountUpdate"
                         :resultColor="resultColor"
@@ -139,10 +140,10 @@
 	        ],
             replaceMeters:  [],
 	        currentOperation: 9,
-	        newLocation: 0
+	        newLocation: 0,
+            isRouter: false
         }),
         mounted() {
-            this.dialogOperations = this.operations.filter(operation => !operation.notAcceptOrIssueOperation)
             this.acceptedPerson = this.getEmployeeCardByStaffId(this.staffId)
             this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
         },
@@ -181,7 +182,7 @@
 			        case 11:  this.newLocation = 8; break
 			        case 12:  this.newLocation = 9; break
 		        }
-		        //this.changeDefaultPerson(operation)
+		        this.changeDefaultPerson(operation)
 		        this.resetValidation()
             },
 		    dialogModel: function (newVal) {
@@ -192,20 +193,20 @@
         },
         methods: {
 	        ...mapActions('storage', [
-                'createLog',
+                'createAcceptOrIssueLog',
 	        ]),
 
             changeDefaultPerson(currentOperation) {
 	            if (currentOperation !== 9) {
-		            this.issuingPerson = ''
-		            this.issuingPersonLabel = 'Принимающий сотрудник'
-		            this.acceptedPerson = this.getEmployeeCardByStaffId(this.staffId)
-		            this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
-	            } else {
 		            this.acceptedPerson = ''
-		            this.acceptedPersonLabel = 'Отдающий сотрудник'
+		            this.acceptedPersonLabel = 'Принимающий сотрудник'
 		            this.issuingPerson = this.getEmployeeCardByStaffId(this.staffId)
 		            this.issuingPersonLabel = this.getEmployeeTitleByCard(this.issuingPerson)
+	            } else {
+		            this.issuingPerson = ''
+		            this.issuingPersonLabel = 'Отдающий сотрудник'
+		            this.acceptedPerson = this.getEmployeeCardByStaffId(this.staffId)
+		            this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
 	            }
             },
 
@@ -218,16 +219,29 @@
 	        },
 
 	        checkIfMeterLocationValid(meter) {
-		        return (meter.oldLocation === 0 && this.newLocation !== 0)
-			        || (meter.oldLocation !== 0 && this.newLocation === 0)
+		        if (this.isRouter) {
+			        return (meter.oldLocation === 1 && this.newLocation !== 1) ||
+				        (meter.oldLocation !== 1 && this.newLocation === 1)
+		        } else {
+			        return (meter.oldLocation === 0 && this.newLocation !== 0) ||
+				        (meter.oldLocation !== 0 && this.newLocation === 0)
+		        }
 	        },
 
 	        meterCountUpdate(count) {
 	            this.meterCount = count
             },
 
-            open() {
-	            this.dialogModel = true
+            open(isRouter) {
+	            this.isRouter = isRouter
+                if (this.isRouter) {
+	                this.currentOperation = 1
+	                this.dialogOperations = this.operations.filter(operation => operation.routerOperation)
+                } else {
+	                this.dialogOperations = this.operations.filter(operation => !operation.notAcceptOrIssueOperation)
+                }
+
+	           	this.dialogModel = true
             },
 
             close() {
@@ -253,11 +267,13 @@
             },
 
             resetValidation() {
-	            this.$refs.form.resetValidation()
+	            if (this.$refs.form) {
+		            this.$refs.form.resetValidation()
+	            }
             },
 
 	        async accept() {
-                if (!this.$refs.form.validate()) {
+                if (this.$refs.form && !this.$refs.form.validate()) {
                     return
                 }
 
@@ -284,7 +300,7 @@
 		            this.formSubmit = true
 		            this.$refs.addMeterTable.setLoading(true)
 
-		            const res = await this.createLog({
+		            const res = await this.createAcceptOrIssueLog({
                         meters: this.replaceMeters,
                         operationType: this.currentOperation,
                         newLocation: this.newLocation,

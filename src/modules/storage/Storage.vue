@@ -153,8 +153,10 @@
                     <main-menu
                         class="pr-2"
                         @acceptOrIssue="$refs.acceptOrIssueDialog.open()"
-                        @register="$refs.registerDialog.open(false)"
+                        @register="$refs.registerDialog.open()"
                         @showHideColums="$refs.showHideColumnsDialog.open()"
+                        @routeRegister="$refs.routerRegisterDialog.open()"
+                        @routeAcceptOrIssue="$refs.acceptOrIssueDialog.open(true)"
                     ></main-menu>
                 </v-toolbar>
             </template>
@@ -211,6 +213,10 @@
             module-name="storage"
         >
         </show-hide-columns-dialog>
+        <router-register-dialog
+            ref="routerRegisterDialog"
+            :meters="meters"
+        ></router-register-dialog>
     </v-card>
 </template>
 
@@ -223,6 +229,7 @@
 	import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
     import ActionColumn from "../utils-components/ActionColumn"
     import EditDialog from "./components/EditDialog"
+    import RouterRegisterDialog from "./components/RouterRegisterDialog"
 
 	export default {
 		name: "Storage",
@@ -233,7 +240,8 @@
             AcceptOrIssueDialog,
 			ShowHideColumnsDialog,
 			ActionColumn,
-			EditDialog
+			EditDialog,
+			RouterRegisterDialog
 		},
 		data: () => ({
 			options: {},
@@ -385,7 +393,9 @@
 
 	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
 
-	        if (this.staffId === 49480) {
+	        console.log(this.roles)
+
+	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'admin') {
 		        this.actions.push({ title: 'Удалить', action: 'delete', icon: 'mdi-delete' })
 	        }
 
@@ -437,7 +447,7 @@
 				locations: 'storage/getLocations',
 				owners: 'storage/getOwners',
 				employees: 'storage/getEmployees',
-				roles: 'storage/getRoles',
+				roles: 'getRoles',
 				staffId: 'getStaffId',
 			}),
 			showHeaders() {
@@ -465,7 +475,7 @@
 			...mapMutations(['setFavoriteModuleColor', 'setMeters']),
 			...mapMutations('storage', ['setMeters', 'setSearchMetersView']),
 			...mapActions('storage', [
-                'filter',
+                'meterFilter',
                 'fetchMeterTypes',
                 'fetchMetersPerPage',
                 'fetchEmployees',
@@ -619,7 +629,8 @@
 	                await this.initializeMeters()
                 } else {
                 	try {
-		                this.totalMeters = await this.filter({ filters: this.filters, options: this.options })
+		                this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
+		                console.log(this.totalMeters)
 	                } catch (e) {
                         this.showNotificationStandardError(e)
 	                }

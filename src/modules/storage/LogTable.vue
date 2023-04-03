@@ -179,47 +179,42 @@
 					let oldValue = field[2].substring(9, field[2].length);
 					switch (name) {
 						case 'Type':
-							name = 'Тип';
-							oldValue = this.getMeterTypeTitle(oldValue);
-							newValue = this.getMeterTypeTitle(newValue);
+							name = 'Тип'
+							oldValue = this.getMeterTypeTitle(oldValue)
+							newValue = this.getMeterTypeTitle(newValue)
 							break;
 						case 'SerialNumber':
-							name = 'Серийный номер';
-							oldValue = oldValue === '0' ? 'отсутствует' : oldValue;
-							newValue = newValue === '0' ? 'отсутствует' : newValue;
+							name = 'Серийный номер'
+							oldValue = oldValue === '0' ? 'отсутствует' : oldValue
+							newValue = newValue === '0' ? 'отсутствует' : newValue
 							break;
 						case 'AccuracyClass':
-							name = 'Класс точности';
-							oldValue = oldValue === '0' ? '0.5' : '1';
-							newValue = newValue === '0' ? '0.5' : '1';
+							name = 'Класс точности'
+							oldValue = oldValue === '0' ? '0.5' : '1'
+							newValue = newValue === '0' ? '0.5' : '1'
 							break;
 						case 'PassportNumber':
-							name = 'Номер паспорта';
-							oldValue = oldValue === '0' || oldValue === 'null' ? 'отсутствует' : oldValue;
-							newValue = newValue === '0' || newValue === 'null' ? 'отсутствует' : newValue;
+							name = 'Номер паспорта'
+							oldValue = oldValue === '0' || oldValue === 'null' ? 'отсутствует' : oldValue
+							newValue = newValue === '0' || newValue === 'null' ? 'отсутствует' : newValue
 							break;
 						case 'Condition':
 							name = 'Состояние';
-							oldValue = oldValue === '0' ? 'Новый' : 'Б/у';
-							newValue = newValue === '0' ? 'Новый' : 'Б/у';
+							oldValue = oldValue === '0' ? 'Новый' : 'Б/у'
+							newValue = newValue === '0' ? 'Новый' : 'Б/у'
 							break;
 						case 'CalibrationDate':
-							name = 'Дата поверки';
-							oldValue = oldValue === 'null' ? 'отсутствует' : this.formatDate(oldValue, true);
-							newValue = newValue === 'null' ? 'отсутствует' : this.formatDate(newValue, true);
+							name = 'Дата поверки'
+							oldValue = oldValue === 'null' ? 'отсутствует' : oldValue
+							newValue = newValue === 'null' ? 'отсутствует' : newValue
 							break;
 						case 'CalibrationInterval':
-							name = 'Межповерочный интервал';
+							name = 'Межповерочный интервал'
 							break;
 						case 'LVModem':
-							name = 'Проверка LV модема';
-							oldValue = this.getLVStateTitle(oldValue);
-							newValue = this.getLVStateTitle(newValue);
-							break;
-						case 'ExpDate':
-							name = 'Дата ввода в эксплуатацию';
-							oldValue = oldValue === '0' ? 'отсутствует' : oldValue;
-							newValue = newValue === '0' ? 'отсутствует' : newValue;
+							name = 'Проверка LV модема'
+							oldValue = this.getLVStateTitle(oldValue)
+							newValue = this.getLVStateTitle(newValue)
 							break;
 					}
 
@@ -275,8 +270,9 @@
 
 				day = day.length < 2 ? day.padStart(2, '0') : day
 				month = month.length < 2 ? month.padStart(2, '0') : month
+
                 if (withoutTime) {
-	                return `${day}.${month}.${year}`
+	                return `${ day }.${ month }.${ year }`
                 } else {
 	                return `${ day }.${ month }.${ year } ${ hours }:${ minutes }:${ seconds }`
                 }

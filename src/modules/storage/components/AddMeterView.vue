@@ -2,7 +2,7 @@
     <div class="pr-3">
         <div class="add-panel">
             <v-combobox
-                :items="types"
+                :items="meterTypes"
                 item-text="title"
                 item-value="index"
                 label="Тип"
@@ -20,7 +20,7 @@
                 clearable
                 outlined
                 :disabled="formSubmit"
-                @keypress.enter="parseSerialNumberAndInsertOnEnterPress"
+                @keypress.enter="parseSerialNumberOnEnterPress"
             >
             </v-text-field>
             <v-btn-toggle
@@ -31,7 +31,7 @@
                 <v-btn @click="meterDeleteButtonOnClick" :disabled="formSubmit">
                     <v-icon :color="colorRed" large>mdi-minus-thick</v-icon>
                 </v-btn>
-                <v-btn @click="scannerActiveOnClick" :disabled="formSubmit">
+                <v-btn @click="scannerActiveOnClick" :disabled="formSubmit || isRouter">
                     <v-icon :color="scannerButtonColor" large>mdi-barcode-scan</v-icon>
                 </v-btn>
             </v-btn-toggle>
@@ -123,15 +123,19 @@
 	        ],
 	        scannerButtonColor: 'grey',
 	        serialNumber: '',
-	        type: { index: 121, title: 'AIU5' },
-	        scannerActive: false,
+	        type: {},
+	        scannerActive: true,
 	        selectedMeterIndex: 0,
 	        metersWithLetters: [ 66, 111, 119, 120 ],
+            meterTypes: []
         }),
         props: {
 			isRegister: {
 				type: Boolean
             },
+	        isRouter: {
+		        type: Boolean
+	        },
 	        newLocation: {
 	        	type: Number,
                 required: true
@@ -159,6 +163,16 @@
 			'showNotification',
 			'showNotificationStandardError',
 		],
+        mounted() {
+			if (this.isRouter) {
+				this.meterTypes = this.types.filter(type => type.option === 41)
+				this.type = { index: 46, title: 'RTR512.10-6L/EY' }
+            } else {
+				this.meterTypes = this.types.slice()
+                this.type = { index: 121, title: 'AIU5' }
+            }
+
+        },
 		watch: {
 			scannerActive(newVal) {
 				this.scannerButtonColor = newVal ? this.colorBlue : this.colorGrey
@@ -185,8 +199,13 @@
 	        ]),
 
 	        checkLocation(meter) {
-		        return (meter.oldLocation === 0 && this.newLocation !== 0)
-                    || (meter.oldLocation !== 0 && this.newLocation === 0)
+	        	if (this.isRouter) {
+			        return (meter.oldLocation === 1 && this.newLocation !== 1) ||
+				        (meter.oldLocation !== 1 && this.newLocation === 1)
+                } else {
+			        return (meter.oldLocation === 0 && this.newLocation !== 0) ||
+				        (meter.oldLocation !== 0 && this.newLocation === 0)
+                }
 	        },
 
             setLoading(loading) {
@@ -216,7 +235,6 @@
 		        if (!this.formSubmit) {
 			        this.meters.splice(this.selectedMeterIndex, 1)
 			        this.$emit('onMeterCountUpdate', this.meters.length)
-			        //this.meterTotalSuccess = this.meters.length
 		        } else {
 			        this.showNotification(
 				        'Операция уже завершена, редактирование списка не доступно',
@@ -224,7 +242,7 @@
 		        }
 	        },
 
-	        async parseSerialNumberAndInsertOnEnterPress() {
+	        async parseSerialNumberOnEnterPress() {
 		        if (this.scannerActive && this.options) {
 			        const parseOption = this.types.find(type => this.type.index === type.index)
 			        if (parseOption && parseOption.option) {
@@ -242,7 +260,7 @@
 	        	this.serialNumber = ''
             },
 
-	        async checkMeterAndInsert(isRegister) {
+	        async checkMeterAndInsert() {
 		        if (!this.serialNumber) {
 			        this.showNotification(`Серийный номер не должен быть пустым`, this.colorOrange)
 			        return
@@ -267,31 +285,34 @@
 
 		        try {
 			        this.loading = true
-
-			        const res = await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
+			        const meter = await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
 
 			        if (this.isRegister) {
-				        if (res.length) {
+				        if (meter.length) {
 					        return this.showNotification(
-						        `Счетчик с типом ${this.getMeterTypeTitle(meterType)}
-                                          и серийным номером ${this.serialNumber} уже найден в базе данных`,
+						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
+						         ${ this.getMeterTypeTitle(meterType) }
+						         и серийным номером ${ this.serialNumber } уже найден в базе данных`,
 						        this.colorBlue)
 				        }
+
 				        this.meters.unshift({
 					        type: meterType,
 					        serialNumber: this.serialNumber,
 					        status: 0,
-					        oldLocation: 0
+					        oldLocation: this.isRouter ? 1: 0
 				        })
 			        } else {
-				        if (!res.length) {
+				        if (!meter.length) {
 					        return this.showNotification(
-						        `Счетчик с типом ${this.getMeterTypeTitle(meterType)}
-                                          и серийным номером ${this.serialNumber} не найден в базе данных`,
+						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
+						         ${ this.getMeterTypeTitle(meterType) }
+						         и серийным номером ${ this.serialNumber } не найден в базе данных`,
 						        this.colorOrange)
 				        }
-				        const oldLocation = res[0].METER_LOCATION
-				        const guid = res[0].GUID
+				        const oldLocation = meter[0].METER_LOCATION
+				        const guid = meter[0].GUID
+
 				        this.meters.unshift({
 					        type: meterType,
 					        serialNumber: this.serialNumber,

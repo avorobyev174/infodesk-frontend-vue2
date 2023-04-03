@@ -179,7 +179,7 @@
                                                     this.colorOrange)
 			            return
                     }
-
+		            this.setLoading(true)
                     const updatedMeter = await this.actualizeMeterDataFromStek(item)
                     console.log(updatedMeter)
                     const mainUpdatedMeter = this.meters.find((mainMeter) => {
@@ -194,7 +194,9 @@
                     }
                 } catch (e) {
                     this.showNotificationComponentError(this.componentTitle, e)
-                }
+                } finally {
+                    this.setLoading(false)
+	            }
             },
 
             //Обработчик закрытия диалога актуализации

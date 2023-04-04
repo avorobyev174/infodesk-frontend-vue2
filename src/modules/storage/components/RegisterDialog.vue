@@ -12,6 +12,7 @@
             v-model="formValid"
             lazy-validation
             @keypress.enter.native.prevent
+            @keypress.esc="close"
         >
             <v-card class="p-2">
                 <v-card-title>
@@ -196,7 +197,7 @@
 	        },
 
 	        async accept() {
-		        if (!this.isRouter && !this.$refs.form.validate()) {
+		        if (!this.isRouter && this.$refs.form && !this.$refs.form.validate()) {
 			        return
 		        }
 

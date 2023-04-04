@@ -440,7 +440,6 @@
 				activeModules: 'getActiveModules',
 				types: 'storage/getMeterTypes',
 				accuracyClasses: 'storage/getAccuracyClasses',
-				customerTypes: 'storage/getCustomerTypes',
 				conditions: 'storage/getConditions',
 				locations: 'storage/getLocations',
 				owners: 'storage/getOwners',
@@ -463,7 +462,7 @@
 		        getConditionTitle: this.getConditionTitle,
 		        getEmployeeStaffIdByCard: this.getEmployeeStaffIdByCard,
 		        getEmployeeTitleByCard: this.getEmployeeTitleByCard,
-		        getMeterLocationTitle: this.getMeterLocationTitle,
+		        getLocationTitle: this.getLocationTitle,
 		        getEmployeeCardByStaffId: this.getEmployeeCardByStaffId,
 		        initializeMeters: this.initializeMeters,
 		        resetFilters: this.resetFilters,
@@ -554,23 +553,23 @@
 			},
 
 			getAccuracyClassTitle(accuracyClass) {
-				return this.accuracyClasses.find(accClass => accuracyClass === accClass.value).text
+				const accClass = this.accuracyClasses.find(accClass => accuracyClass === accClass.value)
+				return accClass ? accClass.text : accuracyClass
 			},
 
 			getConditionTitle(condition) {
-				return this.conditions.find(cond => condition === cond.value).text
+				const cond = this.conditions.find(cond => condition === cond.value)
+				return cond ? cond.text : condition
 			},
 
 			getLocationTitle(location) {
-				return this.locations.find(loc => location === loc.value).text
-			},
-
-			getMeterLocationTitle(location) {
-				return this.locations.find(loc => location === loc.value).text
+				const loc = this.locations.find(loc => location === loc.value)
+				return loc ? loc.text : location
 			},
 
 			getOwnerTitle(owner) {
-				return this.owners.find(own => owner === own.value).text
+				const own =  this.owners.find(own => owner === own.value)
+				return own ? own.text : owner
 			},
 
 			getEmployeeTitleByStaffId(employeeStaffId) {

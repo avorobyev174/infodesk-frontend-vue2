@@ -12,6 +12,7 @@
             lazy-validation
             @submit.prevent="accept"
             @keypress.enter.native.prevent
+            @keypress.esc="close"
         >
             <v-card class="p-2">
                 <v-card-title>
@@ -40,6 +41,7 @@
                             type="number"
                             hide-spin-buttons
                             :disabled="formSubmit"
+                            v-show="!isRouter"
                         ></v-text-field>
                         <v-text-field
                             v-model="acceptedPerson"
@@ -50,6 +52,7 @@
                             type="number"
                             hide-spin-buttons
                             :disabled="formSubmit"
+                            v-show="!isRouter"
                         ></v-text-field>
                         <v-text-field
                             v-model="comment"
@@ -197,17 +200,19 @@
 	        ]),
 
             changeDefaultPerson(currentOperation) {
-	            if (currentOperation !== 9) {
-		            this.acceptedPerson = ''
-		            this.acceptedPersonLabel = 'Принимающий сотрудник'
-		            this.issuingPerson = this.getEmployeeCardByStaffId(this.staffId)
-		            this.issuingPersonLabel = this.getEmployeeTitleByCard(this.issuingPerson)
-	            } else {
-		            this.issuingPerson = ''
-		            this.issuingPersonLabel = 'Отдающий сотрудник'
-		            this.acceptedPerson = this.getEmployeeCardByStaffId(this.staffId)
-		            this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
-	            }
+	        	if (!this.isRouter) {
+			        if (currentOperation !== 9) {
+				        this.acceptedPerson = ''
+				        this.acceptedPersonLabel = 'Принимающий сотрудник'
+				        this.issuingPerson = this.getEmployeeCardByStaffId(this.staffId)
+				        this.issuingPersonLabel = this.getEmployeeTitleByCard(this.issuingPerson)
+			        } else {
+				        this.issuingPerson = ''
+				        this.issuingPersonLabel = 'Отдающий сотрудник'
+				        this.acceptedPerson = this.getEmployeeCardByStaffId(this.staffId)
+				        this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
+			        }
+		        }
             },
 
 	        issuingPersonOnFocusOut() {
@@ -273,7 +278,7 @@
             },
 
 	        async accept() {
-                if (this.$refs.form && !this.$refs.form.validate()) {
+                if (!this.isRouter && this.$refs.form && !this.$refs.form.validate()) {
                     return
                 }
 
@@ -282,8 +287,20 @@
 				        `Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
 		        }
 
-		        this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
-                this.acceptedPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.acceptedPerson))
+		        if (!this.isRouter) {
+			        this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
+			        this.acceptedPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.acceptedPerson))
+		        }
+
+		        if (this.isRouter) {
+			        if (this.currentOperation !== 1) {
+				        this.acceptedPersonStaffId = 0
+				        this.issuingPersonStaffId = this.staffId
+			        } else {
+				        this.acceptedPersonStaffId = this.staffId
+				        this.issuingPersonStaffId = 0
+			        }
+		        }
 
 		        if (isNaN(this.issuingPersonStaffId) || isNaN(this.acceptedPersonStaffId)) {
 			        return this.showNotification(

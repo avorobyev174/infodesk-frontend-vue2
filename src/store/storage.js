@@ -45,10 +45,6 @@ export const storage = {
 			{ text: '10', value: 10 },
 			{ text: '16', value: 16 }
 		],
-		customerTypes: [
-			{ text: 'Физ. лицо', value: 0 },
-			{ text: 'Юр. лицо', value: 1 }
-		],
 		accuracyClasses: [
 			{ text: '0,5', value: 0 },
 			{ text: '1', value: 1 }
@@ -91,9 +87,6 @@ export const storage = {
 		},
 		getAccuracyClasses(state) {
 			return state.accuracyClasses
-		},
-		getCustomerTypes(state) {
-			return state.customerTypes
 		},
 		getConditions(state) {
 			return state.conditions

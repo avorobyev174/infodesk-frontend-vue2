@@ -65,7 +65,7 @@
                     tag="span"
                     :color="oldLocationColor"
                 >
-                    {{ getMeterLocationTitle(item.oldLocation) }}
+                    {{ getLocationTitle(item.oldLocation) }}
                     <v-icon right small v-show="isRegister && oldLocationColor === colorGreen">`
                         mdi-check-circle-outline
                     </v-icon>
@@ -76,7 +76,7 @@
                     small
                     tag="span"
                     :color="checkLocation(item) ? resultColor : colorRed">
-                    {{ getMeterLocationTitle(newLocation) }}
+                    {{ getLocationTitle(newLocation) }}
                     <v-icon right small v-if="item.status === 1">`
                         mdi-check-circle-outline
                     </v-icon>
@@ -154,7 +154,7 @@
 	        }
         },
 		inject: [
-			'getMeterLocationTitle',
+			'getLocationTitle',
 			'getMeterTypeTitle',
 			'showNotification',
 			'showNotificationStandardError',

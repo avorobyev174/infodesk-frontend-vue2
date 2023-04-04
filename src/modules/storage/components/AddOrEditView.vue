@@ -8,7 +8,7 @@
             class="pl-1 pt-2 pb-0 pr-3"
             v-model="type"
             :disabled="formSubmit"
-            v-show="isEdit"
+            v-show="isEdit && !isRouter"
         >
         </v-combobox>
         <v-text-field
@@ -18,7 +18,7 @@
             v-model="serialNumber"
             clearable
             :disabled="formSubmit"
-            v-show="isEdit"
+            v-show="isEdit && !isRouter"
         ></v-text-field>
         <v-text-field
             class="pt-2 pb-0 pr-3"
@@ -27,7 +27,7 @@
             v-model="passportNumber"
             clearable
             :disabled="formSubmit"
-            v-show="isEdit"
+            v-show="isEdit && !isRouter"
         ></v-text-field>
         <v-select
             v-model="accuracyClass"
@@ -36,6 +36,7 @@
             item-value="value"
             label="Класс точности"
             :disabled="formSubmit"
+            v-show="!isRouter"
         />
         <v-select
             v-model="condition"
@@ -44,12 +45,14 @@
             item-value="value"
             label="Состояние"
             :disabled="formSubmit"
+            v-show="!isRouter"
         />
         <v-text-field
             v-model="calibrationDate"
             label="Дата поверки"
             type="date"
             :disabled="formSubmit"
+            v-show="!isRouter"
         ></v-text-field>
         <v-select
             v-model="interval"
@@ -58,6 +61,7 @@
             item-value="value"
             label="Межповерочный интервал"
             :disabled="formSubmit"
+            v-show="!isRouter"
         />
         <v-select
             v-model="owner"
@@ -66,6 +70,7 @@
             item-value="value"
             label="Собственник"
             :disabled="formSubmit"
+            v-show="!isRouter"
         />
        <slot name="issuing-person-input"></slot>
         <v-text-field
@@ -77,7 +82,7 @@
 </template>
 
 <script>
-	import {mapGetters, mapState} from "vuex"
+	import { mapGetters, mapState } from "vuex"
 
 	export default {
 		name: "AddOrEditView",
@@ -118,42 +123,19 @@
             },
         },
         props: {
-			isEdit: {
-				type: Boolean
-            },
-            formSubmit: {
-	            type: Boolean
-            },
-	        parentDialogModel: {
-		        type: Boolean
-	        },
-	        typeTemp: {
-		        type: Number
-	        },
-            serialNumberTemp: {
-				type: String
-            },
-	        calibrationDateTemp: {
-				type: String
-            },
-	        accuracyClassTemp: {
-		        type: Number
-	        },
-	        conditionTemp: {
-		        type: Number
-	        },
-	        intervalTemp: {
-		        type: Number
-	        },
-	        ownerTemp: {
-		        type: Number
-	        },
-	        passportNumberTemp: {
-		        type: Number
-	        },
-	        commentTemp: {
-		        type: String
-	        },
+	        isRouter: Boolean,
+			isEdit: Boolean,
+            formSubmit: Boolean,
+	        parentDialogModel: Boolean,
+	        typeTemp: Number,
+            serialNumberTemp: String,
+	        calibrationDateTemp: String,
+	        accuracyClassTemp: Number,
+	        conditionTemp: Number,
+	        intervalTemp: Number,
+	        ownerTemp: Number,
+	        passportNumberTemp: Number,
+	        commentTemp: String,
         },
         methods: {
 	        clear() {
@@ -180,16 +162,27 @@
             },
 
             getData() {
-	        	return {
-			        accuracyClass: this.accuracyClass,
-			        condition: this.condition,
-			        interval: this.interval,
-			        owner: this.owner,
-			        calibration: this.getFormattedDate(this.calibrationDate),
-			        comment: this.comment,
-			        type: this.type.index,
-			        serialNumber: this.serialNumber,
-			        passportNumber: this.passportNumber === '' ? 0 : this.passportNumber,
+	        	if (this.isRouter) {
+			        return {
+				        accuracyClass: 0,
+				        condition: 0,
+				        interval: 0,
+				        owner: 0,
+				        calibration: null,
+				        passportNumber: 0,
+				        comment: this.comment,
+				        isRouter: this.isRouter
+			        }
+                } else {
+			        return {
+				        accuracyClass: this.accuracyClass,
+				        condition: this.condition,
+				        interval: this.interval,
+				        owner: this.owner,
+				        calibration: this.getFormattedDate(this.calibrationDate),
+				        comment: this.comment,
+				        passportNumber: this.passportNumber === '' ? 0 : this.passportNumber,
+			        }
                 }
             },
 

@@ -194,7 +194,7 @@
 					})
 
 					if (!res.length) {
-						this.showNotificationStandardError('Что то пошло не так при регистрации маршрутизатора')
+						this.showNotificationStandardError('Что то пошло не так при регистрации')
 					} else {
 						let successCount = 0
 						this.regRepairMeters.forEach(regMeter => {

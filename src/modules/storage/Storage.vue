@@ -152,11 +152,11 @@
                     <v-spacer></v-spacer>
                     <main-menu
                         class="pr-2"
-                        @acceptOrIssue="$refs.acceptOrIssueDialog.open()"
-                        @register="$refs.registerDialog.open()"
+                        @acceptOrIssue="$refs.acceptOrIssueDialog.open(false)"
+                        @register="$refs.registerDialog.open(false)"
                         @showHideColums="$refs.showHideColumnsDialog.open()"
-                        @routeRegister="$refs.routerRegisterDialog.open()"
-                        @routeAcceptOrIssue="$refs.acceptOrIssueDialog.open(true)"
+                        @routerRegister="$refs.registerDialog.open(true)"
+                        @routerAcceptOrIssue="$refs.acceptOrIssueDialog.open(true)"
                     ></main-menu>
                 </v-toolbar>
             </template>
@@ -393,8 +393,6 @@
 
 	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
 
-	        console.log(this.roles)
-
 	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'admin') {
 		        this.actions.push({ title: 'Удалить', action: 'delete', icon: 'mdi-delete' })
 	        }
@@ -630,7 +628,6 @@
                 } else {
                 	try {
 		                this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
-		                console.log(this.totalMeters)
 	                } catch (e) {
                         this.showNotificationStandardError(e)
 	                }

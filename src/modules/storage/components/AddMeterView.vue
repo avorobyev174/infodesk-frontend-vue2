@@ -90,7 +90,7 @@
 </template>
 
 <script>
-	import {mapActions, mapGetters, mapState} from "vuex";
+	import { mapActions, mapGetters, mapState } from "vuex";
 
 	export default {
 		name: "AddMeterView",
@@ -121,7 +121,7 @@
 
 		        },
 	        ],
-	        scannerButtonColor: 'grey',
+	        scannerButtonColor: '',
 	        serialNumber: '',
 	        type: {},
 	        scannerActive: true,
@@ -130,12 +130,8 @@
             meterTypes: []
         }),
         props: {
-			isRegister: {
-				type: Boolean
-            },
-	        isRouter: {
-		        type: Boolean
-	        },
+			isRegister: Boolean,
+	        isRouter: Boolean,
 	        newLocation: {
 	        	type: Number,
                 required: true
@@ -164,18 +160,15 @@
 			'showNotificationStandardError',
 		],
         mounted() {
-			if (this.isRouter) {
-				this.meterTypes = this.types.filter(type => type.option === 41)
-				this.type = { index: 46, title: 'RTR512.10-6L/EY' }
-            } else {
-				this.meterTypes = this.types.slice()
-                this.type = { index: 121, title: 'AIU5' }
-            }
-
+	        this.checkIsRouter()
+	        this.scannerButtonColor = this.colorBlue
         },
 		watch: {
 			scannerActive(newVal) {
 				this.scannerButtonColor = newVal ? this.colorBlue : this.colorGrey
+			},
+			isRouter() {
+				this.checkIsRouter()
 			},
 		},
 		computed: {
@@ -197,6 +190,16 @@
 		        'parseSerialNumber',
 		        'checkMeterInDB',
 	        ]),
+
+            checkIsRouter() {
+	            if (this.isRouter) {
+		            this.meterTypes = this.types.filter(type => type.option === 41)
+		            this.type = { index: 46, title: 'RTR512.10-6L/EY' }
+	            } else {
+		            this.meterTypes = this.types.slice()
+		            this.type = { index: 121, title: 'AIU5' }
+	            }
+            },
 
 	        checkLocation(meter) {
 	        	if (this.isRouter) {

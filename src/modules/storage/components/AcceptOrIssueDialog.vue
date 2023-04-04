@@ -63,7 +63,7 @@
                         :meters="replaceMeters"
                         :new-location="newLocation"
                         ref="addMeterTable"
-                        is-router
+                        :is-router="isRouter"
                         @onResetValidation="this.resetValidation"
                         @onMeterCountUpdate="meterCountUpdate"
                         :resultColor="resultColor"
@@ -251,8 +251,8 @@
 
 	        clear() {
 	        	this.meterCount = ''
-		        this.currentOperation = 9
-		        this.newLocation = 0
+		        this.currentOperation = this.isRouter ? 1: 9
+		        this.newLocation = this.isRouter ? 1: 0
 		        this.issuingPerson = ''
 		        this.acceptedPerson = ''
 		        this.comment = ''

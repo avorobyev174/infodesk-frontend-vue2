@@ -11,7 +11,6 @@
             ref="form"
             v-model="formValid"
             lazy-validation
-            @submit.prevent="accept"
             @keypress.enter.native.prevent
         >
             <v-card class="p-2">
@@ -28,9 +27,11 @@
                         <add-or-edit-view
                             :form-submit="formSubmit"
                             ref="addOrEditView"
+                            :is-router="isRouter"
                             >
                                 <template v-slot:issuing-person-input>
                                     <v-text-field
+                                        v-show="!isRouter"
                                         v-model="issuingPerson"
                                         :label="issuingPersonLabel"
                                         :rules="personRules"
@@ -51,6 +52,7 @@
                         @onResetValidation="resetValidation"
                         @onMeterCountUpdate="meterCountUpdate"
                         :resultColor="resultColor"
+                        :is-router="isRouter"
                         is-register
                         :oldLocationColor="oldLocationColor"
                     ></add-meter-view>
@@ -69,7 +71,7 @@
                         v-if="!formSubmit"
                         color="primary"
                         text
-                        type="submit"
+                        @click="accept"
                     >
                         ОК
                     </v-btn>
@@ -98,7 +100,7 @@
 
 <script>
 	import AddMeterView from "./AddMeterView"
-	import {mapActions, mapGetters, mapState} from "vuex"
+	import { mapActions, mapGetters, mapState } from "vuex"
 	import AddOrEditView from "./AddOrEditView"
 
 	export default {
@@ -120,6 +122,7 @@
 			formSubmit: false,
 			regMeters:  [],
 			oldLocationColor: 'grey',
+            isRouter: false,
 			personRules: [
 				v => !!v || 'Обязательно к заполнению',
 				v => v && !String(v).match('[^0-9]') || 'Должны присутствовать только цифры'
@@ -165,7 +168,8 @@
 		        this.meterCount = count
 	        },
 
-	        open() {
+	        open(isRouter) {
+	        	this.isRouter = isRouter
 		        this.dialogModel = true
 	        },
 
@@ -192,7 +196,7 @@
 	        },
 
 	        async accept() {
-		        if (!this.$refs.form.validate()) {
+		        if (!this.isRouter && !this.$refs.form.validate()) {
 			        return
 		        }
 
@@ -201,10 +205,12 @@
                         `Для выполнения операции заполните таблицу`, this.colorOrange)
                 }
 
-                this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
+                if (!this.isRouter) {
+	                this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
+                }
                 this.acceptedPersonStaffId = this.staffId
 
-                if (isNaN(this.issuingPersonStaffId) || isNaN(this.acceptedPersonStaffId)) {
+                if ((!this.isRouter && isNaN(this.issuingPersonStaffId)) || isNaN(this.acceptedPersonStaffId)) {
                     return this.showNotification(
                         'Операция с неизвестным сотрудником не возможна', this.colorOrange)
                 }
@@ -216,7 +222,7 @@
 
                     const res = await this.registration({
                         meters: this.regMeters,
-                        issuingPersonStaffId: this.issuingPersonStaffId,
+                        issuingPersonStaffId: this.isRouter ? 0 : this.issuingPersonStaffId,
                         acceptedPersonStaffId: this.acceptedPersonStaffId,
                         ...meterData
                     })

@@ -48,8 +48,8 @@
             actions: [
 	            { id: 1, title: 'Регистрация', onClick: 'register', icon: 'mdi-plus-thick', color: 'primary', visible: true },
                 { id: 2, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
-	            { id: 3, title: 'Регистрация маршрутизатора', onClick: 'routeRegister', icon: 'mdi-plus-thick', color: 'primary', visible: true },
-	            { id: 4, title: 'Прием/Выдача маршрутизатора', onClick: 'routeAcceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
+	            { id: 3, title: 'Регистрация маршрутизатора', onClick: 'routerRegister', icon: 'mdi-plus-thick', color: 'primary', visible: true },
+	            { id: 4, title: 'Прием/Выдача маршрутизатора', onClick: 'routerAcceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
 	            { id: 5, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', visible: true },
             ],
         }),

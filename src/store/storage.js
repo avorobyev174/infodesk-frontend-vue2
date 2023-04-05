@@ -9,6 +9,7 @@ export const storage = {
 		serverModuleName: 'meter-storage',
 		meterTypes: [],
 		employees: [],
+		storageEmployees: [],
 		logs: [],
 		locations: [
 			{ text: 'Склад', value: 0 },
@@ -106,6 +107,9 @@ export const storage = {
 		getEmployees(state) {
 			return state.employees
 		},
+		getStorageEmployees(state) {
+			return state.storageEmployees
+		},
 		getLogs(state) {
 			return state.logs
 		},
@@ -134,6 +138,9 @@ export const storage = {
 		},
 		setEmployees(state, employees) {
 			state.employees = employees
+		},
+		setStorageEmployees(state, employees) {
+			state.storageEmployees = employees
 		},
 		setLogs(state, logs) {
 			state.logs = logs
@@ -183,7 +190,7 @@ export const storage = {
 				response
 					.data
 					.map(type => { return { title: type.TYPE_NAME, index: type.TYPE_INDEX, option: type.MNF_ID } })
-					.sort((a, b) => a.title > b.title))
+					.sort((a, b) => a.title > b.title ? 1 : -1))
 		},
 		
 		async fetchEmployees({ state, commit }) {
@@ -192,6 +199,20 @@ export const storage = {
 				{ headers: {'authorization': $cookies.get('auth_token')} })
 			
 			commit('setEmployees', response.data)
+		},
+		
+		async fetchStorageEmployees({ state, commit }) {
+			const response = await get(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/storage-employees`,
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+			
+			const employees = response.data.map(emp => {
+				const nameArr = emp.name.trim().split(' ')
+				const name = `${ nameArr[0] } ${ nameArr[1][0] }. ${ nameArr[2][0] }.`
+				return { staffId: emp.staff_id, name, card: emp.card }
+			}).sort((a, b) => a.name > b.name ? 1 : -1)
+			
+			commit('setStorageEmployees', employees)
 		},
 		
 		async meterFilter({ state, commit }, { filters, options }) {
@@ -204,7 +225,7 @@ export const storage = {
 					{ headers: {'authorization': $cookies.get('auth_token')} })
 				
 				commit('setMeters', response.data.rows)
-				console.log(response.data)
+				
 				return response.data.total
 			} finally {
 				commit('setMeterLoading', false)

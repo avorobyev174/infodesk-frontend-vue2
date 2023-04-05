@@ -133,6 +133,41 @@
                 </v-menu>
             </template>
 
+            <template v-slot:header.CURRENT_OWNER="{ header }">
+                {{ header.text }}
+                <v-menu
+                        nudge-bottom="10px"
+                        nudge-left="180px"
+                        offset-y
+                        :close-on-content-click="false"
+                        origin="center center"
+                        transition="scale-transition"
+                        ref="filterByOwnerMenu"
+                >
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn v-bind="attrs" v-on="on" icon>
+                            <v-icon :color="filterByOwnerColor" small>
+                                mdi-filter-plus
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
+                        <v-combobox
+                            :items="storageEmployees"
+                            item-text="name"
+                            item-value="staffId"
+                            label="Выберите сотрудника"
+                            class="p-3 pt-5 pb-0"
+                            v-model="filterByOwner"
+                            clearable
+                            multiple
+                            @change="doFilter"
+                        >
+                        </v-combobox>
+                    </div>
+                </v-menu>
+            </template>
+
             <template v-slot:top>
                 <v-toolbar
                     flat
@@ -213,10 +248,6 @@
             module-name="storage"
         >
         </show-hide-columns-dialog>
-        <router-register-dialog
-            ref="routerRegisterDialog"
-            :meters="meters"
-        ></router-register-dialog>
     </v-card>
 </template>
 
@@ -229,7 +260,6 @@
 	import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
     import ActionColumn from "../utils-components/ActionColumn"
     import EditDialog from "./components/EditDialog"
-    import RouterRegisterDialog from "./components/RouterRegisterDialog"
 
 	export default {
 		name: "Storage",
@@ -240,14 +270,14 @@
             AcceptOrIssueDialog,
 			ShowHideColumnsDialog,
 			ActionColumn,
-			EditDialog,
-			RouterRegisterDialog
+			EditDialog
 		},
 		data: () => ({
 			options: {},
 			filterBySerialNumber: '',
 			filterByType: [],
 			filterByLocation: [],
+			filterByOwner: [],
             search: '',
             isSearchMeterView: false,
 			moduleName: 'meter_storage',
@@ -359,6 +389,7 @@
 			filterBySerialNumberColor: 'grey',
 			filterByTypeColor: 'grey',
 			filterByLocationColor: 'grey',
+			filterByOwnerColor: 'grey',
 			totalMeters: 0,
             filters: {},
             searchMeters: [],
@@ -372,7 +403,6 @@
 				: this.selectedHeaders = this.headers
 
 			const isFavorite = $cookies.get('common_favorite_module')
-			//const currentUserStaffId = $cookies.get('common_favorite_module')
 
 			isFavorite === '/storage'
 				? this.setFavoriteModuleColor(this.colorGold)
@@ -387,8 +417,9 @@
 
 	        document.onkeydown = () => {
 		        const route = this.$route.name === 'Storage'
-		        if (window.event.keyCode === 18 && route)
+		        if (window.event.keyCode === 18 && route) {
 			        this.initializeMeters()
+		        }
 	        }
 
 	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
@@ -444,6 +475,7 @@
 				locations: 'storage/getLocations',
 				owners: 'storage/getOwners',
 				employees: 'storage/getEmployees',
+				storageEmployees: 'storage/getStorageEmployees',
 				roles: 'getRoles',
 				staffId: 'getStaffId',
 			}),
@@ -478,6 +510,7 @@
                 'fetchEmployees',
 				'fetchLogs',
 				'fetchParseOptions',
+				'fetchStorageEmployees',
             ]),
             //Обработка куки
 			setCookies() {
@@ -531,7 +564,8 @@
             },
 
 			initializeEmployees() {
-				this.fetchEmployees()
+				//this.fetchEmployees()
+				this.fetchStorageEmployees()
 			},
 
 			initializeParseOptions() {
@@ -548,7 +582,7 @@
             },
 
 			getMeterTypeTitle(meterType) {
-				const type = this.types.find(type => meterType === type.index)
+				const type = this.types.find(type => parseInt(meterType) === type.index)
                 return type ? type.title : meterType
 			},
 
@@ -573,41 +607,35 @@
 			},
 
 			getEmployeeTitleByStaffId(employeeStaffId) {
-				if (employeeStaffId === 0)
+				if (employeeStaffId === 0) {
 					return 'Отсутствует'
-				const emp = this.employees.find(emp => employeeStaffId === emp.STAFF_ID)
-				return emp ?
-                    `${ emp.EMPLOYEE_LAST_NAME } ${ emp.EMPLOYEE_FIRST_NAME[0] }. ${ emp.EMPLOYEE_MIDDLE_NAME[0] }.`
-                    : employeeStaffId
+				}
+				const emp = this.storageEmployees.find(emp => employeeStaffId === emp.staffId)
+				return emp ?  emp.name : employeeStaffId
 			},
 
 			getEmployeeStaffIdByCard(employeeCard) {
-				if (!employeeCard)
+				if (!employeeCard) {
 					return 'Неизвестный сотрудник'
-				const emp = this.employees.find(emp => parseInt(employeeCard) === emp.CARD_NUMBER)
-
-				return emp ?
-					emp.STAFF_ID
-					: 'Неизвестный сотрудник'
+				}
+				const emp = this.storageEmployees.find(emp => parseInt(employeeCard) === emp.card)
+				return emp ? emp.staffId : 'Неизвестный сотрудник'
 			},
 
 			getEmployeeCardByStaffId(staffId) {
-				if (!staffId)
+				if (!staffId) {
 					return 'Неизвестный сотрудник'
-				const emp = this.employees.find(emp => staffId === emp.STAFF_ID)
-
-				return emp ?
-					emp.CARD_NUMBER
-					: 'Неизвестный сотрудник'
+				}
+				const emp = this.storageEmployees.find(emp => staffId === emp.staffId)
+				return emp ? emp.card : 'Неизвестный сотрудник'
 			},
 
 			getEmployeeTitleByCard(employeeCard) {
-				if (!employeeCard)
+				if (!employeeCard) {
 					return 'Неизвестный сотрудник'
-				const emp = this.employees.find(emp => parseInt(employeeCard) === emp.CARD_NUMBER)
-				return emp ?
-					`${ emp.EMPLOYEE_LAST_NAME } ${ emp.EMPLOYEE_FIRST_NAME[0] }. ${ emp.EMPLOYEE_MIDDLE_NAME[0] }.`
-					: 'Неизвестный сотрудник'
+				}
+				const emp = this.storageEmployees.find(emp => parseInt(employeeCard) === emp.card)
+				return emp ? emp.name : 'Неизвестный сотрудник'
 			},
 
             serialNumberClearOnClick() {
@@ -640,9 +668,13 @@
             },
 
             checkAllFilters() {
-	            this.filterBySerialNumber
-		            ? this.filters['serialNumber'] = this.filterBySerialNumber
-                    : delete this.filters['serialNumber']
+				if (this.filterBySerialNumber) {
+					this.filters['serialNumber'] = this.filterBySerialNumber.startsWith('0')
+                        ? this.filterBySerialNumber.slice(1)
+                        : this.filterBySerialNumber
+                } else {
+					delete this.filters['serialNumber']
+                }
 
 	            this.filterByType.length
 		            ? this.filters['types'] = this.filterByType.map(type => type.index)
@@ -650,8 +682,12 @@
 
 
 	            this.filterByLocation.length
-                    ? this.filters['locations'] = this.filterByLocation.map(type => type.value)
+                    ? this.filters['locations'] = this.filterByLocation.map(loc => loc.value)
                     : delete this.filters['locations']
+
+	            this.filterByOwner.length
+		            ? this.filters['owners'] = this.filterByOwner.map(owner => owner.staffId)
+		            : delete this.filters['owners']
             },
 
 			async initializeLogs(item, row) {

@@ -164,6 +164,8 @@
             getData() {
 	        	if (this.isRouter) {
 			        return {
+			        	type: this.type.index,
+				        serialNumber:  this.serialNumber,
 				        accuracyClass: 0,
 				        condition: 0,
 				        interval: 0,
@@ -175,6 +177,8 @@
 			        }
                 } else {
 			        return {
+				        type: this.type.index,
+				        serialNumber:  this.serialNumber,
 				        accuracyClass: this.accuracyClass,
 				        condition: this.condition,
 				        interval: this.interval,

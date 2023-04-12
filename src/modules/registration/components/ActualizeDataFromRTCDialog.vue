@@ -21,7 +21,7 @@
                 <td>{{ getPhaseTitle(meter.phase) }}</td>
                 <td>{{ meter.phone }}</td>
                 <td>{{ getStatusTitle(meter.status) }}</td>
-                <td>
+                <td class="text-center">
                     <v-chip v-if="meter.actualizeStatus === 'нет'" :color="colorGrey">{{ meter.actualizeStatus }}</v-chip>
                     <v-chip v-else-if="meter.actualizeStatus === 'ошибка'" :color="colorRed">{{ meter.actualizeStatus }}</v-chip>
                     <v-chip v-else-if="meter.actualizeStatus === 'да'" :color="colorGreen"> {{ meter.actualizeStatus }}</v-chip>

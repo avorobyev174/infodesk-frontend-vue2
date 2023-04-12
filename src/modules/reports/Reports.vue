@@ -79,15 +79,16 @@
 </template>
 
 <script>
-	import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
-	import saveCountByAddressReportToExcel from "./js/saveCountByAddressReportToExcel";
-	import saveLoadedInPyramidByCustomerAddressReportToExcel from "./js/saveLoadedInPyramidByCustomerAddressReportToExcel";
-	import saveFromUitToStorageReportToExcel from "../reports/js/saveFromUitToStorageReportToExcel";
-	import saveNotLoadedInPyramidReportToExcel from "../reports/js/saveNotLoadedInPyramidReportToExcel";
-	import saveNonActivePyramidMetersToExcelFile from "../reports/js/saveNonActiveMetersDataToExcel";
-	import nonActiveInPyramidReport from "./components/nonActiveInPyramidReport";
-	import saveLastTimeDataToExcelFile from "../reports/js/saveLastTimeDataToExcel";
-	import meterCountByAddressReport from "./components/meterCountByAddressReport";
+	import {mapActions, mapGetters, mapMutations, mapState} from "vuex"
+	import saveCountByAddressReportToExcel from "./js/saveCountByAddressReportToExcel"
+	import saveLoadedInPyramidByCustomerAddressReportToExcel from "./js/saveLoadedInPyramidByCustomerAddressReportToExcel"
+	import saveFromUitToStorageReportToExcel from "../reports/js/saveFromUitToStorageReportToExcel"
+	import saveNotLoadedInPyramidReportToExcel from "../reports/js/saveNotLoadedInPyramidReportToExcel"
+	import saveNonActivePyramidMetersToExcelFile from "../reports/js/saveNonActiveMetersDataToExcel"
+	import nonActiveInPyramidReport from "./components/nonActiveInPyramidReport"
+	import saveLastTimeDataToExcelFile from "../reports/js/saveLastTimeDataToExcel"
+	import meterCountByAddressReport from "./components/meterCountByAddressReport"
+    import saveRotecDataToExcelFile from "./js/saveRotecDataToExcel"
 
 	export default {
 		name: "Reports",
@@ -128,15 +129,6 @@
 				            show: false
                         },
 			            {
-			            	id: 5,
-                            name: 'Текущее количество счетчиков на складе после программирования',
-                            download: true,
-                            description: 'Текущее количество счетчиков на складе принятых после программирования УИТ',
-                            func: 'getMeterFromRepairToStorageCountReport',
-				            loading: false,
-				            show: false
-                        },
-			            {
 			            	id: 6,
                             name: 'Счетчики не загруженные в пирамиду',
                             download: true,
@@ -168,6 +160,30 @@
 			            },
 		            ],
 	            },
+	            {
+		            id: 9,
+		            name: 'Программирование',
+		            children: [
+			            {
+				            id: 5,
+				            name: 'Текущее количество счетчиков на складе после программирования',
+				            download: true,
+				            description: 'Текущее количество счетчиков на складе принятых после программирования УИТ',
+				            func: 'getMeterFromRepairToStorageCountReport',
+				            loading: false,
+				            show: false
+			            },
+			            {
+				            id: 10,
+				            name: 'Информация по счетчикам Ротек',
+				            download: true,
+				            description: 'Список счетчиков Ротек из модуля Склад и дополнительная информация',
+				            func: 'getRotecReport',
+				            loading: false,
+				            show: false
+			            },
+		            ],
+	            },
             ],
 		}),
 		inject: ['showNotification', 'showNotificationError', 'checkAuth', 'setBackgroundImage'],
@@ -186,11 +202,13 @@
 			}
 		},
 		mounted() {
-			if (!this.checkAuth())
+			if (!this.checkAuth()) {
 				return
+			}
 
-			if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
+			if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
 				this.$router.push('/')
+			}
 
 			this.setBackgroundImage(true)
 		},
@@ -203,6 +221,7 @@
 					'getNonActiveInPyramid',
 					'getLoadedPyramidCountByCustomerAddress',
 					'getAlphaLastTimeDataReport',
+					'getRotecMetersInfo',
 				]),
 			...mapActions('registration',
 				[
@@ -351,7 +370,7 @@
                         finalRow[0] = i + 1
                         finalRow[1] = row.address === '' ? 'отсутствует' : row.address
                         if (row.months.length) {
-                            row.months.forEach(month => {
+                            row.months.forEach((month) => {
 	                            finalRow[month.month + 1] = month.count
                             })
                         }
@@ -379,6 +398,22 @@
 				}
 			},
 
+			async getRotecReport(item) {
+				item.loading = true
+				try {
+					const { serialNumbers, lastPort } =  await this.getRotecMetersInfo()
+                    saveRotecDataToExcelFile(
+                    	serialNumbers.map((row) => row.SERIAL_NUMBER),
+	                    lastPort ? lastPort.max + 1 : 0,
+                        '172.27.32.23'
+                    )
+				} catch ({ message }) {
+					this.showNotification(`Ошибка при выполнении отчета: ${ message }`, this.colorRed)
+				} finally {
+					item.loading = false
+				}
+			},
+
 			dateFormat(dateToFormat) {
 				const date = new Date(dateToFormat)
 				let day = String(date.getDate())
@@ -388,8 +423,10 @@
 				day = day.length < 2 ? day.padStart(2, '0') : day
 				month = month.length < 2 ? month.padStart(2, '0') : month
 
-				return `${day}.${month}.${year}`
+				return `${ day }.${ month }.${ year }`
 			},
+
+
 	    }
 	}
 </script>

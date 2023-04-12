@@ -42,6 +42,7 @@
                     <v-chip v-if="!item.color" small tag="span" :color="colorGrey">{{ item.value }}</v-chip>
                     <v-chip v-else-if="item.color === 1" small tag="span" :color="colorRed">{{ item.value }}</v-chip>
                     <v-chip v-else-if="item.color === 2" small tag="span" :color="colorGreen">{{ item.value }}</v-chip>
+                    <v-chip v-else-if="item.color === 3" small tag="span" :color="colorOrange">{{ item.value }}</v-chip>
                 </div>
             </div>
             <div v-else>
@@ -145,7 +146,9 @@
 			...mapGetters({
 				logs: 'storage/getLogs',
 				operations: 'storage/getOperations',
-				lvStates: 'storage/getLVStates'
+				lvStates: 'storage/getLVStates',
+				roles: 'getRoles',
+				staffId: 'getStaffId',
 			}),
 		},
 		inject: ['showNotification', 'showNotificationStandardError', 'getEmployeeTitleByStaffId', 'getMeterTypeTitle'],
@@ -225,14 +228,15 @@
 			},
 
 			parseUpdateCustomField(field) {
-				if (field == null)
+				if (field == null) {
 					return ''
-
+				}
 				let updateMaterialsFields = []
-                /*
-				if (Utils.getAccessId() == 1) {
-					return '...';
-				}*/
+
+				if (this.roles && this.roles.storage_module && this.roles.storage_module === 'keeper') {
+					updateMaterialsFields.push({ value:  '...' })
+					return updateMaterialsFields
+				}
 
 				let repFields = field.split(';');
 
@@ -242,13 +246,15 @@
 						if (item.includes('материалы'))
 							continue
 						if (item.includes('Статус')) {
-							if (item.includes('не работает'))
+							if (item.includes('не работает')) {
 								updateMaterialsFields.push({ value: item, color: 1 })
-                            else {
-								updateMaterialsFields.push({value: item, color: 2 })
+							} else {
+								updateMaterialsFields.push({ value: item, color: 2 })
 							}
-                        } else {
-							updateMaterialsFields.push({value: item})
+						} else if (item.includes('Дата')) {
+							updateMaterialsFields.push({ value: item, color: 3 })
+						} else {
+							updateMaterialsFields.push({ value: item })
 						}
 					}
 				}

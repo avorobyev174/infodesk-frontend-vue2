@@ -42,8 +42,8 @@
         name: "ExcelMenu",
         data: () => ({
             actions: [
-                { id: 1, title: 'Скачать excel файл для загрузки в Пирамиду', onClick: 'saveExcelDataToPyramid', icon: 'mdi-file-upload', color: 'primary', disabled: false },
-                { id: 3, title: 'Скачать excel файл с обновленными счетчиками в СТЭКе', onClick: 'saveExcelRefreshDataToPyramid', icon: 'mdi-file-refresh', color: 'primary', disabled: false, show: true },
+                { id: 1, title: 'Скачать excel файл для загрузки в Пирамиду', onClick: 'saveExcelDataToPyramid', icon: 'mdi-file-upload', color: 'primary' },
+                { id: 2, title: 'Скачать excel файл с обновленными счетчиками в СТЭКе', onClick: 'saveExcelRefreshDataToPyramid', icon: 'mdi-file-refresh', color: 'primary' },
             ],
         }),
         methods: {

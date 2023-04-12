@@ -8,6 +8,8 @@ export const storage = {
 		logLoading: false,
 		serverModuleName: 'meter-storage',
 		meterTypes: [],
+		meterTypesInRepair: [],
+		materialTypes: [],
 		employees: [],
 		storageEmployees: [],
 		logs: [],
@@ -86,6 +88,12 @@ export const storage = {
 		getMeterTypes(state) {
 			return state.meterTypes
 		},
+		getMaterialTypes(state) {
+			return state.materialTypes
+		},
+		getMeterRepairTypes(state) {
+			return state.meterTypesInRepair
+		},
 		getAccuracyClasses(state) {
 			return state.accuracyClasses
 		},
@@ -135,6 +143,12 @@ export const storage = {
 		},
 		setMeterTypes(state, meterTypes) {
 			state.meterTypes = meterTypes
+		},
+		setMeterTypesInRepair(state, meterTypesInRepair) {
+			state.meterTypesInRepair = meterTypesInRepair
+		},
+		setMaterialTypes(state, materialTypes) {
+			state.materialTypes = materialTypes
 		},
 		setEmployees(state, employees) {
 			state.employees = employees
@@ -193,6 +207,14 @@ export const storage = {
 					.sort((a, b) => a.title > b.title ? 1 : -1))
 		},
 		
+		async fetchMaterialsTypes({ state, commit }) {
+			const response = await get(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/materials-types`,
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+			
+			commit('setMaterialTypes', response.data.map(type => { return { id: type.ID, title: type.ITEM } }))
+		},
+		
 		async fetchEmployees({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/employees`,
@@ -248,6 +270,15 @@ export const storage = {
 		async checkMeterInDB({ state, commit }, { serialNumber, type }) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter`,
+				{ serialNumber, type },
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+			
+			return response.data
+		},
+		
+		async checkMeterInRepairDB({ state, commit }, { serialNumber, type }) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter-in-repair`,
 				{ serialNumber, type },
 				{ headers: {'authorization': $cookies.get('auth_token')} })
 			
@@ -382,6 +413,58 @@ export const storage = {
 			}
 		},
 		
+		async getMeterTypesInRepair({ state, commit }) {
+			const response = await get(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/get-meter-types-in-repair`,
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+			
+			const meterTypesInRepair = response.data.map(type => type.METER_TYPE)
+			commit('setMeterTypesInRepair', meterTypesInRepair)
+		},
+		
+		async getAllAvailableMetersFromRepair({ state, commit }) {
+			const response = await get(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/get-available-meters-from-repair/`,
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+			
+			return response.data
+			
+		},
+		
+		async getAllAvailableMetersByTypeFromRepair({ state, commit }, meterType) {
+			const response = await get(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/get-available-meters-from-repair/` + meterType,
+				{ headers: {'authorization': $cookies.get('auth_token')} })
+		
+			return response.data
+		},
+		
+		async insertMeterStorageMaterials({ state, commit }, { meters, materials, updateStr }) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/insert-meter-materials`,
+				{ meters, materials, updateStr },
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return response.data
+		},
+		
+		async insertMaterialToStorage({ state, commit }, materials) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/insert-material-to-storage`,
+				{ materials },
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return response.data
+		},
+		
+		async insertMeterWorkStatus({ state, commit }, { meters, isWorkable, comment, updateStr }) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/insert-meter-work-status`,
+				{ meters, isWorkable, comment, updateStr },
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return response.data
+		},
 	},
 	namespaced: true
 }

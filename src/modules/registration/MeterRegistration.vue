@@ -375,7 +375,7 @@ export default {
       'fetchBrokenMeters',
       'getNonActiveInPyramidMeters',
       'removeMeterPyramidLoadValue',
-      'addMeterPyramidLoadValue'
+      'addMeterPyramidLoadValue',
     ]),
 
     setCookies() {
@@ -507,7 +507,7 @@ export default {
     showMetersInPyramidOnClick() {
       this.showMetersInPyramid = !this.showMetersInPyramid
       this.showPyramidMeters()
-    }
+    },
   }
 }
 </script>

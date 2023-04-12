@@ -27,7 +27,7 @@
                 <td>{{ meter.customer_email }}</td>
                 <td>{{ meter.kftt }}</td>
                 <td>{{ meter.customer_type }}</td>
-                <td>
+                <td class="text-center">
                     <v-chip v-if="meter.actualizeStatus === 'нет'" :color="colorGrey">{{ meter.actualizeStatus }}</v-chip>
                     <v-chip v-else-if="meter.actualizeStatus === 'ошибка'" :color="colorRed">{{ meter.actualizeStatus }}</v-chip>
                     <v-chip v-else :color="colorGreen"> {{ meter.actualizeStatus }}</v-chip>

@@ -23,7 +23,7 @@
                     <td>{{ getPhaseTitle(meter.phase) }}</td>
                     <td>{{ meter.phone }}</td>
                     <td>{{ getStatusTitle(meter.status) }}</td>
-                    <td>
+                    <td class="text-center">
                         <v-chip v-if="meter.sms_status === 1" :color="colorGrey">
                             {{ getSmsTitleBySmsStatus(meter.sms_status) }}
                         </v-chip>

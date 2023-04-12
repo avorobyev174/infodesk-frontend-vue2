@@ -50,7 +50,8 @@
                 { id: 2, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
 	            { id: 3, title: 'Регистрация маршрутизатора', onClick: 'routerRegister', icon: 'mdi-plus-thick', color: 'primary', visible: true },
 	            { id: 4, title: 'Прием/Выдача маршрутизатора', onClick: 'routerAcceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
-	            { id: 5, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', visible: true },
+	            { id: 5, title: 'Ремонт/Прием материалов', onClick: 'repairOrMaterialsAdd', icon: 'mdi-cog', color: 'primary', visible: true },
+	            { id: 6, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', visible: true },
             ],
         }),
 		computed: {
@@ -63,6 +64,7 @@
 	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'keeper') {
 		        this.actions[2].visible = false
 		        this.actions[3].visible = false
+		        this.actions[4].visible = false
 	        }
 	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'repairer') {
 		        this.actions[0].visible = false

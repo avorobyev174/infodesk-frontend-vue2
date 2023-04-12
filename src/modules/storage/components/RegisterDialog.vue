@@ -258,6 +258,7 @@
                     }
                 } catch (e) {
                     this.showNotificationStandardError(e)
+	                this.formSubmit = false
                 } finally {
                     this.$refs.addMeterTable.setLoading(false)
                 }

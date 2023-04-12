@@ -192,6 +192,7 @@
                         @showHideColums="$refs.showHideColumnsDialog.open()"
                         @routerRegister="$refs.registerDialog.open(true)"
                         @routerAcceptOrIssue="$refs.acceptOrIssueDialog.open(true)"
+                        @repairOrMaterialsAdd="$refs.repairAndMaterialsDialog.open()"
                     ></main-menu>
                 </v-toolbar>
             </template>
@@ -248,6 +249,9 @@
             module-name="storage"
         >
         </show-hide-columns-dialog>
+        <repair-and-materials-dialog
+            ref="repairAndMaterialsDialog"
+        ></repair-and-materials-dialog>
     </v-card>
 </template>
 
@@ -260,6 +264,8 @@
 	import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
     import ActionColumn from "../utils-components/ActionColumn"
     import EditDialog from "./components/EditDialog"
+    import Utils from "./components/Utils"
+    import RepairAndMaterialsDialog from "./components/RepairAndMaterialsDialog"
 
 	export default {
 		name: "Storage",
@@ -270,7 +276,8 @@
             AcceptOrIssueDialog,
 			ShowHideColumnsDialog,
 			ActionColumn,
-			EditDialog
+			EditDialog,
+			RepairAndMaterialsDialog
 		},
 		data: () => ({
 			options: {},
@@ -415,12 +422,11 @@
 	        if (!this.activeModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
 		        this.$router.push('/')
 
-	        document.onkeydown = () => {
-		        const route = this.$route.name === 'Storage'
-		        if (window.event.keyCode === 18 && route) {
-			        this.initializeMeters()
-		        }
-	        }
+            document.addEventListener('keydown', (evt) => {
+	            if (evt.key === 'Alt' && this.$route.name === 'Storage') {
+		            this.initializeMeters()
+	            }
+            })
 
 	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
 
@@ -428,9 +434,7 @@
 		        this.actions.push({ title: 'Удалить', action: 'delete', icon: 'mdi-delete' })
 	        }
 
-	        this.initializeTypes()
-            this.initializeEmployees()
-            this.initializeParseOptions()
+	        this.initializeOther()
         },
 		watch: {
 			options: {
@@ -454,6 +458,7 @@
 	            }
             },
         },
+        mixins: [ Utils ],
 		computed: {
 			...mapState({
 				loading: state => state.storage.meterLoading,
@@ -469,13 +474,6 @@
 				meters: 'storage/getMeters',
 				searchMetersView: 'storage/getSearchMetersView',
 				activeModules: 'getActiveModules',
-				types: 'storage/getMeterTypes',
-				accuracyClasses: 'storage/getAccuracyClasses',
-				conditions: 'storage/getConditions',
-				locations: 'storage/getLocations',
-				owners: 'storage/getOwners',
-				employees: 'storage/getEmployees',
-				storageEmployees: 'storage/getStorageEmployees',
 				roles: 'getRoles',
 				staffId: 'getStaffId',
 			}),
@@ -489,6 +487,7 @@
 		        formatDate: this.formatDate,
 		        getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
 		        getMeterTypeTitle: this.getMeterTypeTitle,
+		        getMaterialTypeTitle: this.getMaterialTypeTitle,
 		        getOwnerTitle: this.getOwnerTitle,
 		        getAccuracyClassTitle: this.getAccuracyClassTitle,
 		        getConditionTitle: this.getConditionTitle,
@@ -511,7 +510,10 @@
 				'fetchLogs',
 				'fetchParseOptions',
 				'fetchStorageEmployees',
+				'fetchMaterialsTypes',
+				'getMeterTypesInRepair',
             ]),
+
             //Обработка куки
 			setCookies() {
 				if (this.getCookies) {
@@ -536,6 +538,7 @@
 				this.selectedHeaders = this.headers.filter(header => columns.includes(header.index))
 			},
 
+			//Обработка поиска
             doSearchOnEnter() {
 				if (!this.search) {
 					return
@@ -559,90 +562,34 @@
 				}
             },
 
-            initializeTypes() {
-                this.fetchMeterTypes()
-            },
-
-			initializeEmployees() {
-				//this.fetchEmployees()
-				this.fetchStorageEmployees()
-			},
-
-			initializeParseOptions() {
-				this.fetchParseOptions()
-			},
-
+			//Инициализация компонента
             async initializeMeters() {
 				this.isSearchMeterView = false
                 try {
 	                this.totalMeters = await this.fetchMetersPerPage(this.options)
+	                this.getMeterTypesInRepair()
                 } catch (e) {
 	                this.showNotificationStandardError(e)
                 }
             },
 
-			getMeterTypeTitle(meterType) {
-				const type = this.types.find(type => parseInt(meterType) === type.index)
-                return type ? type.title : meterType
-			},
-
-			getAccuracyClassTitle(accuracyClass) {
-				const accClass = this.accuracyClasses.find(accClass => accuracyClass === accClass.value)
-				return accClass ? accClass.text : accuracyClass
-			},
-
-			getConditionTitle(condition) {
-				const cond = this.conditions.find(cond => condition === cond.value)
-				return cond ? cond.text : condition
-			},
-
-			getLocationTitle(location) {
-				const loc = this.locations.find(loc => location === loc.value)
-				return loc ? loc.text : location
-			},
-
-			getOwnerTitle(owner) {
-				const own =  this.owners.find(own => owner === own.value)
-				return own ? own.text : owner
-			},
-
-			getEmployeeTitleByStaffId(employeeStaffId) {
-				if (employeeStaffId === 0) {
-					return 'Отсутствует'
+			async initializeLogs(item, row) {
+				row.select(true)
+				try {
+					await this.fetchLogs(item.GUID)
+				} catch (e) {
+					this.showNotificationStandardError(e)
 				}
-				const emp = this.storageEmployees.find(emp => employeeStaffId === emp.staffId)
-				return emp ?  emp.name : employeeStaffId
 			},
 
-			getEmployeeStaffIdByCard(employeeCard) {
-				if (!employeeCard) {
-					return 'Неизвестный сотрудник'
-				}
-				const emp = this.storageEmployees.find(emp => parseInt(employeeCard) === emp.card)
-				return emp ? emp.staffId : 'Неизвестный сотрудник'
+			initializeOther() {
+				this.fetchMeterTypes()
+				this.fetchStorageEmployees()
+				this.fetchParseOptions()
+				this.fetchMaterialsTypes()
 			},
 
-			getEmployeeCardByStaffId(staffId) {
-				if (!staffId) {
-					return 'Неизвестный сотрудник'
-				}
-				const emp = this.storageEmployees.find(emp => staffId === emp.staffId)
-				return emp ? emp.card : 'Неизвестный сотрудник'
-			},
-
-			getEmployeeTitleByCard(employeeCard) {
-				if (!employeeCard) {
-					return 'Неизвестный сотрудник'
-				}
-				const emp = this.storageEmployees.find(emp => parseInt(employeeCard) === emp.card)
-				return emp ? emp.name : 'Неизвестный сотрудник'
-			},
-
-            serialNumberClearOnClick() {
-				this.filterBySerialNumber = ''
-                this.doFilter()
-            },
-
+			//Обработка фильтров
 			async doFilter(inputSource) {
 				if (inputSource === 'serialNumber') {
 					this.$refs.filterBySerialNumberMenu.save()
@@ -690,28 +637,9 @@
 		            : delete this.filters['owners']
             },
 
-			async initializeLogs(item, row) {
-				row.select(true)
-                try {
-					await this.fetchLogs(item.GUID)
-                } catch (e) {
-	                this.showNotificationStandardError(e)
-                }
-            },
-
-			formatDate(dateToFormat) {
-				if (!dateToFormat)
-					return 'отсутствует'
-
-				const date = new Date(dateToFormat)
-				let day = String(date.getDate())
-				let month = String(date.getMonth() + 1)
-				const year = date.getFullYear()
-
-				day = day.length < 2 ? day.padStart(2, '0') : day
-				month = month.length < 2 ? month.padStart(2, '0') : month
-
-				return `${ day }.${ month }.${ year }`
+			serialNumberClearOnClick() {
+				this.filterBySerialNumber = ''
+				this.doFilter()
 			},
 		},
 	}

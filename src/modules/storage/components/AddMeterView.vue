@@ -28,18 +28,34 @@
                 <v-btn @click="meterAddButtonOnClick" :disabled="formSubmit">
                     <v-icon :color="colorGreen" large>mdi-plus-thick</v-icon>
                 </v-btn>
-                <v-btn @click="meterDeleteButtonOnClick" :disabled="formSubmit">
+                <v-btn
+                        @click="meterDeleteButtonOnClick"
+                        :disabled="formSubmit"
+                        :class="isRouter ? 'round-button' : ''"
+                >
                     <v-icon :color="colorRed" large>mdi-minus-thick</v-icon>
                 </v-btn>
-                <v-btn @click="scannerActiveOnClick" :disabled="formSubmit || isRouter">
+                <v-btn
+                        @click="scannerActiveOnClick"
+                        :disabled="formSubmit"
+                        v-show="!(isRepair || isRouter)"
+                        :class="!(isRepair || isRouter) ? 'round-button' : ''"
+                >
                     <v-icon :color="scannerButtonColor" large>mdi-barcode-scan</v-icon>
+                </v-btn>
+                <v-btn @click="addAllMetersByTypeOnClick" :disabled="formSubmit" v-show="isRepair">
+                    <v-icon :color="colorGreen" large>mdi-playlist-plus</v-icon>
+                </v-btn>
+                <v-btn @click="addAllAvailableMetersOnClick" :disabled="formSubmit" v-show="isRepair">
+                    <v-icon :color="colorGreen" v-if="isAddAll" large>mdi-playlist-star</v-icon>
+                    <v-icon :color="colorRed" v-else large>mdi-playlist-remove</v-icon>
                 </v-btn>
             </v-btn-toggle>
         </div>
         <v-data-table
             fixed-header
-            height="300px"
-            class="meter-add-table pl-1"
+            :height="isRepair ? 200 : 300"
+            class="pl-1"
             :items="meters"
             single-select
             item-key="serialNumber"
@@ -64,15 +80,16 @@
                     small
                     tag="span"
                     :color="oldLocationColor"
+                    v-show="!isRepair"
                 >
                     {{ getLocationTitle(item.oldLocation) }}
                     <v-icon right small v-show="isRegister && oldLocationColor === colorGreen">`
                         mdi-check-circle-outline
                     </v-icon>
                 </v-chip>
-                <span v-show="!isRegister"> &#10132; </span>
+                <span v-show="!(isRegister || isRepair)"> &#10132; </span>
                 <v-chip
-                    v-show="!isRegister"
+                    v-show="!(isRegister || isRepair)"
                     small
                     tag="span"
                     :color="checkLocation(item) ? resultColor : colorRed">
@@ -127,15 +144,14 @@
 	        scannerActive: true,
 	        selectedMeterIndex: 0,
 	        metersWithLetters: [ 66, 111, 119, 120 ],
-            meterTypes: []
+            meterTypes: [],
+	        isAddAll: true
         }),
         props: {
 			isRegister: Boolean,
 	        isRouter: Boolean,
-	        newLocation: {
-	        	type: Number,
-                required: true
-            },
+	        isRepair: Boolean,
+	        newLocation: Number,
             meters: {
 	        	type: Array,
                 required: true
@@ -144,14 +160,8 @@
 		        type: Boolean,
 		        required: true
 	        },
-	        resultColor: {
-		        type: String,
-		        required: true
-            },
-	        oldLocationColor: {
-		        type: String,
-		        required: false
-	        }
+	        resultColor: String,
+	        oldLocationColor: String
         },
 		inject: [
 			'getLocationTitle',
@@ -159,9 +169,12 @@
 			'showNotification',
 			'showNotificationStandardError',
 		],
-        mounted() {
+        async mounted() {
 	        this.checkIsRouter()
 	        this.scannerButtonColor = this.colorBlue
+	        if (this.isRepair) {
+		        this.headers = this.headers.slice(0, this.headers.length - 1)
+	        }
         },
 		watch: {
 			scannerActive(newVal) {
@@ -170,6 +183,10 @@
 			isRouter() {
 				this.checkIsRouter()
 			},
+			isRepair() {
+				this.headers = this.headers.slice(0, this.headers.length - 1)
+				this.checkIsRouter()
+            }
 		},
 		computed: {
 			...mapState({
@@ -183,22 +200,32 @@
 			...mapGetters({
 				types: 'storage/getMeterTypes',
 				options: 'storage/getOptions',
+				typesInRepair: 'storage/getMeterRepairTypes',
 			}),
 		},
         methods: {
 	        ...mapActions('storage', [
 		        'parseSerialNumber',
 		        'checkMeterInDB',
+		        'checkMeterInRepairDB',
+		        'getAllAvailableMetersFromRepair',
+		        'getAllAvailableMetersByTypeFromRepair',
 	        ]),
 
             checkIsRouter() {
 	            if (this.isRouter) {
 		            this.meterTypes = this.types.filter(type => type.option === 41)
 		            this.type = { index: 46, title: 'RTR512.10-6L/EY' }
-	            } else {
+	            } else if (this.isRepair) {
+		            this.meterTypes =  this.types.filter(type => this.typesInRepair.includes(type.index))
+		            if (this.meterTypes.length) {
+			            this.type = { index: this.meterTypes[0].index, title: this.meterTypes[0].title }
+		            }
+	            } else  {
 		            this.meterTypes = this.types.slice()
 		            this.type = { index: 121, title: 'AIU5' }
 	            }
+
             },
 
 	        checkLocation(meter) {
@@ -225,13 +252,9 @@
 	        },
 
 	        meterAddButtonOnClick() {
-		        if (!this.formSubmit) {
-			        this.checkMeterAndInsert()
-		        } else {
-			        this.showNotification(
-				        'Операция уже завершена, редактирование списка не доступно',
-				        this.colorBlue)
-		        }
+		        !this.formSubmit
+			        ? this.checkMeterAndInsert()
+			        : this.showNotification('Операция уже завершена, редактирование списка не доступно', this.colorBlue)
 	        },
 
 	        meterDeleteButtonOnClick() {
@@ -286,12 +309,16 @@
 			        return
 		        }
 
+		        this.loading = true
 		        try {
-			        this.loading = true
-			        const meter = await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
+			        let meterInDb = this.isRepair
+                        ? await this.checkMeterInRepairDB({ type: meterType, serialNumber: this.serialNumber })
+                        : await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
 
+			        console.log(meterInDb)
 			        if (this.isRegister) {
-				        if (meter.length) {
+				        //регистрация
+				        if (meterInDb.length) {
 					        return this.showNotification(
 						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
 						         ${ this.getMeterTypeTitle(meterType) }
@@ -306,23 +333,23 @@
 					        oldLocation: this.isRouter ? 1: 0
 				        })
 			        } else {
-				        if (!meter.length) {
+			        	//прием выдача
+				        if (!meterInDb.length) {
 					        return this.showNotification(
 						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
 						         ${ this.getMeterTypeTitle(meterType) }
-						         и серийным номером ${ this.serialNumber } не найден в базе данных`,
+						         и серийным номером ${ this.serialNumber } не найден в базе данных
+						         ${ this.isRepair ? 'или не находится в ремонте' : '' }`,
 						        this.colorOrange)
 				        }
-				        const oldLocation = meter[0].METER_LOCATION
-				        const guid = meter[0].GUID
 
-				        this.meters.unshift({
-					        type: meterType,
-					        serialNumber: this.serialNumber,
-					        status: 0,
-					        oldLocation,
-					        guid,
-				        })
+				        const oldLocation = meterInDb[0].METER_LOCATION
+				        const guid = meterInDb[0].GUID
+                        const meter = { type: meterType, serialNumber: this.serialNumber }
+
+				        this.isRepair
+					        ? this.meters.unshift(meter)
+                            : this.meters.unshift({ ...meter, status: 0, oldLocation, guid })
                     }
 
                     this.$emit('onMeterCountUpdate', this.meters.length)
@@ -330,11 +357,48 @@
 			        this.serialNumber = ''
                     this.$emit('onResetValidation', true)
 		        } catch (e) {
+			        console.log(e)
 			        this.showNotificationStandardError(e)
 		        } finally {
 			        this.loading = false
 		        }
 	        },
+
+	        async addAllAvailableMetersOnClick() {
+	        	if (this.isAddAll) {
+			        const availableMeters = await this.getAllAvailableMetersFromRepair()
+			        availableMeters.forEach(availableMeter => {
+			        	if (!this.meters.find(meter => meter.guid === availableMeter.GUID)) {
+					        this.meters.push({
+						        type: availableMeter.METER_TYPE,
+						        serialNumber: availableMeter.SERIAL_NUMBER,
+						        status: 0,
+						        guid: availableMeter.GUID
+					        })
+				        }
+			        })
+			        this.$emit('onMeterCountUpdate', this.meters.length)
+		        } else {
+			        this.$emit('onMeterCountUpdate', '')
+			        this.$emit('metersClear')
+                }
+                this.isAddAll = !this.isAddAll
+            },
+
+	        async addAllMetersByTypeOnClick() {
+		        const availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.index)
+		        availableByTypeMeters.forEach(availableMeter => {
+			        if (!this.meters.find(meter => meter.guid === availableMeter.GUID)) {
+				        this.meters.push({
+					        type: availableMeter.METER_TYPE,
+					        serialNumber: availableMeter.SERIAL_NUMBER,
+					        status: 0,
+					        guid: availableMeter.GUID
+				        })
+			        }
+		        })
+		        this.$emit('onMeterCountUpdate', this.meters.length)
+            }
         },
 	}
 </script>
@@ -369,4 +433,12 @@
         font-size: 14px !important;
     }
 
+    .round-button {
+        border-top-right-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
+    }
+
+    .scanner-button-show {
+        display: none;
+    }
 </style>

@@ -9,8 +9,10 @@ function stringToArrayBuffer(str) {
     return buf
 }
 
-export default function saveRotecDataToExcelFile(serialNumbers, lastPort, ipAddress) {
-    const rotecInfoArray = serialNumbers.map((serialNumber, i) => [`${ serialNumber },${ ipAddress },${ lastPort + i }`])
+export default function saveRotecDataToExcelFile(meters, getIpAddressTitle) {
+    const rotecInfoArray = meters
+        .sort((a, b) => a.port - b.port)
+        .map((meter) => [`${ meter.serial_number },${ getIpAddressTitle(meter.ip_address) },${ meter.port }`])
 
     let workBook = XLSX.utils.book_new()
     workBook.SheetNames.push("Счетчики РОТЕК");
@@ -18,11 +20,8 @@ export default function saveRotecDataToExcelFile(serialNumbers, lastPort, ipAddr
     let workSheetMeters = XLSX.utils.aoa_to_sheet(rotecInfoArray)
     workBook.Sheets["Счетчики РОТЕК"] = workSheetMeters
 
-    //Ширина и слияние колонок счетчики
-    workSheetMeters['!cols'] = [
-        { width: 70 },
-    ]
+    workSheetMeters['!cols'] = [ { width: 100 } ]
 
-    let workBookOut = XLSX.write(workBook, {bookType:'xlsx',  type: 'binary'})
-    saveAs(new Blob([stringToArrayBuffer(workBookOut)],{type:"application/octet-stream"}), 'rotec-data.xlsx')
+    let workBookOut = XLSX.utils.sheet_to_csv(workBook.Sheets["Счетчики РОТЕК"], { strip: true })
+    saveAs(new Blob([ stringToArrayBuffer(workBookOut) ],{ type: 'application/octet-stream' }), 'rotec-data.csv')
 }

@@ -10,9 +10,23 @@
                 v-model="type"
                 outlined
                 :disabled="formSubmit"
+                @change="meterTypeOnChange"
+            >
+            </v-combobox>
+            <v-combobox
+                v-if="isRepair"
+                :items="availableByTypeSerials"
+                item-text="title"
+                item-value="index"
+                label="Серийный номер"
+                class="pl-1 pt-2 pb-0 pr-3"
+                v-model="serialNumber"
+                outlined
+                :disabled="formSubmit"
             >
             </v-combobox>
             <v-text-field
+                v-else
                 class="pt-2 pb-0 pr-3"
                 type="text"
                 label="Серийный номер"
@@ -145,7 +159,9 @@
 	        selectedMeterIndex: 0,
 	        metersWithLetters: [ 66, 111, 119, 120 ],
             meterTypes: [],
-	        isAddAll: true
+	        isAddAll: true,
+	        availableByTypeSerials: [],
+	        availableByTypeMeters: []
         }),
         props: {
 			isRegister: Boolean,
@@ -175,6 +191,7 @@
 	        if (this.isRepair) {
 		        this.headers = this.headers.slice(0, this.headers.length - 1)
 	        }
+	        await this.meterTypeOnChange()
         },
 		watch: {
 			scannerActive(newVal) {
@@ -315,7 +332,7 @@
                         ? await this.checkMeterInRepairDB({ type: meterType, serialNumber: this.serialNumber })
                         : await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
 
-			        console.log(meterInDb)
+			        //console.log(meterInDb)
 			        if (this.isRegister) {
 				        //регистрация
 				        if (meterInDb.length) {
@@ -385,10 +402,16 @@
                 this.isAddAll = !this.isAddAll
             },
 
+            async meterTypeOnChange() {
+	        	if (this.isRepair) {
+			        this.availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.index)
+                    this.availableByTypeSerials = this.availableByTypeMeters.map((availableMeter) => availableMeter.SERIAL_NUMBER)
+                }
+            },
+
 	        async addAllMetersByTypeOnClick() {
-		        const availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.index)
-		        availableByTypeMeters.forEach(availableMeter => {
-			        if (!this.meters.find(meter => meter.guid === availableMeter.GUID)) {
+		        this.availableByTypeMeters.forEach((availableMeter) => {
+			        if (!this.meters.find((meter) => meter.guid === availableMeter.GUID)) {
 				        this.meters.push({
 					        type: availableMeter.METER_TYPE,
 					        serialNumber: availableMeter.SERIAL_NUMBER,

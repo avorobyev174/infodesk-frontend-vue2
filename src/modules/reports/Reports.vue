@@ -39,7 +39,7 @@
                         v-on="on"
                         @click="item.show = !item.show"
                     >
-                        <v-icon large v-if="item.download" color="grey">
+						<v-icon large v-if="item.description" color="grey">
                             mdi-information
                         </v-icon>
                     </v-btn>
@@ -79,15 +79,15 @@
 </template>
 
 <script>
-	import {mapActions, mapGetters, mapMutations, mapState} from "vuex"
+	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
 	import saveCountByAddressReportToExcel from "./js/saveCountByAddressReportToExcel"
 	import saveLoadedInPyramidByCustomerAddressReportToExcel from "./js/saveLoadedInPyramidByCustomerAddressReportToExcel"
 	import saveFromUitToStorageReportToExcel from "../reports/js/saveFromUitToStorageReportToExcel"
 	import saveNotLoadedInPyramidReportToExcel from "../reports/js/saveNotLoadedInPyramidReportToExcel"
 	import saveNonActivePyramidMetersToExcelFile from "../reports/js/saveNonActiveMetersDataToExcel"
-	import nonActiveInPyramidReport from "./components/nonActiveInPyramidReport"
+	import nonActiveInPyramidReport from "./components/NonActiveInPyramidReport"
 	import saveLastTimeDataToExcelFile from "../reports/js/saveLastTimeDataToExcel"
-	import meterCountByAddressReport from "./components/meterCountByAddressReport"
+	import meterCountByAddressReport from "./components/MeterCountByAddressReport"
     import saveRotecDataToExcelFile from "./js/saveRotecDataToExcel"
 
 	export default {
@@ -101,11 +101,9 @@
             selecteditem: null,
             items: [
 				{
-					id: 1,
 					name: 'Альфа Центр',
 					children: [
 						{
-							id: 2,
                             name: 'Последний опрос',
                             download: true,
                             description: 'Последний опрос комплекса Альфа Центр',
@@ -115,75 +113,80 @@
                         },
 					],
 				},
-	            {
-		            id: 3,
-		            name: 'Пирамида',
-		            children: [
-			            {
-			            	id: 4,
+				{
+					name: 'Пирамида',
+					children: [
+						{
                             name: 'Выполнение плана установки по месяцам (дома)',
                             download: true,
-				            description: 'Количество загруженных в пирамиду счетчиков сгруппированных по адресам входящих в план',
-				            func: 'getPyramidLoadedByCustomerAddressReport',
+							description: 'Количество загруженных в пирамиду счетчиков сгруппированных по адресам входящих в план',
+							func: 'getPyramidLoadedByCustomerAddressReport',
                             loading: false,
-				            show: false
+							show: false
                         },
-			            {
-			            	id: 6,
+						{
                             name: 'Счетчики не загруженные в пирамиду',
                             download: true,
                             description: `Отчет содержит информацию по не загруженным в пирамиду счетчикам:`,
                             columns: `- серийный номер\n- тип\n- принадлежность\n- номер сим карты\n- дата регистрации в модуле "регистрация счетчиков"\n- признак наличия счетчика в данный момент на складе`,
                             func: 'getNotInPyramidReport',
-				            loading: false,
+							loading: false,
                             show: false
                         },
-			            {
-				            id: 7,
-				            name:  'Не активные счетчики',
-				            download: true,
-				            description: 'Отчет содержит информацию по счетчикам которые не передают данные за определенный\nпериод времени:',
-				            columns: `- серийный номер\n- ip\n- порт\n- номер сим карты\n- адрес`,
-                            params: `Параметры:\n   0 - счетчики вообще не имеющие данных\n   n - количество дней без передачи данных`,
-				            func: 'reportDialogOpen',
-				            loading: false,
-				            show: false
-			            },
-			            {
-				            id: 8,
-				            name:  'Выполнение плана по месяцам (принадлежность)',
-				            download: true,
-				            description: 'Количество созданных / загруженных в пирамиду счетчиков сгруппированных по принадлежности',
-				            func: 'reportCountByAddressDialogOpen',
-				            loading: false,
-				            show: false
-			            },
-		            ],
-	            },
-	            {
-		            id: 9,
-		            name: 'Программирование',
-		            children: [
-			            {
-				            id: 5,
-				            name: 'Текущее количество счетчиков на складе после программирования',
-				            download: true,
-				            description: 'Текущее количество счетчиков на складе принятых после программирования УИТ',
-				            func: 'getMeterFromRepairToStorageCountReport',
-				            loading: false,
-				            show: false
-			            },
-			            {
-				            id: 10,
-				            name: 'Информация по счетчикам Ротек',
-				            download: true,
-				            description: 'Список счетчиков Ротек из модуля Склад и дополнительная информация',
-				            func: 'getRotecReport',
-				            loading: false,
-				            show: false
-			            },
-		            ],
-	            },
+						{
+							name:  'Не активные счетчики',
+							download: true,
+							description: 'Отчет содержит информацию по счетчикам которые не передают данные за определенный\nпериод времени:',
+							columns: `- серийный номер\n- ip\n- порт\n- номер сим карты\n- адрес`,
+							params: `Параметры:\n   0 - счетчики вообще не имеющие данных\n   n - количество дней без передачи данных`,
+							func: 'reportDialogOpen',
+							loading: false,
+							show: false
+						},
+						{
+							name:  'Выполнение плана по месяцам (принадлежность)',
+							download: true,
+							description: 'Количество созданных / загруженных в пирамиду счетчиков сгруппированных по принадлежности',
+							func: 'reportCountByAddressDialogOpen',
+							loading: false,
+							show: false
+						},
+					],
+				},
+				{
+					name: 'Программирование',
+					children: [
+						{
+							name: 'Текущее количество счетчиков на складе после программирования',
+							download: true,
+							description: 'Текущее количество счетчиков на складе принятых после программирования УИТ',
+							func: 'getMeterFromRepairToStorageCountReport',
+							loading: false,
+							show: false
+						},
+						{
+							name: 'Информация по счетчикам Ротек',
+							download: true,
+							description: 'Список счетчиков Ротек из модуля Склад и дополнительная информация в формате csv',
+							func: 'getRotecReport',
+							loading: false,
+							show: false
+						},
+					],
+				},
+				{
+					name: 'Склад',
+					children: [
+						{
+							name: 'По местоположению ПУ',
+							download: false,
+							description: 'Текущее количество счетчиков сгруппированных по местоположению',
+							func: 'getMeterFromRepairToStorageCountReport',
+							loading: false,
+							show: false
+						},
+					],
+				},
             ],
 		}),
 		inject: ['showNotification', 'showNotificationError', 'checkAuth', 'setBackgroundImage'],
@@ -223,14 +226,15 @@
 					'getAlphaLastTimeDataReport',
 					'getRotecMetersInfo',
 				]),
-			...mapActions('registration',
-				[
-					'getIpAddressTitle'
-				]),
 			...mapMutations(['setFavoriteModuleColor']),
 
 			localFuncCall(item) {
 				this[ item.func ](item);
+			},
+
+			getIpAddressTitle(ipAddress) {
+				const ipAddr = this.ipAddresses.find(address => ipAddress === address.value)
+				return ipAddr ? ipAddr.text : ipAddress
 			},
 
 			async getAlphaReport(item) {
@@ -346,7 +350,7 @@
                             meter.port,
                             meter.phone,
                             address,
-	                        meter.last_date_time ? new Date(meter.last_date_time) : 'данные отсутствуют'
+							meter.last_date_time ? new Date(meter.last_date_time) : 'данные отсутствуют'
                         ])
                     })
 
@@ -355,7 +359,7 @@
                     console.log(e)
                     this.showNotification('Ошибка при выполнении отчета', this.colorRed)
                 } finally {
-	                this.selecteditem.loading = false
+					this.selecteditem.loading = false
                 }
             },
 
@@ -371,19 +375,19 @@
                         finalRow[1] = row.address === '' ? 'отсутствует' : row.address
                         if (row.months.length) {
                             row.months.forEach((month) => {
-	                            finalRow[month.month + 1] = month.count
+								finalRow[month.month + 1] = month.count
                             })
                         }
 						return finalRow
 					})
 
                     let monthsSum = []
-                    for (let i = 0; i < 12; i++) {
-	                    const sum = editedResponse.reduce((acc, cur) => {
-		                    return acc += cur[i + 2] ? parseInt(cur[i + 2]) : 0
-	                    }, 0)
-	                    monthsSum.push(sum)
-                    }
+					for (let i = 0; i < 12; i++) {
+						const sum = editedResponse.reduce((acc, cur) => {
+							return acc += cur[i + 2] ? parseInt(cur[i + 2]) : 0
+						}, 0)
+						monthsSum.push(sum)
+					}
 					//console.log(monthsSum)
 					monthsSum.unshift('Итого')
 					monthsSum.unshift(editedResponse.length + 1)
@@ -401,12 +405,8 @@
 			async getRotecReport(item) {
 				item.loading = true
 				try {
-					const { serialNumbers, lastPort } =  await this.getRotecMetersInfo()
-                    saveRotecDataToExcelFile(
-                    	serialNumbers.map((row) => row.SERIAL_NUMBER),
-	                    lastPort ? lastPort.max + 1 : 0,
-                        '172.27.32.23'
-                    )
+					const meters =  await this.getRotecMetersInfo()
+                    saveRotecDataToExcelFile(meters, this.getIpAddressTitle)
 				} catch ({ message }) {
 					this.showNotification(`Ошибка при выполнении отчета: ${ message }`, this.colorRed)
 				} finally {
@@ -427,7 +427,7 @@
 			},
 
 
-	    }
+		}
 	}
 </script>
 

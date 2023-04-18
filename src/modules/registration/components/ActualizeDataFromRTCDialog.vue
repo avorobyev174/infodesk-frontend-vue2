@@ -33,8 +33,8 @@
 </template>
 
 <script>
-    import {mapActions, mapGetters, mapState} from "vuex";
-    import DialogWithTableSlot from "../../utils-components/DialogWithTableSlot";
+    import {mapActions, mapGetters, mapState} from "vuex"
+    import DialogWithTableSlot from "../../utils-components/DialogWithTableSlot"
 
     export default {
         name: "ActualizeDataFromRTCDialog",

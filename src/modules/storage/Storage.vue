@@ -264,7 +264,7 @@
 	import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
     import ActionColumn from "../utils-components/ActionColumn"
     import EditDialog from "./components/EditDialog"
-    import Utils from "./components/Utils"
+    import StorageMixin from "./components/StorageMixin"
     import RepairAndMaterialsDialog from "./components/RepairAndMaterialsDialog"
 
 	export default {
@@ -458,7 +458,7 @@
 	            }
             },
         },
-        mixins: [ Utils ],
+        mixins: [ StorageMixin ],
 		computed: {
 			...mapState({
 				loading: state => state.storage.meterLoading,

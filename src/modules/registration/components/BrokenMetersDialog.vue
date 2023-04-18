@@ -76,8 +76,7 @@
 </template>
 
 <script>
-    import {mapActions, mapGetters, mapState} from "vuex";
-    import SimpleDialogWithTableSlot from "../../utils-components/SimpleDialogWithTableSlot";
+    import { mapActions, mapState } from "vuex"
 
     export default {
         name: "BrokenMetersDialog",
@@ -97,9 +96,6 @@
             meters: [],
             accounts: []
         }),
-        components: {
-            simpleDialogWithTableSlot: SimpleDialogWithTableSlot
-        },
         inject: ['showNotification', 'showNotificationComponentError', 'showNotificationStandardError', 'getMeterTypeTitle' ],
         computed: {
             ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue'])

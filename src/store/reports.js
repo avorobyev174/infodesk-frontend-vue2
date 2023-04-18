@@ -60,6 +60,48 @@ export const reports = {
             
             return response.data
         },
+        
+        async getLocationReport({ state, commit }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-location-report`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+    
+        async getOwnerReport({ state, commit }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-owner-report`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+    
+        async getMeterReport({ state, commit }, { type, serialNumber }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-meter-report`,
+                { type, serialNumber },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+        
+        async getStoragePeriodReport({ state, commit }, { startDate, endDate }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-storage-logs-by-period-report`,
+                { startDate, endDate },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+        async getInOutByPeriodAndLocationReport({ state, commit }, { startDate, endDate, location }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-in-out-by-period-and-location-report`,
+                { startDate, endDate, location },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
     },
     namespaced: true
 }

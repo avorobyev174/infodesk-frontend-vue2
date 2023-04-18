@@ -9,7 +9,7 @@
         <v-card>
             <v-card-title style="display: flex; flex-direction: column">
                 <span class="m-auto text-h5 text-break text-center">{{ title }}</span>
-                <span class="m-auto text-h7" v-if="successCountNumber !== undefined">{{ successCountNumber }}</span>
+                <span class="m-auto text-h7" v-if="successCountNumber">{{ successCountNumber }}</span>
             </v-card-title>
 
             <v-card-text>

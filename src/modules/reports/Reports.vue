@@ -5,22 +5,28 @@
             <p class="search-card-info">списки содержат отчеты по комплексам с описанием данных</p>
         </v-card-text>
         <v-treeview
+            open-all
             class="px-1"
             hoverable
-            :items="items"
+            :items="reportItems"
             item-key="name"
             open-on-click
-            open-all
             :transition="true"
             selection-type="independent"
         >
-            <template v-slot:label="{ item, open }">
+            <template v-slot:label="{ item, open, leaf }">
                 <div class="report-body">
                     <v-icon large v-if="item.description">
                         {{ 'mdi-circle-small' }}
                     </v-icon>
-                    <p v-if="item.description" class="report-name">{{ item.name }}</p>
-                    <p v-else class="report-title" >{{ item.name }}</p>
+                    <p
+                        v-if="item.description"
+                        class="report-name"
+                    >{{ item.name }}</p>
+                    <p
+                        v-else
+                        class="report-title"
+                    >{{ item.name }}</p>
                     <v-expand-transition>
                         <div v-show="item.show" class="report-description">
                             <p class="report-description-main">{{ item.description }}</p>
@@ -37,9 +43,10 @@
                         icon
                         v-bind="attrs"
                         v-on="on"
+						v-show="item.description"
                         @click="item.show = !item.show"
                     >
-						<v-icon large v-if="item.description" color="grey">
+						<v-icon large color="grey">
                             mdi-information
                         </v-icon>
                     </v-btn>
@@ -55,13 +62,32 @@
                         v-bind="attrs"
                         v-on="on"
                         class="px-2"
+						v-show="item.download"
                     >
-                        <v-icon large v-if="item.download" color="green">
+                        <v-icon large color="green">
                             mdi-download-circle
                         </v-icon>
                     </v-btn>
                 </template>
                 <span>Скачать</span>
+            </v-tooltip>
+			<v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        icon
+                        @click="localFuncCall(item)"
+                        :loading="item.loading"
+                        v-bind="attrs"
+                        v-on="on"
+                        class="px-2"
+						v-show="item.open"
+                    >
+                        <v-icon large color="green">
+                            mdi-play-circle
+                        </v-icon>
+                    </v-btn>
+                </template>
+                <span>Сформировать</span>
             </v-tooltip>
         </template>
         </v-treeview>
@@ -75,6 +101,15 @@
             @okButtonClickEvent="getPyramidLoadedByAddressReport"
             title="Параметры отчета"
         />
+        <result-show-report-dialog
+            ref="resultShowReportDialog"
+            :report-data="reportData"
+            :title="reportTitle"
+        ></result-show-report-dialog>
+        <storage-input-report-dialog
+            @submitClick="showStorageReport"
+            ref="storageInputReportDialog"
+        ></storage-input-report-dialog>
     </v-card>
 </template>
 
@@ -85,124 +120,47 @@
 	import saveFromUitToStorageReportToExcel from "../reports/js/saveFromUitToStorageReportToExcel"
 	import saveNotLoadedInPyramidReportToExcel from "../reports/js/saveNotLoadedInPyramidReportToExcel"
 	import saveNonActivePyramidMetersToExcelFile from "../reports/js/saveNonActiveMetersDataToExcel"
-	import nonActiveInPyramidReport from "./components/NonActiveInPyramidReport"
 	import saveLastTimeDataToExcelFile from "../reports/js/saveLastTimeDataToExcel"
-	import meterCountByAddressReport from "./components/MeterCountByAddressReport"
-    import saveRotecDataToExcelFile from "./js/saveRotecDataToExcel"
+	import saveRotecDataToExcelFile from "./js/saveRotecDataToExcel"
+	import NonActiveInPyramidReport from "./components/NonActiveInPyramidReport"
+	import MeterCountByAddressReport from "./components/MeterCountByAddressReport"
+	import ReportItemsMixin from './mixins/ReportItemsMixin'
+    import ResultShowReportDialog from "./components/storage/ResultShowReportDialog"
+	import StorageMixin from "../storage/components/StorageMixin"
+	import ReportStorageMixin from "./mixins/ReportStorageMixin"
+    import StorageInputReportDialog from "./components/storage/StorageInputReportDialog"
 
 	export default {
 		name: "Reports",
 		components: {
-			nonActiveInPyramidReport,
-			meterCountByAddressReport
+			NonActiveInPyramidReport,
+			MeterCountByAddressReport,
+			ResultShowReportDialog,
+			StorageInputReportDialog
         },
 		data: () => ({
             expand: false,
-            selecteditem: null,
-            items: [
-				{
-					name: 'Альфа Центр',
-					children: [
-						{
-                            name: 'Последний опрос',
-                            download: true,
-                            description: 'Последний опрос комплекса Альфа Центр',
-                            func: 'getAlphaReport',
-							loading: false,
-							show: false
-                        },
-					],
-				},
-				{
-					name: 'Пирамида',
-					children: [
-						{
-                            name: 'Выполнение плана установки по месяцам (дома)',
-                            download: true,
-							description: 'Количество загруженных в пирамиду счетчиков сгруппированных по адресам входящих в план',
-							func: 'getPyramidLoadedByCustomerAddressReport',
-                            loading: false,
-							show: false
-                        },
-						{
-                            name: 'Счетчики не загруженные в пирамиду',
-                            download: true,
-                            description: `Отчет содержит информацию по не загруженным в пирамиду счетчикам:`,
-                            columns: `- серийный номер\n- тип\n- принадлежность\n- номер сим карты\n- дата регистрации в модуле "регистрация счетчиков"\n- признак наличия счетчика в данный момент на складе`,
-                            func: 'getNotInPyramidReport',
-							loading: false,
-                            show: false
-                        },
-						{
-							name:  'Не активные счетчики',
-							download: true,
-							description: 'Отчет содержит информацию по счетчикам которые не передают данные за определенный\nпериод времени:',
-							columns: `- серийный номер\n- ip\n- порт\n- номер сим карты\n- адрес`,
-							params: `Параметры:\n   0 - счетчики вообще не имеющие данных\n   n - количество дней без передачи данных`,
-							func: 'reportDialogOpen',
-							loading: false,
-							show: false
-						},
-						{
-							name:  'Выполнение плана по месяцам (принадлежность)',
-							download: true,
-							description: 'Количество созданных / загруженных в пирамиду счетчиков сгруппированных по принадлежности',
-							func: 'reportCountByAddressDialogOpen',
-							loading: false,
-							show: false
-						},
-					],
-				},
-				{
-					name: 'Программирование',
-					children: [
-						{
-							name: 'Текущее количество счетчиков на складе после программирования',
-							download: true,
-							description: 'Текущее количество счетчиков на складе принятых после программирования УИТ',
-							func: 'getMeterFromRepairToStorageCountReport',
-							loading: false,
-							show: false
-						},
-						{
-							name: 'Информация по счетчикам Ротек',
-							download: true,
-							description: 'Список счетчиков Ротек из модуля Склад и дополнительная информация в формате csv',
-							func: 'getRotecReport',
-							loading: false,
-							show: false
-						},
-					],
-				},
-				{
-					name: 'Склад',
-					children: [
-						{
-							name: 'По местоположению ПУ',
-							download: false,
-							description: 'Текущее количество счетчиков сгруппированных по местоположению',
-							func: 'getMeterFromRepairToStorageCountReport',
-							loading: false,
-							show: false
-						},
-					],
-				},
-            ],
+            selectedItem: null,
+			dialogModel: false,
+            reportData: [],
+            reportTitle: '',
+            reportItems: [],
 		}),
+		mixins: [ ReportItemsMixin, StorageMixin, ReportStorageMixin ],
 		inject: ['showNotification', 'showNotificationError', 'checkAuth', 'setBackgroundImage'],
 		computed: {
-			...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue']),
+			...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold']),
 			...mapGetters({
-				ipAddresses: 'registration/getIpAddress'
+				ipAddresses: 'registration/getIpAddress',
 			}),
 		},
+        provide: function () {
+	        return {
+		        formatDate: this.formatDate,
+	        }
+        },
 		created() {
-			const isFavorite = $cookies.get('common_favorite_module')
-			if (isFavorite === '/reports') {
-				this.setFavoriteModuleColor(this.colorGold)
-			} else {
-				this.setFavoriteModuleColor('')
-			}
+			this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/reports' ? this.colorGold : '')
 		},
 		mounted() {
 			if (!this.checkAuth()) {
@@ -214,6 +172,7 @@
 			}
 
 			this.setBackgroundImage(true)
+            this.reportItems = this.getReportItems()
 		},
 		methods: {
 			...mapActions('reports',
@@ -225,11 +184,12 @@
 					'getLoadedPyramidCountByCustomerAddress',
 					'getAlphaLastTimeDataReport',
 					'getRotecMetersInfo',
+                    'getLocationReport'
 				]),
 			...mapMutations(['setFavoriteModuleColor']),
 
 			localFuncCall(item) {
-				this[ item.func ](item);
+				this[ item.func ](item)
 			},
 
 			getIpAddressTitle(ipAddress) {
@@ -245,7 +205,7 @@
                     saveLastTimeDataToExcelFile(response)
 				} catch (e) {
 					console.log(e)
-					this.showNotification('Ошибка при выполнении отчета', this.colorRed)
+					this.showNotification(`Ошибка при выполнении отчета: ${ e.message }`, this.colorRed)
 				} finally {
 					item.loading = false
 				}
@@ -294,9 +254,8 @@
                             date: this.dateFormat(row.date)
 						}
 					})
-					//console.log(editedResponse)
-					saveFromUitToStorageReportToExcel(editedResponse)
 
+					saveFromUitToStorageReportToExcel(editedResponse)
 				} catch (e) {
 					console.log(e)
 					this.showNotification('Ошибка при выполнении отчета', this.colorRed)
@@ -326,16 +285,16 @@
 
 			async reportDialogOpen(item) {
 				this.$refs.reportDialogActive.open()
-                this.selecteditem = item
+                this.selectedItem = item
             },
 
 			async reportCountByAddressDialogOpen(item) {
 				this.$refs.reportDialogCount.open()
-				this.selecteditem = item
+				this.selectedItem = item
 			},
 
 			async getNonActiveInPyramidReport(days) {
-				this.selecteditem.loading = true
+				this.selectedItem.loading = true
                 try {
                     const response = await this.getNonActiveInPyramid(days)
                     //console.log(response)
@@ -359,12 +318,12 @@
                     console.log(e)
                     this.showNotification('Ошибка при выполнении отчета', this.colorRed)
                 } finally {
-					this.selecteditem.loading = false
+					this.selectedItem.loading = false
                 }
             },
 
 			async getPyramidLoadedByAddressReport(created) {
-				this.selecteditem.loading = true
+				this.selectedItem.loading = true
 				try {
 					const response = await this.getCountByAddress(created)
 					//console.log(response)
@@ -398,7 +357,7 @@
 					console.log(e)
 					this.showNotification('Ошибка при выполнении отчета', this.colorRed)
 				} finally {
-					this.selecteditem.loading = false
+					this.selectedItem.loading = false
 				}
 			},
 
@@ -426,7 +385,9 @@
 				return `${ day }.${ month }.${ year }`
 			},
 
-
+			async getStorageReport(item) {
+                this.$refs.storageInputReportDialog.reportDialogOpen(item)
+			}
 		}
 	}
 </script>

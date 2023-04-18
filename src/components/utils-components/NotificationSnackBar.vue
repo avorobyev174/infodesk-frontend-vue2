@@ -50,21 +50,19 @@
 	         * @param {error} e предаваемая ошибка
 	         */
             showNotificationError(text, e) {
-		        //console.log(Object.entries(e))
-                if (e || text) {
-                    if (e.response !== undefined) {
+                if (text && e) {
+                    if (e.response) {
                         this.showNotification(`${ text }: ${ e.response.data }`, this.colorRed)
                         if (e.response.status === 401) {
-                            setTimeout(() => {
-                                //console.log('logout user')
-                                this.logoutUser()
-                            }, 3500)
+                            setTimeout(this.logoutUser, 3500)
                         }
                     } else {
                         this.showNotification(`${ text }: ${ e.message }`, this.colorRed)
                     }
+                } else if (text) {
+	                this.showNotification(`${ text }`, this.colorRed)
                 } else {
-                    this.showNotification(`Ошибка (не отвечает сервер)`, this.colorRed)
+                    this.showNotification(`Что то пошло не так, возможно не отвечает сервер`, this.colorRed)
                 }
             }
         }

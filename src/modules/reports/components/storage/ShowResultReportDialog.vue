@@ -14,7 +14,7 @@
             <v-card-text class="pb-0">
                 <v-simple-table
                     fixed-header
-                    class="mb-0"
+                    class="mb-0 result-table"
                     :height="height"
                 >
                     <template v-slot:default>
@@ -46,6 +46,13 @@
                 >
                     Скачать excel файл
                 </v-btn>
+                <v-btn
+                    color="blue darken-1"
+                    text
+                    @click="print"
+                >
+                    Печать
+                </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -58,7 +65,7 @@
     import { mapState } from "vuex"
 
     export default {
-        name: "ResultShowReportDialog",
+        name: "ShowResultReportDialog",
         data: () => ({
             dialogModel: false,
             report: {},
@@ -83,6 +90,31 @@
 
             close() {
             	this.dialogModel = false
+            },
+
+            print() {
+	            const newWindow = window.open("МЭК")
+	            const tableHtml = document.querySelector('.result-table .v-data-table__wrapper table')
+
+	            newWindow.document.write("<html>")
+	            newWindow.document.write('<style type = "text/css">')
+	            newWindow.document.write('table { border: 1px solid black; border-collapse: collapse; width: 100%; }')
+	            newWindow.document.write('td, th { text-align: center; border: 1px solid black; padding: 5px }')
+	            newWindow.document.write('th { background-color: #F7F7F7; font-weight: bold; word-break: break-word; }')
+	            newWindow.document.write('h3 { text-align: center; margin: 10px }')
+	            newWindow.document.write('</style>')
+	            newWindow.document.write('</head>')
+	            newWindow.document.write('<body>')
+	            newWindow.document.write(`<h3 style="${ !this.report.additional ? 'margin-bottom: 20px' : '' }">${ this.report.dialogTitle }</h3>`)
+                if (this.report.additional) {
+	                newWindow.document.write(`<h3 style="margin-bottom: 20px" >${ this.report.additional }</h3>`)
+                }
+	            newWindow.document.write(tableHtml.outerHTML)
+	            newWindow.document.write('</body>')
+	            newWindow.document.write('</html>')
+	            newWindow.document.close()
+	            newWindow.print()
+	            newWindow.close()
             },
 
 	        dataToExcelFile() {

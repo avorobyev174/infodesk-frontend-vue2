@@ -26,7 +26,7 @@
                 <v-btn
                     color="blue darken-1"
                     text
-                    @click.once="close"
+                    @click="close"
                 >
                     Отмена
                 </v-btn>

@@ -26,8 +26,7 @@
 		        func: 'getAlphaReport',
 		        loading: false,
 		        show: false,
-		        roles: ['admin']
-	        },
+Lj	        },
 	        pyramidLoadedByCustomerAddressReport: {
 		        name: 'Выполнение плана установки по месяцам (дома)',
 		        download: true,
@@ -44,7 +43,6 @@
 		        func: 'getNotInPyramidReport',
 		        loading: false,
 		        show: false,
-		        roles: ['admin']
 	        },
 	        pyramidNonActiveMeters: {
 		        name:  'Не активные счетчики',
@@ -63,7 +61,6 @@
 		        func: 'reportCountByAddressDialogOpen',
 		        loading: false,
 		        show: false,
-		        roles: ['admin']
 	        },
 	        meterFromRepairToStorageCountReport: {
 		        name: 'Текущее количество счетчиков на складе после программирования',
@@ -72,7 +69,6 @@
 		        func: 'getMeterFromRepairToStorageCountReport',
 		        loading: false,
 		        show: false,
-		        roles: ['admin']
 	        },
 	        rotecReport: {
 		        name: 'Информация по счетчикам Ротек',
@@ -81,40 +77,36 @@
 		        func: 'getRotecReport',
 		        loading: false,
 		        show: false,
-		        roles: ['admin']
 	        },
 	        storageLocationReport: {
                 id: 1,
-                name: 'По местоположению ПУ',
+                name: 'Местонахождение приборов учета',
                 download: false,
-                description: 'Текущее количество счетчиков сгруппированных по местоположению',
+                description: 'Текущее количество счетчиков сгруппированных по местонахождению',
                 func: 'showLocationStorageReport',
                 loading: false,
                 show: false,
                 open: true,
-                roles: ['admin', 'keeper']
             },
 	        storageOwnerReport: {
 		        id: 2,
-		        name: 'По владельцу ПУ',
+		        name: 'Владелец приборов учета',
 		        download: false,
 		        description: 'Текущее количество счетчиков сгруппированных по сотруднику',
 		        func: 'showOwnerStorageReport',
 		        loading: false,
 		        show: false,
 		        open: true,
-		        roles: ['admin', 'keeper']
 	        },
 	        storageMeterReport: {
 		        id: 3,
-		        name: 'По движению ПУ',
+		        name: 'Движение выбранного прибора учета',
 		        download: false,
 		        description: 'Список всех логов текущего счетчика',
 		        func: 'getStorageReport',
 		        loading: false,
 		        show: false,
 		        open: true,
-		        roles: ['admin', 'keeper']
 	        },
 	        storageLogsReport: {
 		        id: 4,
@@ -125,18 +117,46 @@
 		        loading: false,
 		        show: false,
 		        open: true,
-		        roles: ['admin', 'keeper']
 	        },
 	        storageInOutByLocationReport: {
 		        id: 5,
-		        name: 'Отчет по движению приборов учета за период по объекту',
+		        name: 'Движение приборов учета за период по местонахождению (общее количество)',
 		        download: false,
-		        description: 'Информация по всему комплексу за выбранный период по объекту',
+		        description: 'Информация по количеству полученных и отданных приборов учета за выбранный период по местонахождению',
 		        func: 'getStorageReport',
 		        loading: false,
 		        show: false,
 		        open: true,
-		        roles: ['admin', 'keeper']
+	        },
+	        storageInOutByEmployeeReport: {
+		        id: 6,
+		        name: 'Движение приборов учета за период по сотруднику (общее количество)',
+		        download: false,
+		        description: 'Информация по количеству полученных и отданных приборов учета за выбранный период по сотруднику',
+		        func: 'getStorageReport',
+		        loading: false,
+		        show: false,
+		        open: true,
+	        },
+	        storageLogsByLocationReport: {
+		        id: 7,
+		        name: 'Движение приборов учета за период по местонахождению',
+		        download: false,
+		        description: 'Информация по логам полученных и отданных приборов учета за выбранный период по местонахождению',
+		        func: 'getStorageReport',
+		        loading: false,
+		        show: false,
+		        open: true,
+	        },
+	        storageLogsByEmployeeReport: {
+		        id: 8,
+		        name: 'Движение приборов учета за период по сотруднику',
+		        download: false,
+		        description: 'Информация по логам полученных и отданных приборов учета за выбранный период по сотруднику',
+		        func: 'getStorageReport',
+		        loading: false,
+		        show: false,
+		        open: true,
 	        },
         }),
         methods: {
@@ -171,6 +191,9 @@
 					            this.storageMeterReport,
 					            this.storageLogsReport,
 					            this.storageInOutByLocationReport,
+					            this.storageInOutByEmployeeReport,
+					            this.storageLogsByLocationReport,
+					            this.storageLogsByEmployeeReport,
 				            ],
 			            },
                     ]
@@ -185,6 +208,9 @@
 					            this.storageMeterReport,
 					            this.storageLogsReport,
 					            this.storageInOutByLocationReport,
+					            this.storageInOutByEmployeeReport,
+					            this.storageLogsByLocationReport,
+					            this.storageLogsByEmployeeReport,
 				            ],
 			            },
 		            ]

@@ -27,7 +27,7 @@
                 >
                 </v-text-field>
             </template>
-            <template v-slot:fields v-else-if="id === 4 || id === 5">
+            <template v-slot:fields v-else-if="[4, 5, 6, 7, 8].includes(id)">
                 <v-combobox
                     :items="locations"
                     item-text="text"
@@ -35,7 +35,17 @@
                     label="Местонахождение"
                     v-model="location"
                     outlined
-                    v-if="id === 5"
+                    v-show="id === 5 || id === 7"
+                >
+                </v-combobox>
+                <v-combobox
+                    :items="employees"
+                    item-text="name"
+                    item-value="staffId"
+                    label="Сотрудник"
+                    v-model="employee"
+                    outlined
+                    v-show="id === 6 || id === 8"
                 >
                 </v-combobox>
                 <v-text-field
@@ -70,18 +80,21 @@
             SimpleDialogWithInputSlot
         },
         mounted() {
-	        this.type = { index: 121, title: 'AIU5' }
-	        this.location = { value: 0, text: 'Склад' }
+	        //this.type = { index: 121, title: 'AIU5' }
+	        // this.location = { text: 'Склад', value: 0 }
+	        // this.employee = { name: 'Авдонин И. Д.', staffId: 107315 }
         },
         computed: {
 	        ...mapGetters({
                 types: 'storage/getMeterTypes',
                 locations: 'storage/getLocations',
+                employees: 'storage/getStorageEmployees',
 	        }),
         },
 		data: () => ({
-            type: {},
-            location: 0,
+            type: { index: 121, title: 'AIU5' },
+            location: { text: 'Склад', value: 0 },
+            employee: { name: 'Авдонин И. Д.', staffId: 107315 },
             serialNumber: '',
             loading: false,
 			id: 0,
@@ -101,7 +114,7 @@
             ...mapActions('reports', [  ]),
 	        reportDialogOpen(report) {
             	this.id = report.id
-            	this.title = report.description
+            	this.title = report.name
             	this.$refs.meterReportDialog.open()
             },
 
@@ -112,13 +125,34 @@
 	        submit() {
             	let reportInputData = {}
             	switch (this.id) {
-		            case 3: reportInputData = {	type: this.type.index, serialNumber: this.serialNumber }; break
-		            case 4: reportInputData = {	startDate: this.startDate, endDate: this.endDate }; break
-		            case 5: reportInputData = {
-		            	location: this.location.value,
-                        startDate: this.formatDate(this.startDate),
-                        endDate: this.formatDate(this.endDate)
-		            }; break
+		            case 3:
+		            	reportInputData = {	type: this.type.index, serialNumber: this.serialNumber }; break
+		            case 4:
+		            	reportInputData = {	startDate: this.startDate, endDate: this.endDate }; break
+		            case 5:
+                        reportInputData = {
+                            location: this.location.value,
+                            startDate: this.formatDate(this.startDate),
+                            endDate: this.formatDate(this.endDate)
+                        }; break
+		            case 6:
+			            reportInputData = {
+				            empStaffId: this.employee.staffId,
+				            startDate: this.formatDate(this.startDate),
+				            endDate: this.formatDate(this.endDate)
+			            }; break
+		            case 7:
+			            reportInputData = {
+				            location: this.location.value,
+				            startDate: this.formatDate(this.startDate),
+				            endDate: this.formatDate(this.endDate)
+			            }; break
+		            case 8:
+			            reportInputData = {
+				            empStaffId: this.employee.staffId,
+				            startDate: this.formatDate(this.startDate),
+				            endDate: this.formatDate(this.endDate)
+			            }; break
 	            }
 
                 return this.$emit('submitClick', {

@@ -1,5 +1,5 @@
 <template>
-    <v-card class="m-3 px-4 pb-6" max-width="800px">
+    <v-card class="m-3 px-4 pb-6" max-width="900px">
         <v-card-text class="pb-0">
             <p class="text-h6 text-secondary search-card-title">Отчеты по комплексам</p>
             <p class="search-card-info">списки содержат отчеты по комплексам с описанием данных</p>
@@ -101,11 +101,11 @@
             @okButtonClickEvent="getPyramidLoadedByAddressReport"
             title="Параметры отчета"
         />
-        <result-show-report-dialog
+        <show-result-report-dialog
             ref="resultShowReportDialog"
             :report-data="reportData"
             :title="reportTitle"
-        ></result-show-report-dialog>
+        ></show-result-report-dialog>
         <storage-input-report-dialog
             @submitClick="showStorageReport"
             ref="storageInputReportDialog"
@@ -125,7 +125,7 @@
 	import NonActiveInPyramidReport from "./components/NonActiveInPyramidReport"
 	import MeterCountByAddressReport from "./components/MeterCountByAddressReport"
 	import ReportItemsMixin from './mixins/ReportItemsMixin'
-    import ResultShowReportDialog from "./components/storage/ResultShowReportDialog"
+    import ShowResultReportDialog from "./components/storage/ShowResultReportDialog"
 	import StorageMixin from "../storage/components/StorageMixin"
 	import ReportStorageMixin from "./mixins/ReportStorageMixin"
     import StorageInputReportDialog from "./components/storage/StorageInputReportDialog"
@@ -135,7 +135,7 @@
 		components: {
 			NonActiveInPyramidReport,
 			MeterCountByAddressReport,
-			ResultShowReportDialog,
+			ShowResultReportDialog,
 			StorageInputReportDialog
         },
 		data: () => ({

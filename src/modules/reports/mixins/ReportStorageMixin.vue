@@ -25,6 +25,9 @@
 			        'getMeterReport',
 			        'getStoragePeriodReport',
 			        'getInOutByPeriodAndLocationReport',
+			        'getInOutByPeriodAndEmployeeReport',
+			        'getLogsByPeriodAndLocationReport',
+			        'getLogsByPeriodAndEmpReport',
 		        ]),
 
 		    async showStorageReport(report) {
@@ -32,7 +35,10 @@
 			    switch (report.id) {
 				    case 3: return this.showMeterStorageReport(report)
 				    case 4: return this.showStoragePeriodReport(report)
-				    case 5: return this.showLocationPeriodStorageReport(report)
+				    case 5: return this.showLocationByPeriodStorageReport(report)
+				    case 6: return this.showEmployeeByPeriodStorageReport(report)
+				    case 7: return this.showLocationLogsByPeriodStorageReport(report)
+				    case 8: return this.showEmpLogsByPeriodStorageReport(report)
 			    }
 		    },
 
@@ -155,7 +161,7 @@
 	            }
             },
 
-		    async showLocationPeriodStorageReport({ startDate, endDate, location, title }) {
+		    async showLocationByPeriodStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getInOutByPeriodAndLocationReport({ startDate, endDate, location })
 
@@ -178,7 +184,7 @@
 
 				    this.$refs.resultShowReportDialog.open(
 					    {
-						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Пришло', 'Ушло', 'Количество на конец периода' ],
+						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
 						    dialogTitle: title,
 						    additional:  `${ startDate } - ${ endDate }`,
 						    data
@@ -189,7 +195,109 @@
 			    } catch (e) {
 				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
-            }
+            },
+
+		    async showEmployeeByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
+			    try {
+				    const response = await this.getInOutByPeriodAndEmployeeReport({ startDate, endDate, empStaffId })
+
+				    const countMap = new Map(Object.entries(response))
+				    if (!countMap.size) {
+					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+				    }
+
+				    let data = []
+				    for (const entry of countMap.entries()) {
+					    let record = []
+					    const [ type, count ] = entry
+					    record.push(this.getMeterTypeTitle(type))
+					    record.push(count.startDateCount ? count.startDateCount : 0)
+					    record.push(count.comingCount ? count.comingCount : 0)
+					    record.push(count.leaveCount ? count.leaveCount : 0)
+					    record.push(count.endDateCount ? count.endDateCount : 0)
+					    data.push(record)
+				    }
+
+				    this.$refs.resultShowReportDialog.open(
+					    {
+						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
+						    dialogTitle: title,
+						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ startDate } - ${ endDate }`,
+						    data
+					    },
+					    500,
+					    1000
+				    )
+			    } catch (e) {
+				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			    }
+		    },
+
+		    async showLocationLogsByPeriodStorageReport({ startDate, endDate, location, title }) {
+			    try {
+				    const response = await this.getLogsByPeriodAndLocationReport({ startDate, endDate, location })
+
+				    if (!response.length) {
+					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+				    }
+
+				    const data = response.map((row) => {
+					    return {
+						    ...row,
+						    TYPE: this.getMeterTypeTitle(row.TYPE),
+						    OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
+						    ISSUING_PERSON: this.getEmployeeTitleByStaffId(row.ISSUING_PERSON),
+						    ACCEPTED_PERSON: this.getEmployeeTitleByStaffId(row.ACCEPTED_PERSON)
+					    }
+				    })
+
+				    this.$refs.resultShowReportDialog.open(
+					    {
+						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
+						    dialogTitle: title,
+						    additional:  `${ startDate } - ${ endDate }`,
+						    data
+					    },
+					    600,
+					    1200
+				    )
+			    } catch (e) {
+				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			    }
+		    },
+
+		    async showEmpLogsByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
+			    try {
+				    const response = await this.getLogsByPeriodAndEmpReport({ startDate, endDate, empStaffId })
+
+				    if (!response.length) {
+					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+				    }
+
+				    const data = response.map((row) =>
+                        ({
+						    ...row,
+						    TYPE: this.getMeterTypeTitle(row.TYPE),
+						    OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
+						    ISSUING_PERSON: this.getEmployeeTitleByStaffId(row.ISSUING_PERSON),
+						    ACCEPTED_PERSON: this.getEmployeeTitleByStaffId(row.ACCEPTED_PERSON)
+					    }))
+
+
+				    this.$refs.resultShowReportDialog.open(
+					    {
+						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
+						    dialogTitle: title,
+						    additional:  `${ startDate } - ${ endDate }`,
+						    data
+					    },
+					    600,
+					    1200
+				    )
+			    } catch (e) {
+				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			    }
+		    },
         }
     }
 </script>

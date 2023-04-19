@@ -94,10 +94,38 @@ export const reports = {
         
             return response.data
         },
+        
         async getInOutByPeriodAndLocationReport({ state, commit }, { startDate, endDate, location }) {
             const response = await axios.post(
                 this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-in-out-by-period-and-location-report`,
                 { startDate, endDate, location },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+        
+        async getInOutByPeriodAndEmployeeReport({ state, commit }, { startDate, endDate, empStaffId }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-in-out-by-period-and-emp-report`,
+                { startDate, endDate, empStaffId },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+    
+        async getLogsByPeriodAndLocationReport({ state, commit }, { startDate, endDate, location }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-storage-logs-by-location-report`,
+                { startDate, endDate, location },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+    
+        async getLogsByPeriodAndEmpReport({ state, commit }, { startDate, endDate, empStaffId }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-storage-logs-by-emp-report`,
+                { startDate, endDate, empStaffId },
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data

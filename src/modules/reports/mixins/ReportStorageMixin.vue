@@ -28,10 +28,11 @@
 			        'getInOutByPeriodAndEmployeeReport',
 			        'getLogsByPeriodAndLocationReport',
 			        'getLogsByPeriodAndEmpReport',
+			        'getGroupLogsByPeriodAndEmpReport',
+			        'getCurrentCountByLocationReport',
 		        ]),
 
 		    async showStorageReport(report) {
-			    console.log(report)
 			    switch (report.id) {
 				    case 3: return this.showMeterStorageReport(report)
 				    case 4: return this.showStoragePeriodReport(report)
@@ -39,6 +40,8 @@
 				    case 6: return this.showEmployeeByPeriodStorageReport(report)
 				    case 7: return this.showLocationLogsByPeriodStorageReport(report)
 				    case 8: return this.showEmpLogsByPeriodStorageReport(report)
+				    case 9: return this.showEmpGroupLogsByPeriodStorageReport(report)
+				    case 10: return this.showCurrentCountByLocationStorageReport(report)
 			    }
 		    },
 
@@ -78,6 +81,8 @@
 				        .map((row) => ({ ...row, CURRENT_OWNER: this.getCurrentOwner(row.CURRENT_OWNER) }))
 				        .sort((a, b) => b.COUNT - a.COUNT)
 
+			        this.$refs.storageInputReportDialog.close()
+
 			        this.$refs.resultShowReportDialog.open({
 				        titles: ['Владелец', 'Количество'],
 				        dialogTitle: item.description,
@@ -115,6 +120,8 @@
                         }
 				    })
 
+				    this.$refs.storageInputReportDialog.close()
+
 				    this.$refs.resultShowReportDialog.open(
 				    	{
                             titles: [ 'Дата', 'Операция', 'Отдающий', 'Принимающий', 'Комментарий', 'Доп. информация' ],
@@ -146,11 +153,13 @@
 			            }
 		            })
 
-		            console.log(data)
+		            this.$refs.storageInputReportDialog.close()
+
 		            this.$refs.resultShowReportDialog.open(
 			            {
 				            titles: [ 'Дата', 'Операция', 'Серийный номер', 'Отдающий', 'Принимающий', 'Комментарий' ],
 				            dialogTitle: title,
+				            additional: `${ startDate } - ${ endDate }`,
 				            data
 			            },
 			            500,
@@ -218,6 +227,8 @@
 					    data.push(record)
 				    }
 
+				    this.$refs.storageInputReportDialog.close()
+
 				    this.$refs.resultShowReportDialog.open(
 					    {
 						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
@@ -251,11 +262,13 @@
 					    }
 				    })
 
+				    this.$refs.storageInputReportDialog.close()
+
 				    this.$refs.resultShowReportDialog.open(
 					    {
 						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional:  `${ startDate } - ${ endDate }`,
+						    additional: `${ this.getLocationTitle(location) } ${ startDate } - ${ endDate }`,
 						    data
 					    },
 					    600,
@@ -274,8 +287,7 @@
 					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
 				    }
 
-				    const data = response.map((row) =>
-                        ({
+				    const data = response.map((row) => ({
 						    ...row,
 						    TYPE: this.getMeterTypeTitle(row.TYPE),
 						    OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
@@ -283,12 +295,13 @@
 						    ACCEPTED_PERSON: this.getEmployeeTitleByStaffId(row.ACCEPTED_PERSON)
 					    }))
 
+				    this.$refs.storageInputReportDialog.close()
 
 				    this.$refs.resultShowReportDialog.open(
 					    {
 						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional:  `${ startDate } - ${ endDate }`,
+						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ startDate } - ${ endDate }`,
 						    data
 					    },
 					    600,
@@ -298,6 +311,73 @@
 				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
 		    },
+
+		    async showEmpGroupLogsByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
+			    try {
+				    const response = await this.getGroupLogsByPeriodAndEmpReport({ startDate, endDate, empStaffId })
+
+				    if (!response.length) {
+					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+				    }
+
+				    const data = response.map((row) => ({
+					    ...row,
+					    type: this.getMeterTypeTitle(row.type),
+					    operationType: this.getOperationTitle(row.operationType),
+					    issuingPerson: this.getEmployeeTitleByStaffId(row.issuingPerson),
+					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
+				    }))
+
+				    this.$refs.storageInputReportDialog.close()
+
+				    this.$refs.resultShowReportDialog.open(
+					    {
+						    titles: [ 'Дата', 'Тип ПУ', 'Количество', 'Тип операции', 'Отдающий', 'Принимающий' ],
+						    dialogTitle: title,
+						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ startDate } - ${ endDate }`,
+						    data
+					    },
+					    600,
+					    1200
+				    )
+			    } catch (e) {
+				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			    }
+		    },
+
+		    async showCurrentCountByLocationStorageReport({ startDate, endDate, location, title }) {
+			    try {
+				    const response = await this.getCurrentCountByLocationReport({ startDate, endDate, location })
+
+				    if (!response.length) {
+					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+				    }
+
+				    const data = response.map((row) => ({
+					    ...row,
+					    type: this.getMeterTypeTitle(row.type),
+					    issuingPerson: this.getEmployeeTitleByStaffId(row.issuingPerson),
+					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
+				    }))
+
+				    console.log(data[0])
+
+				    this.$refs.storageInputReportDialog.close()
+
+				    this.$refs.resultShowReportDialog.open(
+					    {
+						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата прихода', 'Отдающий', 'Принимающий', 'Комментарий' ],
+						    dialogTitle: title,
+						    additional: `${ this.getLocationTitle(location) } ${ startDate } - ${ endDate }`,
+						    data
+					    },
+					    600,
+					    1200
+				    )
+			    } catch (e) {
+				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			    }
+            }
         }
     }
 </script>

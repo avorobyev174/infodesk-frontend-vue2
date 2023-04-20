@@ -50,6 +50,7 @@
         data: () => ({
 	        formValid: true,
 	        dialogModel: false,
+	        loading: false,
         }),
         props: {
             title: {
@@ -60,28 +61,27 @@
             	type: Number,
                 default: 500
             },
-            loading: Boolean
         },
-		watch: {
-			dialogFormOpen(val) {
-				this.dialogModel = val
-			}
-		},
         methods: {
 			open() {
 				this.dialogModel = true
             },
 
+	        setLoading(loading) {
+		        this.loading = loading
+	        },
+
 	        close() {
 		        this.dialogModel = false
+		        this.$refs.form.resetValidation()
 	        },
 
             okClick() {
 	            if (!this.$refs.form.validate()) {
 		            return
 	            }
-	            this.$emit('okButtonClickEvent', this.days )
-	            this.dialogModel = false
+	            this.$emit('okButtonClickEvent')
+	            this.loading = true
             }
         }
 	}

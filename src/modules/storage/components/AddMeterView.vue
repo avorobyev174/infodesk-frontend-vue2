@@ -68,7 +68,7 @@
         </div>
         <v-data-table
             fixed-header
-            :height="isRepair ? 200 : 300"
+            :height="isRepair ? 200 : 400"
             class="pl-1"
             :items="meters"
             single-select
@@ -121,7 +121,9 @@
 </template>
 
 <script>
-	import { mapActions, mapGetters, mapState } from "vuex";
+	import { mapActions, mapGetters, mapState } from "vuex"
+    import correctSound from '../audio/correct.mp3'
+    import wrongSound from '../audio/wrong.mp3'
 
 	export default {
 		name: "AddMeterView",
@@ -309,6 +311,9 @@
 			        return
 		        }
 
+		        const correct = new Audio(correctSound)
+		        const wrong = new Audio(wrongSound)
+
 		        const meterType = this.type.index
 
 		        //Проверка на счетчики с буквами в серийных номерах и минусом в начале
@@ -319,11 +324,11 @@
 		        }
 
 		        if (this.meters.find(meter => meter.serialNumber === this.serialNumber && meter.type === meterType)) {
-			        this.showNotification(`Счетчик с типом ${ this.getMeterTypeTitle(meterType) }
+			        await wrong.play()
+
+			        return this.showNotification(`Счетчик с типом ${ this.getMeterTypeTitle(meterType) }
                                                     и серийным номером ${ this.serialNumber } уже добавлен в таблицу`,
 				                                    this.colorOrange)
-			        //$("#wrong").trigger('play');
-			        return
 		        }
 
 		        this.loading = true
@@ -332,16 +337,19 @@
                         ? await this.checkMeterInRepairDB({ type: meterType, serialNumber: this.serialNumber })
                         : await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
 
-			        //console.log(meterInDb)
 			        if (this.isRegister) {
 				        //регистрация
 				        if (meterInDb.length) {
+					        await wrong.play()
+
 					        return this.showNotification(
 						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
 						         ${ this.getMeterTypeTitle(meterType) }
 						         и серийным номером ${ this.serialNumber } уже найден в базе данных`,
 						        this.colorBlue)
 				        }
+
+				        await correct.play()
 
 				        this.meters.unshift({
 					        type: meterType,
@@ -352,6 +360,8 @@
 			        } else {
 			        	//прием выдача
 				        if (!meterInDb.length) {
+					        await wrong.play()
+
 					        return this.showNotification(
 						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
 						         ${ this.getMeterTypeTitle(meterType) }
@@ -363,6 +373,8 @@
 				        const oldLocation = meterInDb[0].METER_LOCATION
 				        const guid = meterInDb[0].GUID
                         const meter = { type: meterType, serialNumber: this.serialNumber }
+
+				        await correct.play()
 
 				        this.isRepair
 					        ? this.meters.unshift(meter)

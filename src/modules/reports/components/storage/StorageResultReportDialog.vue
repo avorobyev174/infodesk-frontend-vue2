@@ -7,8 +7,17 @@
     >
         <v-card>
             <v-card-title style="display: flex; flex-direction: column">
-                <p class="m-auto text-h5 text-break text-center pb-1 d-block">{{ report.dialogTitle }}</p>
-                <p class="m-auto text-h5 text-break text-center pb-3 d-block">{{ report.additional }}</p>
+                <p
+                    class="m-auto text-h5 text-break text-center pb-1 d-block"
+                >
+                    {{ report.dialogTitle }}
+                </p>
+                <p
+                    v-show="report.additional"
+                    class="m-auto text-h5 text-break text-center pb-3 d-block">
+                    {{ report.additional }}
+                </p>
+                <v-chip :color="colorGrey">{{ count }}</v-chip>
             </v-card-title>
 
             <v-card-text class="pb-0">
@@ -65,16 +74,17 @@
     import { mapState } from "vuex"
 
     export default {
-        name: "ShowResultReportDialog",
+        name: "StorageResultReportDialog",
         data: () => ({
             dialogModel: false,
             report: {},
 	        width: 800,
-	        height: 500
+	        height: 500,
+            count: '',
         }),
 	    inject: ['showNotification', 'showNotificationError', 'checkAuth', 'setBackgroundImage'],
 	    computed: {
-		    ...mapState(['colorGreen', 'colorRed',]),
+		    ...mapState(['colorGreen', 'colorRed', 'colorGrey']),
 	    },
         methods: {
         	open(report, height, width) {
@@ -86,6 +96,7 @@
 	                this.width = width
                 }
 		        this.dialogModel = true
+                this.count = report.data.length
             },
 
             close() {
@@ -143,7 +154,6 @@
 		        saveAs(new Blob([ stringToArrayBuffer(workBookOut) ],{ type:"application/octet-stream" }),
                                                                       `${ this.report.dialogTitle } ${ getDate() }.xlsx`)
 	        }
-
         }
     }
 </script>

@@ -55,9 +55,7 @@
         data: () => ({
 	        formValid: true,
 	        dialogModel: false,
-	        sortItems: [ { text: 'Время создания записи', value: 0 },
-		                 { text: 'Время загрузки в пирамиду', value: 1 }
-                        ],
+	        sortItems: [ { text: 'Время создания записи', value: 0 },  { text: 'Время загрузки в пирамиду', value: 1 } ],
 	        sortBy: 0
         }),
         props: {

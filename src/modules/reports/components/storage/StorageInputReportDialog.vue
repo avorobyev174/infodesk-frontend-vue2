@@ -2,7 +2,6 @@
     <simple-dialog-with-input-slot
             :title="title"
             ref="meterReportDialog"
-            :loading="loading"
             @okButtonClickEvent="submit"
         >
             <template v-slot:fields v-if="id === 3">
@@ -12,8 +11,8 @@
                     item-value="index"
                     label="Тип"
                     v-model="type"
+                    :rules="selectRules"
                     outlined
-                    required
                 >
                 </v-combobox>
                 <v-text-field
@@ -23,19 +22,19 @@
                     :rules="serialNumberRules"
                     clearable
                     outlined
-                    required
                 >
                 </v-text-field>
             </template>
-            <template v-slot:fields v-else-if="[4, 5, 6, 7, 8].includes(id)">
+            <template v-slot:fields v-else>
                 <v-combobox
                     :items="locations"
                     item-text="text"
                     item-value="value"
                     label="Местонахождение"
                     v-model="location"
+                    :rules="selectRules"
                     outlined
-                    v-show="id === 5 || id === 7"
+                    v-show="[5, 7, 10].includes(id)"
                 >
                 </v-combobox>
                 <v-combobox
@@ -44,8 +43,9 @@
                     item-value="staffId"
                     label="Сотрудник"
                     v-model="employee"
+                    :rules="selectRules"
                     outlined
-                    v-show="id === 6 || id === 8"
+                    v-show="[6, 8, 9].includes(id)"
                 >
                 </v-combobox>
                 <v-text-field
@@ -79,11 +79,6 @@
         components: {
             SimpleDialogWithInputSlot
         },
-        mounted() {
-	        //this.type = { index: 121, title: 'AIU5' }
-	        // this.location = { text: 'Склад', value: 0 }
-	        // this.employee = { name: 'Авдонин И. Д.', staffId: 107315 }
-        },
         computed: {
 	        ...mapGetters({
                 types: 'storage/getMeterTypes',
@@ -92,9 +87,9 @@
 	        }),
         },
 		data: () => ({
-            type: { index: 121, title: 'AIU5' },
-            location: { text: 'Склад', value: 0 },
-            employee: { name: 'Авдонин И. Д.', staffId: 107315 },
+            type: null,
+            location: null,
+            employee: null,
             serialNumber: '',
             loading: false,
 			id: 0,
@@ -108,18 +103,22 @@
 			dateRules: [
 				v => !!v || 'Обязательно к заполнению',
 			],
+			selectRules: [
+				v => !!v || 'Обязательно к заполнению',
+			],
         }),
         inject: [ 'formatDate' ],
         methods: {
             ...mapActions('reports', [  ]),
-	        reportDialogOpen(report) {
+	        open(report) {
             	this.id = report.id
             	this.title = report.name
             	this.$refs.meterReportDialog.open()
             },
 
-            setLoading(loading) {
-            	this.loading = loading
+            close() {
+	            this.$refs.meterReportDialog.setLoading(false)
+	            this.$refs.meterReportDialog.close()
             },
 
 	        submit() {
@@ -130,24 +129,16 @@
 		            case 4:
 		            	reportInputData = {	startDate: this.startDate, endDate: this.endDate }; break
 		            case 5:
+		            case 7:
+		            case 10:
                         reportInputData = {
                             location: this.location.value,
                             startDate: this.formatDate(this.startDate),
                             endDate: this.formatDate(this.endDate)
                         }; break
 		            case 6:
-			            reportInputData = {
-				            empStaffId: this.employee.staffId,
-				            startDate: this.formatDate(this.startDate),
-				            endDate: this.formatDate(this.endDate)
-			            }; break
-		            case 7:
-			            reportInputData = {
-				            location: this.location.value,
-				            startDate: this.formatDate(this.startDate),
-				            endDate: this.formatDate(this.endDate)
-			            }; break
 		            case 8:
+		            case 9:
 			            reportInputData = {
 				            empStaffId: this.employee.staffId,
 				            startDate: this.formatDate(this.startDate),

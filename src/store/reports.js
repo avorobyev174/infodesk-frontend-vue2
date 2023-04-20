@@ -130,6 +130,24 @@ export const reports = {
         
             return response.data
         },
+    
+        async getGroupLogsByPeriodAndEmpReport({ state, commit }, { startDate, endDate, empStaffId }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-storage-group-logs-by-emp-report`,
+                { startDate, endDate, empStaffId },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+    
+        async getCurrentCountByLocationReport({ state, commit }, { startDate, endDate, location }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-storage-count-by-current-location-report`,
+                { startDate, endDate, location },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
     },
     namespaced: true
 }

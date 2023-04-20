@@ -101,11 +101,11 @@
             @okButtonClickEvent="getPyramidLoadedByAddressReport"
             title="Параметры отчета"
         />
-        <show-result-report-dialog
+        <storage-result-report-dialog
             ref="resultShowReportDialog"
             :report-data="reportData"
             :title="reportTitle"
-        ></show-result-report-dialog>
+        ></storage-result-report-dialog>
         <storage-input-report-dialog
             @submitClick="showStorageReport"
             ref="storageInputReportDialog"
@@ -125,7 +125,7 @@
 	import NonActiveInPyramidReport from "./components/NonActiveInPyramidReport"
 	import MeterCountByAddressReport from "./components/MeterCountByAddressReport"
 	import ReportItemsMixin from './mixins/ReportItemsMixin'
-    import ShowResultReportDialog from "./components/storage/ShowResultReportDialog"
+    import StorageResultReportDialog from "./components/storage/StorageResultReportDialog"
 	import StorageMixin from "../storage/components/StorageMixin"
 	import ReportStorageMixin from "./mixins/ReportStorageMixin"
     import StorageInputReportDialog from "./components/storage/StorageInputReportDialog"
@@ -135,7 +135,7 @@
 		components: {
 			NonActiveInPyramidReport,
 			MeterCountByAddressReport,
-			ShowResultReportDialog,
+			StorageResultReportDialog,
 			StorageInputReportDialog
         },
 		data: () => ({
@@ -283,11 +283,6 @@
 				}
 			},
 
-			async reportDialogOpen(item) {
-				this.$refs.reportDialogActive.open()
-                this.selectedItem = item
-            },
-
 			async reportCountByAddressDialogOpen(item) {
 				this.$refs.reportDialogCount.open()
 				this.selectedItem = item
@@ -386,8 +381,13 @@
 			},
 
 			async getStorageReport(item) {
-                this.$refs.storageInputReportDialog.reportDialogOpen(item)
-			}
+                this.$refs.storageInputReportDialog.open(item)
+			},
+
+			async activePyramidDialogOpen(item) {
+				this.$refs.reportDialogActive.open()
+				this.selectedItem = item
+			},
 		}
 	}
 </script>

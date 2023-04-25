@@ -186,6 +186,7 @@
                     />
                     <v-spacer></v-spacer>
                     <main-menu
+                        v-if="!isObserver"
                         class="pr-2"
                         @acceptOrIssue="$refs.acceptOrIssueDialog.open(false)"
                         @register="$refs.registerDialog.open(false)"
@@ -400,7 +401,8 @@
 			totalMeters: 0,
             filters: {},
             searchMeters: [],
-			actions: []
+			actions: [],
+            isObserver: false
 		}),
 		created() {
 			this.setCookies()
@@ -416,11 +418,13 @@
 				: this.setFavoriteModuleColor('')
 		},
         mounted() {
-	        if (!this.checkAuth())
+	        if (!this.checkAuth()) {
 		        return
+	        }
 
-	        if (!this.activeModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
+	        if (!this.activeModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
 		        this.$router.push('/')
+	        }
 
             document.addEventListener('keydown', (evt) => {
 	            if (evt.key === 'Alt' && this.$route.name === 'Storage') {
@@ -430,8 +434,12 @@
 
 	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
 
-	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'admin') {
+	        if (this.roles?.storage_module === 'admin') {
 		        this.actions.push({ title: 'Удалить', action: 'delete', icon: 'mdi-delete' })
+	        }
+
+	        if (this.roles?.storage_module === 'observer') {
+		        this.isObserver = true
 	        }
 
 	        this.initializeOther()
@@ -566,6 +574,10 @@
             async initializeMeters() {
 				this.isSearchMeterView = false
                 try {
+	                if (this.roles?.storage_module === 'repairer') {
+		                this.options.role = 'repairer'
+	                }
+
 	                this.totalMeters = await this.fetchMetersPerPage(this.options)
 	                this.getMeterTypesInRepair()
                 } catch (e) {
@@ -601,6 +613,10 @@
 	                await this.initializeMeters()
                 } else {
                 	try {
+		                if (this.roles?.storage_module === 'repairer') {
+			                this.options.role = 'repairer'
+		                }
+
 		                this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
 	                } catch (e) {
                         this.showNotificationStandardError(e)

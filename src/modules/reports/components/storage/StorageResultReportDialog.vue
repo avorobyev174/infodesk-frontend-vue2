@@ -58,7 +58,7 @@
                 <v-btn
                     color="blue darken-1"
                     text
-                    @click="print"
+                    @click="print()"
                 >
                     Печать
                 </v-btn>
@@ -103,29 +103,46 @@
             	this.dialogModel = false
             },
 
-            print() {
+            print(repairTableHtml, materialTableHtml, title) {
 	            const newWindow = window.open("МЭК")
-	            const tableHtml = document.querySelector('.result-table .v-data-table__wrapper table')
+	            const table = document.querySelector('.result-table .v-data-table__wrapper table')
 
 	            newWindow.document.write("<html>")
 	            newWindow.document.write('<style type = "text/css">')
-	            newWindow.document.write('table { border: 1px solid black; border-collapse: collapse; width: 100%; }')
-	            newWindow.document.write('td, th { text-align: center; border: 1px solid black; padding: 5px }')
+	            newWindow.document.write('table { border-collapse: collapse; width: 100%; }')
+	            newWindow.document.write('td, th { border: 1px solid black; text-align: center; border: 1px solid black; padding: 5px }')
 	            newWindow.document.write('th { background-color: #F7F7F7; font-weight: bold; word-break: break-word; }')
-	            newWindow.document.write('h3 { text-align: center; margin: 10px }')
+                if (!repairTableHtml) {
+	                newWindow.document.write('h3 { text-align: center; margin: 10px }')
+                }
 	            newWindow.document.write('</style>')
 	            newWindow.document.write('</head>')
 	            newWindow.document.write('<body>')
-	            newWindow.document.write(`<h3 style="${ !this.report.additional ? 'margin-bottom: 20px' : '' }">${ this.report.dialogTitle }</h3>`)
-                if (this.report.additional) {
-	                newWindow.document.write(`<h3 style="margin-bottom: 20px" >${ this.report.additional }</h3>`)
+	            if (repairTableHtml) {
+		            newWindow.document.write(`<h3 style="text-align: center">${ title }</h3>`)
+	            } else {
+		            newWindow.document.write(`<h3 style="${ !this.report.additional ? 'margin-bottom: 20px' : '' }">${ this.report.dialogTitle }</h3>`)
+		            if (this.report.additional) {
+			            newWindow.document.write(`<h3 style="margin-bottom: 20px" >${ this.report.additional }</h3>`)
+		            }
                 }
-	            newWindow.document.write(tableHtml.outerHTML)
+
+                if (repairTableHtml) {
+	                newWindow.document.write(repairTableHtml)
+                } else {
+	                newWindow.document.write(table.outerHTML)
+                }
+	            newWindow.document.write('<br>')
+                if (materialTableHtml) {
+	                newWindow.document.write(materialTableHtml)
+                }
 	            newWindow.document.write('</body>')
 	            newWindow.document.write('</html>')
 	            newWindow.document.close()
 	            newWindow.print()
-	            newWindow.close()
+                if (!repairTableHtml) {
+	                newWindow.close()
+                }
             },
 
 	        dataToExcelFile() {

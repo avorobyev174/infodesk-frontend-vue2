@@ -80,14 +80,14 @@
                         v-bind="attrs"
                         v-on="on"
                         class="px-2"
-						v-show="item.open"
+						v-show="item.open || item.print"
                     >
-                        <v-icon large color="green">
+                        <v-icon large :color="item.open ? 'green' : 'blue'">
                             mdi-play-circle
                         </v-icon>
                     </v-btn>
                 </template>
-                <span>Сформировать</span>
+                <span>{{ item.open ? 'Сформировать' : 'Распечатать' }}</span>
             </v-tooltip>
         </template>
         </v-treeview>
@@ -190,11 +190,6 @@
 
 			localFuncCall(item) {
 				this[ item.func ](item)
-			},
-
-			getIpAddressTitle(ipAddress) {
-				const ipAddr = this.ipAddresses.find(address => ipAddress === address.value)
-				return ipAddr ? ipAddr.text : ipAddress
 			},
 
 			async getAlphaReport(item) {

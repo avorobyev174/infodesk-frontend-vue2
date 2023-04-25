@@ -178,6 +178,17 @@
 		        show: false,
 		        open: true,
 	        },
+	        repairAndMaterialsReport: {
+		        id: 11,
+		        name: 'Ремонт и количество материалов',
+		        download: false,
+		        description: 'Количество отремонтированных приборов учета и расходников',
+		        func: 'showRepairAndMaterialStorageReport',
+		        loading: false,
+		        show: false,
+		        open: false,
+		        print: true,
+	        },
         }),
         methods: {
             getReportItems() {
@@ -216,6 +227,7 @@
 					            this.storageLogsByEmployeeReport,
 					            this.storageInOutByEmployeeReport,
 					            this.storageGroupLogsByEmployeeReport,
+					            this.repairAndMaterialsReport,
 				            ],
 			            },
                     ]
@@ -244,7 +256,7 @@
 			            {
 				            name: 'Склад',
 				            children: [
-
+					            this.repairAndMaterialsReport,
 				            ],
 			            },
 		            ]

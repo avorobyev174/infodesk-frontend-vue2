@@ -73,11 +73,14 @@
 
 	        close() {
 		        this.dialogModel = false
-		        this.$refs.form.resetValidation()
+                if (this.$refs.form) {
+	                this.$refs.form.resetValidation()
+                }
+		        this.$emit('closeEvent')
 	        },
 
             okClick() {
-	            if (!this.$refs.form.validate()) {
+	            if (!this.$refs.form?.validate()) {
 		            return
 	            }
 	            this.$emit('okButtonClickEvent')

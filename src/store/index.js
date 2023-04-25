@@ -104,7 +104,7 @@ export default new Vuex.Store({
       await router.push(redirect)
     },
     
-    async logoutUser({state, commit}) {
+    async logoutUser({ state, commit }) {
       $cookies.remove('auth_token')
       $cookies.remove('role_token')
       commit('login', false)

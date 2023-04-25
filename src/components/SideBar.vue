@@ -81,6 +81,7 @@
       }),
       inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
       computed: {
+        ...mapGetters(['getSideBarState', 'getSideBarActiveModules']),
         ...mapState({
           colorBlue: state => state.colorBlue,
           colorRed: state => state.colorRed,
@@ -91,34 +92,30 @@
         }),
       },
       created() {
-          const options = jwt.verify($cookies.get('role_token'), process.env.VUE_APP_ROLE_KEY)
+         try {
+            const options = jwt.verify($cookies.get('role_token'), process.env.VUE_APP_ROLE_KEY)
 
-          if (!options)
+            if (!options) {
               return this.showNotification('Не получены настройки доступа с сервера', this.colorRed)
+            }
 
-          const modulesArr = options.access_modules.split(',').map(m => m.trim())
-          const staffId = options.staff_id
-          const roles = JSON.parse(options.roles)
+            const modulesArr = options.access_modules.split(',').map(m => m.trim())
+            const staffId = options.staff_id
+            const roles = JSON.parse(options.roles)
 
-          if (modulesArr.length) {
-              this.availableModules = this.modules.filter(i => modulesArr.includes(i.name))
-              this.$store.commit('setActiveModules', this.availableModules)
-          }
-          if (staffId) {
-              this.$store.commit('setStaffId', staffId)
-          }
-          if (roles) {
-              this.$store.commit('setRoles', roles)
-          }
-      },
-      mounted() {
-
-      },
-      methods: {
-
-      },
-      computed: {
-        ...mapGetters(['getSideBarState', 'getSideBarActiveModules'])
+            if (modulesArr.length) {
+                this.availableModules = this.modules.filter(i => modulesArr.includes(i.name))
+                this.$store.commit('setActiveModules', this.availableModules)
+            }
+            if (staffId) {
+                this.$store.commit('setStaffId', staffId)
+            }
+            if (roles) {
+                this.$store.commit('setRoles', roles)
+            }
+         } catch (e) {
+           this.showNotification('Не получены настройки роли с сервера', this.colorRed)
+         }
       },
   }
 </script>

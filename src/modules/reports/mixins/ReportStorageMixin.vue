@@ -11,12 +11,14 @@
         mounted() {
 	        this.fetchMeterTypes()
 	        this.fetchStorageEmployees()
+	        this.fetchMaterialsTypes()
         },
 	    methods: {
 		    ...mapActions('storage', [
 			    'fetchStorageEmployees',
 			    'fetchMeterTypes',
-                'checkMeterInDB'
+                'checkMeterInDB',
+                'fetchMaterialsTypes',
 		    ]),
 	        ...mapActions('reports',
 		        [
@@ -30,6 +32,8 @@
 			        'getLogsByPeriodAndEmpReport',
 			        'getGroupLogsByPeriodAndEmpReport',
 			        'getCurrentCountByLocationReport',
+			        'getRepairCountAndMaterialReport',
+			        'getSpentByYearReport',
 		        ]),
 
 		    async showStorageReport(report) {
@@ -42,6 +46,7 @@
 				    case 8: return this.showEmpLogsByPeriodStorageReport(report)
 				    case 9: return this.showEmpGroupLogsByPeriodStorageReport(report)
 				    case 10: return this.showCurrentCountByLocationStorageReport(report)
+				    case 11: return this.showRepairAndMaterialStorageReport(report)
 			    }
 		    },
 
@@ -49,6 +54,7 @@
 		        item.loading = true
 		        try {
 			        const response = await this.getLocationReport()
+			        this.$refs.storageInputReportDialog.close()
 			        const data = response
 				        .map((row) => ({ ...row, METER_LOCATION: this.getLocationTitle(row.METER_LOCATION) }))
 				        .sort((a, b) => b.COUNT - a.COUNT)
@@ -77,11 +83,10 @@
 		        item.loading = true
 		        try {
 			        const response = await this.getOwnerReport()
+			        this.$refs.storageInputReportDialog.close()
 			        const data = response
 				        .map((row) => ({ ...row, CURRENT_OWNER: this.getCurrentOwner(row.CURRENT_OWNER) }))
 				        .sort((a, b) => b.COUNT - a.COUNT)
-
-			        this.$refs.storageInputReportDialog.close()
 
 			        this.$refs.resultShowReportDialog.open({
 				        titles: ['Владелец', 'Количество'],
@@ -98,6 +103,8 @@
 		    async showMeterStorageReport({ type, serialNumber, title }) {
 			    try {
 				    const meter = await this.checkMeterInDB({ type, serialNumber })
+				    this.$refs.storageInputReportDialog.close()
+
                     if (!meter.length) {
 	                    return this.showNotification(`Счетчик отсутсвтвует в базе данных`, this.colorBlue)
                     }
@@ -120,8 +127,6 @@
                         }
 				    })
 
-				    this.$refs.storageInputReportDialog.close()
-
 				    this.$refs.resultShowReportDialog.open(
 				    	{
                             titles: [ 'Дата', 'Операция', 'Отдающий', 'Принимающий', 'Комментарий', 'Доп. информация' ],
@@ -139,6 +144,7 @@
             async showStoragePeriodReport({ startDate, endDate, title }) {
 	            try {
 		            const response = await this.getStoragePeriodReport({ startDate, endDate })
+		            this.$refs.storageInputReportDialog.close()
 
 		            if (!response.length) {
 			            return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
@@ -152,8 +158,6 @@
                             ISSUING_PERSON: this.getEmployeeTitleByStaffId(row.ISSUING_PERSON),
 			            }
 		            })
-
-		            this.$refs.storageInputReportDialog.close()
 
 		            this.$refs.resultShowReportDialog.open(
 			            {
@@ -173,6 +177,7 @@
 		    async showLocationByPeriodStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getInOutByPeriodAndLocationReport({ startDate, endDate, location })
+				    this.$refs.storageInputReportDialog.close()
 
 				    const countMap = new Map(Object.entries(response))
 				    if (!countMap.size) {
@@ -209,8 +214,9 @@
 		    async showEmployeeByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
 			    try {
 				    const response = await this.getInOutByPeriodAndEmployeeReport({ startDate, endDate, empStaffId })
-
+				    this.$refs.storageInputReportDialog.close()
 				    const countMap = new Map(Object.entries(response))
+
 				    if (!countMap.size) {
 					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
 				    }
@@ -247,6 +253,7 @@
 		    async showLocationLogsByPeriodStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getLogsByPeriodAndLocationReport({ startDate, endDate, location })
+				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
@@ -282,6 +289,7 @@
 		    async showEmpLogsByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
 			    try {
 				    const response = await this.getLogsByPeriodAndEmpReport({ startDate, endDate, empStaffId })
+				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
@@ -315,6 +323,7 @@
 		    async showEmpGroupLogsByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
 			    try {
 				    const response = await this.getGroupLogsByPeriodAndEmpReport({ startDate, endDate, empStaffId })
+				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
@@ -348,6 +357,7 @@
 		    async showCurrentCountByLocationStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getCurrentCountByLocationReport({ startDate, endDate, location })
+				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
@@ -377,6 +387,83 @@
 			    } catch (e) {
 				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
+            },
+
+            async showRepairAndMaterialStorageReport() {
+	            try {
+		            const response = await this.getRepairCountAndMaterialReport()
+		            const storageResponse = await this.getSpentByYearReport()
+
+		            if (!response.length) {
+			            return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+		            }
+
+		            let months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                                                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ]
+
+                    const today = new Date()
+		            const currentMonth = today.getMonth() + 1
+		            months = months.slice(0, currentMonth)
+
+                    let repairTableHtml = '<table><thead><tr><th width="220px" rowspan="2">Типы</th>'
+
+		            months.forEach((month) => repairTableHtml += '<th colspan="2">' + month + '</th>')
+                    repairTableHtml += '<th colspan="2" >Всего</th>' +
+	                         '<th width="50px" rowspan="2">%</th></tr><tr>'
+		            months.forEach((month) => repairTableHtml += '<th width="90px">отремонти<br>ровано</th><th width="30px">нет</th>')
+		            repairTableHtml += '<th width="90px">отремонти<br>ровано</th><th width="30px">нет</th></tr></thead><tbody>'
+
+		            repairTableHtml += response.reduce((html, row, i, arr) => {
+			            html += '<tr>'
+                        if (i === arr.length - 1) {
+	                        html += `<td>Итого</td>`
+	                        row.forEach((col) => {
+	                        	if (typeof col === 'object') {
+			                        html += `<td>${col[0]}</td><td>${col[1]}</td>`
+		                        } else {
+			                        html += `<td>${ col }</td>`
+                                }
+	                        })
+                        } else {
+	                        row.forEach((col, i) => {
+		                        if (i === 0) {
+			                        html += `<td>${  this.getMeterTypeTitle(col) }</td>`
+		                        } else {
+		                        	typeof col === 'object'
+			                            ? html += `<td>${ col[0] }</td><td>${ col[1] }</td>`
+                                        : html += `<td>${ col }</td>`
+		                        }
+	                        })
+                        }
+
+			            html += '</tr>'
+                        return html
+		            }, '')
+		            repairTableHtml += '</tbody>'
+
+		            let materialTableHtml = '<table style="margin-top: 20px"><thead><tr><th width="220px" rowspan="2">Использованные материалы</th>' +
+			            '<th>Количество за ' + today.getFullYear() + ' год</th>' +
+			            '<th>Склад материалов</th></tr></thead><tbody>'
+
+		            materialTableHtml += storageResponse.reduce((html, row) => {
+			            html += '<tr>'
+			            row.forEach((col, i) => {
+				            if (i === 0) {
+					            html += `<td>${  this.getMaterialTypeTitle(col) }</td>`
+				            } else {
+                               html += `<td>${ col }</td>`
+				            }
+			            })
+			            html += '</tr>'
+			            return html
+                    }, '')
+		            materialTableHtml += '</tbody>'
+
+		            this.$refs.resultShowReportDialog.print(repairTableHtml, materialTableHtml, `Отчет по ремонту приборов учета ${ this.dateFormat(today) }`)
+
+	            } catch (e) {
+		            this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+	            }
             }
         }
     }

@@ -43,6 +43,7 @@
                                         @onMeterCountUpdate="meterCountUpdate"
                                         @metersClear="metersClear"
                                         is-repair
+                                        current-tab="materialInsertTab"
                                     ></add-meter-view>
                                     <add-material-view
                                         :form-submit="formSubmit"
@@ -72,6 +73,7 @@
                                 @onMeterCountUpdate="meterCountUpdate"
                                 @metersClear="metersClear"
                                 is-repair
+                                current-tab="meterWorkabilityTab"
                             ></add-meter-view>
                             <div class="p-2" >
                                 <v-checkbox
@@ -173,6 +175,7 @@
 			'showNotificationStandardError',
             'getMaterialTypeTitle',
 			'formatDate',
+			'initializeMeters',
 		],
 		methods: {
 			...mapActions('storage', [
@@ -244,6 +247,7 @@
 	                    this.formSubmit = false
                         this.showNotification(`Что то пошло не так при внесении материалов`, this.colorRed)
                     }
+		            this.initializeMeters()
 	            } catch (e) {
 		            this.showNotificationStandardError(e)
 		            this.formSubmit = false
@@ -301,6 +305,7 @@
 			            this.formSubmit = false
 			            this.showNotification(`Что то пошло не так при внесении материалов`, this.colorRed)
 		            }
+		            this.initializeMeters()
 	            } catch (e) {
 		            this.showNotificationStandardError(e)
 		            this.formSubmit = false

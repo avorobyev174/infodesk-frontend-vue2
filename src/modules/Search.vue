@@ -114,7 +114,6 @@
             serialNumberRules: [
                 v => !!v || 'Обязательно к заполнению',
                 v => (v && String(v).length >= 8) || 'Должно быть не меньше 8 символов',
-                v => (v && !(new RegExp('[^0-9]', 'g').test(String(v)))) || 'Должны присутствовать только цифры'
             ],
         }),
         inject: ['showNotification', 'showNotificationStandardError', 'checkAuth', 'setBackgroundImage'],

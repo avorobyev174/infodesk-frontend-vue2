@@ -202,6 +202,16 @@
             <template v-slot:item.METER_TYPE="{ item }">
                 {{ getMeterTypeTitle(item.METER_TYPE) }}
             </template>
+            <template v-slot:item.SERIAL_NUMBER="{ item }">
+                <v-chip
+                    v-if="item.repairColor"
+                    :color="item.repairColor === 1 ? colorOrange : colorGreen">
+                    {{ item.SERIAL_NUMBER }}
+                </v-chip>
+                <span v-else>
+                    {{ item.SERIAL_NUMBER }}
+                </span>
+            </template>
             <template v-slot:item.ACCURACY_CLASS="{ item }">
                 {{ getAccuracyClassTitle(item.ACCURACY_CLASS) }}
             </template>
@@ -265,7 +275,7 @@
 	import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
     import ActionColumn from "../utils-components/ActionColumn"
     import EditDialog from "./components/EditDialog"
-    import StorageMixin from "./components/StorageMixin"
+    import StorageMixin from "./mixins/StorageMixin"
     import RepairAndMaterialsDialog from "./components/RepairAndMaterialsDialog"
 
 	export default {
@@ -426,11 +436,11 @@
 		        this.$router.push('/')
 	        }
 
-            document.addEventListener('keydown', (evt) => {
+            document.onkeydown = (evt) => {
 	            if (evt.key === 'Alt' && this.$route.name === 'Storage') {
 		            this.initializeMeters()
 	            }
-            })
+            }
 
 	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
 

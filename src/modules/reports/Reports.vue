@@ -126,7 +126,7 @@
 	import MeterCountByAddressReport from "./components/MeterCountByAddressReport"
 	import ReportItemsMixin from './mixins/ReportItemsMixin'
     import StorageResultReportDialog from "./components/storage/StorageResultReportDialog"
-	import StorageMixin from "../storage/components/StorageMixin"
+	import StorageMixin from "../storage/mixins/StorageMixin"
 	import ReportStorageMixin from "./mixins/ReportStorageMixin"
     import StorageInputReportDialog from "./components/storage/StorageInputReportDialog"
 

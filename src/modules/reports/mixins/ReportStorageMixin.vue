@@ -3,7 +3,7 @@
 </template>
 <script>
     import { mapActions } from "vuex"
-    import LogTableMixin from "../../storage/components/LogTableMixin"
+    import LogTableMixin from "../../storage/mixins/LogTableMixin"
 
     export default {
         name: 'ReportStorageMixin',

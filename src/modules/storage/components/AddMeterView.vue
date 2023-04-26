@@ -20,7 +20,7 @@
                 item-value="index"
                 label="Серийный номер"
                 class="pl-1 pt-2 pb-0 pr-3"
-                v-model="serialNumber"
+                :search-input.sync="serialNumber"
                 outlined
                 :disabled="formSubmit"
             >
@@ -179,7 +179,8 @@
 		        required: true
 	        },
 	        resultColor: String,
-	        oldLocationColor: String
+	        oldLocationColor: String,
+	        currentTab: String,
         },
 		inject: [
 			'getLocationTitle',
@@ -240,6 +241,7 @@
 		            if (this.meterTypes.length) {
 			            this.type = { index: this.meterTypes[0].index, title: this.meterTypes[0].title }
 		            }
+	                this.meterTypeOnChange()
 	            } else  {
 		            this.meterTypes = this.types.slice()
 		            this.type = { index: 121, title: 'AIU5' }
@@ -311,6 +313,11 @@
 			        return
 		        }
 
+		        if (!this.type) {
+			        this.showNotification(`Тип счетчика не должен быть пустым`, this.colorOrange)
+			        return
+		        }
+
 		        const correct = new Audio(correctSound)
 		        const wrong = new Audio(wrongSound)
 
@@ -377,7 +384,7 @@
 				        await correct.play()
 
 				        this.isRepair
-					        ? this.meters.unshift(meter)
+					        ? this.meters.unshift({ ...meter, guid })
                             : this.meters.unshift({ ...meter, status: 0, oldLocation, guid })
                     }
 
@@ -396,16 +403,17 @@
 	        async addAllAvailableMetersOnClick() {
 	        	if (this.isAddAll) {
 			        const availableMeters = await this.getAllAvailableMetersFromRepair()
-			        availableMeters.forEach(availableMeter => {
-			        	if (!this.meters.find(meter => meter.guid === availableMeter.GUID)) {
-					        this.meters.push({
-						        type: availableMeter.METER_TYPE,
-						        serialNumber: availableMeter.SERIAL_NUMBER,
-						        status: 0,
-						        guid: availableMeter.GUID
-					        })
-				        }
-			        })
+			        for (const availableMeter of availableMeters) {
+			        	if (!this.meters.find(meter => meter.guid === availableMeter.GUID) &&
+                                                                this.checkIfUpdateFieldIsValid(availableMeter)) {
+						        this.meters.push({
+							        type: availableMeter.METER_TYPE,
+							        serialNumber: availableMeter.SERIAL_NUMBER,
+							        status: 0,
+							        guid: availableMeter.GUID
+						        })
+                        }
+			        }
 			        this.$emit('onMeterCountUpdate', this.meters.length)
 		        } else {
 			        this.$emit('onMeterCountUpdate', '')
@@ -417,22 +425,38 @@
             async meterTypeOnChange() {
 	        	if (this.isRepair) {
 			        this.availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.index)
-                    this.availableByTypeSerials = this.availableByTypeMeters.map((availableMeter) => availableMeter.SERIAL_NUMBER)
+                    this.availableByTypeSerials = this.availableByTypeMeters
+                        .filter((availableMeter) => this.checkIfUpdateFieldIsValid(availableMeter))
+                        .map((availableMeter) => availableMeter.SERIAL_NUMBER)
                 }
             },
 
 	        async addAllMetersByTypeOnClick() {
-		        this.availableByTypeMeters.forEach((availableMeter) => {
-			        if (!this.meters.find((meter) => meter.guid === availableMeter.GUID)) {
-				        this.meters.push({
-					        type: availableMeter.METER_TYPE,
-					        serialNumber: availableMeter.SERIAL_NUMBER,
-					        status: 0,
-					        guid: availableMeter.GUID
-				        })
-			        }
-		        })
+                for (const availableMeter of this.availableByTypeMeters) {
+			        if (!this.meters.find((meter) => meter.guid === availableMeter.GUID) &&
+                                                    this.checkIfUpdateFieldIsValid(availableMeter)) {
+                        this.meters.push({
+                            type: availableMeter.METER_TYPE,
+                            serialNumber: availableMeter.SERIAL_NUMBER,
+                            status: 0,
+                            guid: availableMeter.GUID
+                        })
+                    }
+                }
+
 		        this.$emit('onMeterCountUpdate', this.meters.length)
+            },
+
+            checkIfUpdateFieldIsValid(availableMeter) {
+	        	if (availableMeter.updateField) {
+			        if (this.currentTab === 'materialInsertTab') {
+				        return !(availableMeter.updateField.includes('Используемые материалы:') ||
+					            availableMeter.updateField.includes('Статус ремонта:'))
+			        } else if (this.currentTab === 'meterWorkabilityTab') {
+				        return !availableMeter.updateField.includes('Статус ремонта:')
+			        }
+                }
+	        	return true
             }
         },
 	}

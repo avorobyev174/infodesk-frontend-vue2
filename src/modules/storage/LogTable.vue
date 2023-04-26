@@ -21,7 +21,7 @@
 
         <!-- Подмена значений таблицы на лэйблы -->
         <template v-slot:item.DATETIME="{ item }">
-            {{ formatDate(item.DATETIME) }}
+            {{ formatDate(item.DATETIME, true) }}
         </template>
         <template v-slot:item.OPER_TYPE="{ item }">
             {{ getOperationTitle(item.OPER_TYPE) }}
@@ -66,8 +66,8 @@
 </template>
 
 <script>
-	import {mapActions, mapGetters, mapState} from "vuex"
-	import LogTableMixin from "./components/LogTableMixin"
+	import { mapActions, mapGetters, mapState } from "vuex"
+	import LogTableMixin from "./mixins/LogTableMixin"
 
 	export default {
 		name: "LogTable",
@@ -147,38 +147,8 @@
 			}),
 			...mapGetters({
 				logs: 'storage/getLogs',
-				roles: 'getRoles',
-				staffId: 'getStaffId',
 			}),
 		},
-		inject: ['showNotification', 'showNotificationStandardError'],
-		methods: {
-			...mapActions('storage', [
-				'fetchLogs'
-			]),
-
-			formatDate(dateToFormat, withoutTime) {
-				if (!dateToFormat)
-					return 'отсутствует'
-
-				const date = new Date(dateToFormat)
-				let day = String(date.getDate())
-				let month = String(date.getMonth() + 1)
-				const year = date.getFullYear()
-				const hours = date.getHours()
-				const minutes = date.getMinutes()
-				const seconds = date.getSeconds()
-
-				day = day.length < 2 ? day.padStart(2, '0') : day
-				month = month.length < 2 ? month.padStart(2, '0') : month
-
-                if (withoutTime) {
-	                return `${ day }.${ month }.${ year }`
-                } else {
-	                return `${ day }.${ month }.${ year } ${ hours }:${ minutes }:${ seconds }`
-                }
-			},
-		}
 	}
 </script>
 

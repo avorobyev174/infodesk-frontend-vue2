@@ -154,6 +154,7 @@
 			            return {
 				            ...row,
 				            OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
+				            TYPE: this.getMeterTypeTitle(row.TYPE),
                             ACCEPTED_PERSON: this.getEmployeeTitleByStaffId(row.ACCEPTED_PERSON),
                             ISSUING_PERSON: this.getEmployeeTitleByStaffId(row.ISSUING_PERSON),
 			            }
@@ -161,7 +162,7 @@
 
 		            this.$refs.resultShowReportDialog.open(
 			            {
-				            titles: [ 'Дата', 'Операция', 'Серийный номер', 'Отдающий', 'Принимающий', 'Комментарий' ],
+				            titles: [ 'Дата', 'Операция', 'Тип', 'Серийный номер', 'Отдающий', 'Принимающий', 'Комментарий' ],
 				            dialogTitle: title,
 				            additional: `${ startDate } - ${ endDate }`,
 				            data

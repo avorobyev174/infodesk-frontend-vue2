@@ -470,6 +470,9 @@
 			filterByLocation: function(newVal) {
 				this.filterByLocationColor = !newVal.length ? 'grey' :'blue'
 			},
+			filterByOwner: function(newVal) {
+				this.filterByOwnerColor = !newVal.length ? 'grey' :'blue'
+			},
             search: function(newVal) {
 	            if (!newVal) {
 		            this.searchOnClear()

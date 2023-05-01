@@ -23,14 +23,14 @@
                         <add-or-edit-view
                             is-edit
                             ref="addOrEditView"
-                            :serial-number-temp="editedItem.SERIAL_NUMBER"
-                            :type-temp="editedItem.METER_TYPE"
-                            :accuracy-class-temp="editedItem.ACCURACY_CLASS"
-                            :condition-temp="editedItem.CONDITION"
-                            :owner-temp="editedItem.PROPERTY"
-                            :interval-temp="editedItem.CALIBRATION_INTERVAL"
-                            :calibration-date-temp="editedItem.CALIBRATION_DATE"
-                            :passport-number-temp="editedItem.PASSPORT_NUMBER"
+                            :serial-number-temp="editedItem.serial_number"
+                            :type-temp="editedItem.meter_type"
+                            :accuracy-class-temp="editedItem.accuracy_class"
+                            :condition-temp="editedItem.condition"
+                            :owner-temp="editedItem.property"
+                            :interval-temp="editedItem.calibration_interval"
+                            :calibration-date-temp="editedItem.calibration_date"
+                            :passport-number-temp="editedItem.passport_number"
                             :parent-dialog-model="dialogModel"
                         >
                         </add-or-edit-view>
@@ -111,7 +111,8 @@
 			'getEmployeeStaffIdByCard',
 			'getEmployeeTitleByCard',
 			'initializeMeters',
-			'resetFilters'
+			'resetFilters',
+            'formatDate'
 		],
 		methods: {
 			...mapActions('storage', [
@@ -151,30 +152,21 @@
 						'Операция невозможна, ваш номер сотрудника не определен', this.colorOrange)
                 }
 				try {
+					const meterSerialNumber = this.editedItem.serial_number
 					const res = await this.deleteMeter({
-                        guid: this.editedItem.GUID,
+                        guid: this.editedItem.guid,
                         meter: this.editedItem,
                         editorStaffId: this.staffId
 					})
-					//console.log(res)
-					if (!res.length) {
+
+					if (!res) {
 						this.showNotificationStandardError(
-							`Что то пошло не так при удалении счетчика ${ this.editedItem.SERIAL_NUMBER }`,
-                            this.colorRed)
+							`Что то пошло не так при удалении счетчика ${ meterSerialNumber }`, this.colorRed)
 					} else {
-						if (res[0].success) {
-							this.meters.splice(this.editedIndex, 1)
-							this.closeDialogDeleteConfirm()
-							this.showNotification(
-								`Счетчик ${ this.editedItem.SERIAL_NUMBER } успешно удален`,
-                                this.colorGreen)
-							this.resetFilters()
-							this.initializeMeters()
-						} else {
-							this.showNotification(
-								`Что то пошло не так при удалении счетчика ${ this.editedItem.SERIAL_NUMBER }`,
-                                this.colorRed)
-						}
+						this.meters.splice(this.editedIndex, 1)
+						this.closeDialogDeleteConfirm()
+						this.showNotification(`Счетчик ${ meterSerialNumber } успешно удален`, this.colorGreen)
+						this.resetFilters()
 					}
                 } catch (e) {
 					this.showNotificationStandardError(e)
@@ -193,26 +185,26 @@
 			compareData(meter, newMeterData) {
                 let updateField = ''
 
-				if (meter.METER_TYPE !== newMeterData.type) {
-					updateField += `Type CurrentValue=${ newMeterData.type } OldValue=${ meter.METER_TYPE };`
+				if (meter.meter_type !== newMeterData.type) {
+					updateField += `Type CurrentValue=${ newMeterData.type } OldValue=${ meter.meter_type };`
 				}
-				if (meter.SERIAL_NUMBER !== newMeterData.serialNumber) {
-					updateField += `SerialNumber CurrentValue=${ newMeterData.serialNumber } OldValue=${ meter.SERIAL_NUMBER };`
+				if (meter.serial_number !== newMeterData.serialNumber) {
+					updateField += `SerialNumber CurrentValue=${ newMeterData.serialNumber } OldValue=${ meter.serial_number };`
 				}
-				if (meter.ACCURACY_CLASS !== newMeterData.accuracyClass) {
-					updateField += `AccuracyClass CurrentValue=${ newMeterData.accuracyClass } OldValue=${ meter.ACCURACY_CLASS };`
+				if (meter.accuracy_class !== newMeterData.accuracyClass) {
+					updateField += `AccuracyClass CurrentValue=${ newMeterData.accuracyClass } OldValue=${ meter.accuracy_class };`
 				}
-				if (meter.PASSPORT_NUMBER !== newMeterData.passportNumber) {
-					updateField += `PassportNumber CurrentValue=${ newMeterData.passportNumber } OldValue=${ meter.PASSPORT_NUMBER };`
+				if (meter.passport_number !== newMeterData.passportNumber) {
+					updateField += `PassportNumber CurrentValue=${ newMeterData.passportNumber } OldValue=${ meter.passport_number };`
 				}
-				if (meter.CONDITION !== newMeterData.condition) {
-					updateField += `Condition CurrentValue=${ newMeterData.condition } OldValue=${ meter.CONDITION };`
+				if (meter.condition !== newMeterData.condition) {
+					updateField += `Condition CurrentValue=${ newMeterData.condition } OldValue=${ meter.condition };`
 				}
-				if (meter.CALIBRATION_DATE !== newMeterData.calibration) {
-					updateField += `CalibrationDate CurrentValue=${ newMeterData.calibration } OldValue=${ meter.CALIBRATION_DATE };`
+				if (meter.calibration_date !== newMeterData.calibration) {
+					updateField += `CalibrationDate CurrentValue=${ newMeterData.calibration } OldValue=${ this.formatDate(meter.calibration_date) };`
 				}
-				if (meter.CALIBRATION_INTERVAL !== newMeterData.interval) {
-					updateField += `CalibrationInterval CurrentValue=${ newMeterData.interval } OldValue=${ meter.CALIBRATION_INTERVAL };`
+				if (meter.calibration_interval !== newMeterData.interval) {
+					updateField += `CalibrationInterval CurrentValue=${ newMeterData.interval } OldValue=${ meter.calibration_interval };`
 				}
 
 				return updateField
@@ -220,8 +212,8 @@
 
 			async checkDataAndUpdate(newMeterData) {
 				const meter = await this.checkMeterInDB({
-					type: this.editedItem.METER_TYPE,
-					serialNumber: this.editedItem.SERIAL_NUMBER
+					type: this.editedItem.meter_type,
+					serialNumber: this.editedItem.serial_number
 				})
 
                 return this.compareData(meter[0], newMeterData)
@@ -233,8 +225,7 @@
 				const updateField = await this.checkDataAndUpdate(meterData)
 
                 if (!updateField) {
-	                return this.showNotification(
-		                'Ничего не отредактировано', this.colorBlue)
+	                return this.showNotification('Ничего не отредактировано', this.colorBlue)
                 }
 
 				if (!this.staffId) {
@@ -247,21 +238,18 @@
 	                const res = await this.editMeter({
 		                ...meterData,
 		                editorStaffId: this.staffId,
-		                guid: this.editedItem.GUID,
+		                guid: this.editedItem.guid,
 		                updateField
 	                })
 
-	                if (!res.length) {
-		                this.showNotificationStandardError('Что то пошло не так при редактировании')
+	                if (!res) {
+		                this.showNotificationError('Что то пошло не так при редактировании')
 	                } else {
-		                if (res[0].success) {
-			                this.showNotification('Операция выполнена успешно', this.colorGreen)
-                            this.close()
-		                } else {
-			                this.showNotification('Операция выполнена с ошибкой', this.colorRed)
-		                }
+	                	const editedMeter = this.meters.find((meter) => meter.guid === res.guid)
+                        Object.assign(editedMeter, res)
+		                this.showNotification('Редактирование выполнено успешно', this.colorGreen)
+		                this.close()
 		                this.resetFilters()
-		                this.initializeMeters()
 	                }
                 } catch (e) {
 	                this.showNotificationStandardError(e)

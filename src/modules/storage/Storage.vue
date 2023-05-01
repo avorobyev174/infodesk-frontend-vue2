@@ -6,7 +6,7 @@
             height="43vh"
             class="elevation-1 meter-table"
             single-select
-            item-key="ID"
+            item-key="id"
             :items-per-page="500"
             :footer-props="{
                 showFirstLastPage: true,
@@ -29,7 +29,7 @@
                 <p class="pt-4">Нет данных...</p>
             </template>
 
-            <template v-slot:header.SERIAL_NUMBER="{ header }">
+            <template v-slot:header.serial_number="{ header }">
                 {{ header.text }}
                 <v-menu
                     nudge-bottom="10px"
@@ -64,7 +64,7 @@
                 </v-menu>
             </template>
 
-            <template v-slot:header.METER_TYPE="{ header }">
+            <template v-slot:header.meter_type="{ header }">
                 {{ header.text }}
                 <v-menu
                     nudge-bottom="10px"
@@ -99,7 +99,7 @@
                 </v-menu>
             </template>
 
-            <template v-slot:header.METER_LOCATION="{ header }">
+            <template v-slot:header.meter_location="{ header }">
                 {{ header.text }}
                 <v-menu
                     nudge-bottom="10px"
@@ -133,7 +133,7 @@
                 </v-menu>
             </template>
 
-            <template v-slot:header.CURRENT_OWNER="{ header }">
+            <template v-slot:header.current_owner="{ header }">
                 {{ header.text }}
                 <v-menu
                         nudge-bottom="10px"
@@ -176,7 +176,7 @@
                     <v-text-field
                         v-model="search"
                         append-icon="mdi-magnify"
-                        label="Поиск"
+                        label="Поиск по серийному номеру"
                         type="text"
                         hide-details
                         clearable
@@ -199,36 +199,36 @@
             </template>
 
             <!-- Подмена значений таблицы на лэйблы -->
-            <template v-slot:item.METER_TYPE="{ item }">
-                {{ getMeterTypeTitle(item.METER_TYPE) }}
+            <template v-slot:item.meter_type="{ item }">
+                {{ getMeterTypeTitle(item.meter_type) }}
             </template>
-            <template v-slot:item.SERIAL_NUMBER="{ item }">
+            <template v-slot:item.serial_number="{ item }">
                 <v-chip
                     v-if="item.repairColor"
                     :color="item.repairColor === 1 ? colorOrange : colorGreen">
-                    {{ item.SERIAL_NUMBER }}
+                    {{ item.serial_number }}
                 </v-chip>
                 <span v-else>
-                    {{ item.SERIAL_NUMBER }}
+                    {{ item.serial_number }}
                 </span>
             </template>
-            <template v-slot:item.ACCURACY_CLASS="{ item }">
-                {{ getAccuracyClassTitle(item.ACCURACY_CLASS) }}
+            <template v-slot:item.accuracy_class="{ item }">
+                {{ getAccuracyClassTitle(item.accuracy_class) }}
             </template>
-            <template v-slot:item.CONDITION="{ item }">
-                {{ getConditionTitle(item.CONDITION) }}
+            <template v-slot:item.condition="{ item }">
+                {{ getConditionTitle(item.condition) }}
             </template>
-            <template v-slot:item.PROPERTY="{ item }">
-                {{ getOwnerTitle(item.PROPERTY) }}
+            <template v-slot:item.property="{ item }">
+                {{ getOwnerTitle(item.property) }}
             </template>
-            <template v-slot:item.METER_LOCATION="{ item }">
-                {{ getLocationTitle(item.METER_LOCATION) }}
+            <template v-slot:item.meter_location="{ item }">
+                {{ getLocationTitle(item.meter_location) }}
             </template>
-            <template v-slot:item.CALIBRATION_DATE="{ item }">
-                {{ formatDate(item.CALIBRATION_DATE) }}
+            <template v-slot:item.calibration_date="{ item }">
+                {{ formatDate(item.calibration_date) }}
             </template>
-            <template v-slot:item.CURRENT_OWNER="{ item }">
-                {{ getEmployeeTitleByStaffId(item.CURRENT_OWNER) }}
+            <template v-slot:item.current_owner="{ item }">
+                {{ getEmployeeTitleByStaffId(item.current_owner) }}
             </template>
             <template v-slot:item.actions="{ item }">
                 <action-column
@@ -305,14 +305,14 @@
 				{
 					text: 'ID',
                     align: 'center',
-                    value: 'ID',
+                    value: 'id',
                     sortable: true,
                     index: 0,
 					width: '80px',
 				},
 				{
 					text: 'Тип',
-                    value: 'METER_TYPE',
+                    value: 'meter_type',
                     sortable: false,
                     align: 'center',
                     cellClass: 'table-small-cell',
@@ -321,7 +321,7 @@
                 },
 				{
 					text: 'Серийный номер',
-					value: 'SERIAL_NUMBER',
+					value: 'serial_number',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -330,7 +330,7 @@
 				},
 				{
 					text: 'Класс точности',
-					value: 'ACCURACY_CLASS',
+					value: 'accuracy_class',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -338,7 +338,7 @@
 				},
 				{
 					text: 'Номер паспорта',
-					value: 'PASSPORT_NUMBER',
+					value: 'passport_number',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -346,7 +346,7 @@
 				},
 				{
 					text: 'Состояние',
-					value: 'CONDITION',
+					value: 'condition',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -355,7 +355,7 @@
 				},
 				{
 					text: 'Дата поверки',
-					value: 'CALIBRATION_DATE',
+					value: 'calibration_date',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -363,7 +363,7 @@
 				},
 				{
 					text: 'Межповерчный интервал',
-					value: 'CALIBRATION_INTERVAL',
+					value: 'calibration_interval',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -372,7 +372,7 @@
 				},
 				{
 					text: 'Местоположение',
-					value: 'METER_LOCATION',
+					value: 'meter_location',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -380,7 +380,7 @@
 				},
 				{
 					text: 'Текущий владелец',
-					value: 'CURRENT_OWNER',
+					value: 'current_owner',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -388,7 +388,7 @@
 				},
 				{
 					text: 'Собственник',
-					value: 'PROPERTY',
+					value: 'property',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -506,6 +506,7 @@
         provide: function () {
 	        return {
 		        formatDate: this.formatDate,
+		        formatDateIso: this.formatDateIso,
 		        getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
 		        getMeterTypeTitle: this.getMeterTypeTitle,
 		        getMaterialTypeTitle: this.getMaterialTypeTitle,
@@ -527,7 +528,6 @@
                 'meterFilter',
                 'fetchMeterTypes',
                 'fetchMetersPerPage',
-                'fetchEmployees',
 				'fetchLogs',
 				'fetchParseOptions',
 				'fetchStorageEmployees',
@@ -566,12 +566,7 @@
 				}
 
 				this.isSearchMeterView = true
-
-	            const searchedMeters = this.meters.filter(meter => {
-		            return String(meter.ID).includes(this.search) ||
-			            String(meter.SERIAL_NUMBER).includes(this.search) ||
-			            String(meter.PASSPORT_NUMBER).includes(this.search)
-	            })
+	            const searchedMeters = this.meters.filter((meter) => String(meter.serial_number).includes(this.search))
 
 	            this.setSearchMetersView(searchedMeters)
                 this.totalMeters = this.searchMetersView.length
@@ -601,7 +596,7 @@
 			async initializeLogs(item, row) {
 				row.select(true)
 				try {
-					await this.fetchLogs(item.GUID)
+					await this.fetchLogs(item.guid)
 				} catch (e) {
 					this.showNotificationStandardError(e)
 				}

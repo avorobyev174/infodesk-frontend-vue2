@@ -154,8 +154,14 @@
 			'getEmployeeStaffIdByCard',
 			'getEmployeeTitleByCard',
             'initializeMeters',
-            'resetFilters'
+            'resetFilters',
+            'formatDate'
 		],
+		provide: function () {
+			return {
+				formatDate: this.formatDate,
+			}
+		},
         methods: {
 	        ...mapActions('storage', [
 		        'registration',
@@ -202,8 +208,7 @@
 		        }
 
                 if (!this.regMeters.length) {
-                    return this.showNotification(
-                        `Для выполнения операции заполните таблицу`, this.colorOrange)
+                    return this.showNotification(`Для выполнения операции заполните таблицу`, this.colorOrange)
                 }
 
                 if (!this.isRouter) {
@@ -212,8 +217,7 @@
                 this.acceptedPersonStaffId = this.staffId
 
                 if ((!this.isRouter && isNaN(this.issuingPersonStaffId)) || isNaN(this.acceptedPersonStaffId)) {
-                    return this.showNotification(
-                        'Операция с неизвестным сотрудником не возможна', this.colorOrange)
+                    return this.showNotification('Операция с неизвестным сотрудником не возможна', this.colorOrange)
                 }
 
                 try {
@@ -232,9 +236,9 @@
                         this.showNotificationStandardError('Что то пошло не так при регистрации')
                     } else {
                         let successCount = 0
-                        this.regMeters.forEach(regMeter => {
-                            const createdMeter = res.find(meter => meter.serial_number === regMeter.serialNumber)
-                            if (createdMeter && createdMeter.success) {
+                        this.regMeters.forEach((regMeter) => {
+                            const createdMeter = res.find((meter) => meter.serial_number === regMeter.serialNumber)
+                            if (createdMeter?.success) {
                                 successCount++
                                 regMeter.status = 1
                             } else {
@@ -252,7 +256,7 @@
                             this.oldLocationColor = this.colorOrange
                         }
 
-                        this.meterCount = `${ successCount / this.regMeters.length }`
+                        this.meterCount = `${ successCount }/${ this.regMeters.length }`
 	                    this.resetFilters()
                         this.initializeMeters()
                     }

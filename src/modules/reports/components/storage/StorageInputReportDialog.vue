@@ -136,23 +136,23 @@
 		            	reportInputData = {	type: this.type.index, serialNumber: this.serialNumber };
 		            	break
 		            case 4:
-		            	reportInputData = {	startDate: this.formatDate(this.startDate), endDate: this.formatDate(this.endDate) };
+		            	reportInputData = {	startDate: this.startDate, endDate: this.endDate };
 		            	break
 		            case 5:
 		            case 7:
 		            case 10:
                         reportInputData = {
                             location: this.location.value,
-                            startDate: this.formatDate(this.startDate),
-                            endDate: this.formatDate(this.endDate)
+                            startDate: this.startDate,
+                            endDate: this.endDate
                         }; break
 		            case 6:
 		            case 8:
 		            case 9:
 			            reportInputData = {
 				            empStaffId: this.employee.staffId,
-				            startDate: this.formatDate(this.startDate),
-				            endDate: this.formatDate(this.endDate)
+				            startDate: this.startDate,
+				            endDate: this.endDate
 			            }; break
 	            }
 

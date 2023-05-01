@@ -28,3 +28,4 @@ vue.config.js
 Dockerfile-dev
 Dockerfile-prod
 nginx-prod.conf
+server-urls.js

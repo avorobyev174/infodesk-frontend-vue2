@@ -330,13 +330,13 @@
 	                    this.showNotificationStandardError('Что то пошло не так при приеме/выдаче')
                     } else {
 	                    let successCount = 0
-                    	this.replaceMeters.map(addMeter => {
-		                    const updatedMeter = res.find(meter => meter.guid === addMeter.guid)
-		                    if (updatedMeter && updatedMeter.success) {
+                    	this.replaceMeters.map((movedMeter) => {
+		                    const updatedMeter = res.find((meter) => meter.guid === movedMeter.guid)
+		                    if (updatedMeter?.success) {
 			                    successCount++
-			                    addMeter.status = 1
+			                    movedMeter.status = 1
 		                    } else {
-			                    addMeter.status = 2
+			                    movedMeter.status = 2
 		                    }
 	                    })
 

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { production, dev } from '../../server-urls.js'
 
 Vue.use(Vuex)
 
@@ -29,7 +30,7 @@ export default new Vuex.Store({
       colorOrange: 'orange lighten-1',
       colorGrey: 'grey lighten-1',
       colorGold: '#ecc700',
-      serverUrl: process.env.NODE_ENV === "production" ? 'https://info-api.m-e-c.ru:3030' : 'http://info-api.m-e-c.ru:3031',
+      serverUrl: process.env.NODE_ENV === "production" ? production : dev,
       cookies: [],
       favoriteModuleColor: '',
   },

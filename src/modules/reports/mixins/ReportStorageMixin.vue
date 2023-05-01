@@ -56,8 +56,8 @@
 			        const response = await this.getLocationReport()
 			        this.$refs.storageInputReportDialog.close()
 			        const data = response
-				        .map((row) => ({ ...row, METER_LOCATION: this.getLocationTitle(row.METER_LOCATION) }))
-				        .sort((a, b) => b.COUNT - a.COUNT)
+				        .map((row) => ({ ...row, meter_location: this.getLocationTitle(row.meter_location) }))
+				        .sort((a, b) => b.count - a.count)
 
 			        this.$refs.resultShowReportDialog.open({
 				        titles: ['Местонахождение', 'Количество'],
@@ -73,8 +73,8 @@
 
 		    getCurrentOwner (owner)  {
 			    switch (owner) {
-				    case 999999999999999 : return 'Ремонт(завод)'
-				    case 999999999999998: return 'Списан'
+				    case 999999 : return 'Ремонт(завод)'
+				    case 999998: return 'Списан'
 				    default: return this.getEmployeeTitleByStaffId(owner)
 			    }
 		    },
@@ -85,8 +85,8 @@
 			        const response = await this.getOwnerReport()
 			        this.$refs.storageInputReportDialog.close()
 			        const data = response
-				        .map((row) => ({ ...row, CURRENT_OWNER: this.getCurrentOwner(row.CURRENT_OWNER) }))
-				        .sort((a, b) => b.COUNT - a.COUNT)
+				        .map((row) => ({ ...row, current_owner: this.getCurrentOwner(row.current_owner) }))
+				        .sort((a, b) => b.count - a.count)
 
 			        this.$refs.resultShowReportDialog.open({
 				        titles: ['Владелец', 'Количество'],
@@ -112,18 +112,25 @@
 				    const response = await this.getMeterReport({ type, serialNumber })
 				    const data = response.map((row) => {
                         let updateField = ''
-                        if ([1, 2, 10].includes(row.OPER_TYPE)) {
-	                        const updFields = this.parseUpdateCustomField(row.UPDATE_FIELD)
+                        if ([1, 2, 10].includes(row.oper_type)) {
+	                        const updFields = this.parseUpdateCustomField(row.update_field)
                             if (updFields.length) {
 	                            updateField = updFields.map((field) => field.value).join(' ')
                             }
                         } else {
-	                        updateField = this.parseUpdateField(row.UPDATE_FIELD)
+	                        const updFields = this.parseUpdateField(row.update_field)
+	                        if (updFields.length) {
+		                        updateField = updFields.map((field) => {
+		                        	return `${ field.name }: ${ field.oldValue } ➔ ${ field.newValue }`
+                                }).join(' ')
+	                        }
                         }
 					    return {
                         	...row,
-                            OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
-						    UPDATE_FIELD: updateField
+						    oper_type: this.getOperationTitle(row.oper_type),
+						    issuing_person: this.getEmployeeTitleByStaffId(row.issuing_person),
+						    accepted_person: this.getEmployeeTitleByStaffId(row.accepted_person),
+						    update_field: updateField
                         }
 				    })
 
@@ -153,10 +160,10 @@
 		            const data = response.map((row) => {
 			            return {
 				            ...row,
-				            OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
-				            TYPE: this.getMeterTypeTitle(row.TYPE),
-                            ACCEPTED_PERSON: this.getEmployeeTitleByStaffId(row.ACCEPTED_PERSON),
-                            ISSUING_PERSON: this.getEmployeeTitleByStaffId(row.ISSUING_PERSON),
+				            oper_type: this.getOperationTitle(row.oper_type),
+				            type: this.getMeterTypeTitle(row.type),
+                            accepted_person: this.getEmployeeTitleByStaffId(row.accepted_person),
+                            issuing_person: this.getEmployeeTitleByStaffId(row.issuing_person),
 			            }
 		            })
 
@@ -164,7 +171,7 @@
 			            {
 				            titles: [ 'Дата', 'Операция', 'Тип', 'Серийный номер', 'Отдающий', 'Принимающий', 'Комментарий' ],
 				            dialogTitle: title,
-				            additional: `${ startDate } - ${ endDate }`,
+				            additional: `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 				            data
 			            },
 			            500,
@@ -201,7 +208,7 @@
 					    {
 						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
 						    dialogTitle: title,
-						    additional:  `${ startDate } - ${ endDate }`,
+						    additional:  `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    500,
@@ -240,7 +247,7 @@
 					    {
 						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
 						    dialogTitle: title,
-						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ startDate } - ${ endDate }`,
+						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    500,
@@ -263,10 +270,10 @@
 				    const data = response.map((row) => {
 					    return {
 						    ...row,
-						    TYPE: this.getMeterTypeTitle(row.TYPE),
-						    OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
-						    ISSUING_PERSON: this.getEmployeeTitleByStaffId(row.ISSUING_PERSON),
-						    ACCEPTED_PERSON: this.getEmployeeTitleByStaffId(row.ACCEPTED_PERSON)
+						    type: this.getMeterTypeTitle(row.type),
+						    oper_type: this.getOperationTitle(row.oper_type),
+						    issuing_person: this.getEmployeeTitleByStaffId(row.issuing_person),
+						    accepted_person: this.getEmployeeTitleByStaffId(row.accepted_person)
 					    }
 				    })
 
@@ -276,7 +283,7 @@
 					    {
 						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional: `${ this.getLocationTitle(location) } ${ startDate } - ${ endDate }`,
+						    additional: `${ this.getLocationTitle(location) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
@@ -298,10 +305,10 @@
 
 				    const data = response.map((row) => ({
 						    ...row,
-						    TYPE: this.getMeterTypeTitle(row.TYPE),
-						    OPER_TYPE: this.getOperationTitle(row.OPER_TYPE),
-						    ISSUING_PERSON: this.getEmployeeTitleByStaffId(row.ISSUING_PERSON),
-						    ACCEPTED_PERSON: this.getEmployeeTitleByStaffId(row.ACCEPTED_PERSON)
+					        type: this.getMeterTypeTitle(row.type),
+					        oper_type: this.getOperationTitle(row.oper_type),
+                            issuing_person: this.getEmployeeTitleByStaffId(row.issuing_person),
+                            accepted_person: this.getEmployeeTitleByStaffId(row.accepted_person)
 					    }))
 
 				    this.$refs.storageInputReportDialog.close()
@@ -310,7 +317,7 @@
 					    {
 						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ startDate } - ${ endDate }`,
+						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
@@ -344,7 +351,7 @@
 					    {
 						    titles: [ 'Дата', 'Тип ПУ', 'Количество', 'Тип операции', 'Отдающий', 'Принимающий' ],
 						    dialogTitle: title,
-						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ startDate } - ${ endDate }`,
+						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
@@ -371,15 +378,13 @@
 					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
 				    }))
 
-				    console.log(data[0])
-
 				    this.$refs.storageInputReportDialog.close()
 
 				    this.$refs.resultShowReportDialog.open(
 					    {
 						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата прихода', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional: `${ this.getLocationTitle(location) } ${ startDate } - ${ endDate }`,
+						    additional: `${ this.getLocationTitle(location) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
@@ -460,7 +465,7 @@
                     }, '')
 		            materialTableHtml += '</tbody>'
 
-		            this.$refs.resultShowReportDialog.print(repairTableHtml, materialTableHtml, `Отчет по ремонту приборов учета ${ this.dateFormat(today) }`)
+		            this.$refs.resultShowReportDialog.print(repairTableHtml, materialTableHtml, `Отчет по ремонту приборов учета ${ this.formatDate(today) }`)
 
 	            } catch (e) {
 		            this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)

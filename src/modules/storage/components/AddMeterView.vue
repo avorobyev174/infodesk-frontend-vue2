@@ -156,6 +156,9 @@
 	        ],
 	        scannerButtonColor: '',
 	        serialNumber: '',
+	        serialNumberRules: [
+		        v => v && String(v).length >= 6 || 'Должно быть не меньше 6 символов',
+            ],
 	        type: {},
 	        scannerActive: true,
 	        selectedMeterIndex: 0,
@@ -377,8 +380,8 @@
 						        this.colorOrange)
 				        }
 
-				        const oldLocation = meterInDb[0].METER_LOCATION
-				        const guid = meterInDb[0].GUID
+				        const oldLocation = meterInDb[0].meter_location
+				        const guid = meterInDb[0].guid
                         const meter = { type: meterType, serialNumber: this.serialNumber }
 
 				        await correct.play()
@@ -404,13 +407,13 @@
 	        	if (this.isAddAll) {
 			        const availableMeters = await this.getAllAvailableMetersFromRepair()
 			        for (const availableMeter of availableMeters) {
-			        	if (!this.meters.find(meter => meter.guid === availableMeter.GUID) &&
+			        	if (!this.meters.find(meter => meter.guid === availableMeter.guid) &&
                                                                 this.checkIfUpdateFieldIsValid(availableMeter)) {
 						        this.meters.push({
-							        type: availableMeter.METER_TYPE,
-							        serialNumber: availableMeter.SERIAL_NUMBER,
+							        type: availableMeter.meter_type,
+							        serialNumber: availableMeter.serial_number,
 							        status: 0,
-							        guid: availableMeter.GUID
+							        guid: availableMeter.guid
 						        })
                         }
 			        }
@@ -427,19 +430,19 @@
 			        this.availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.index)
                     this.availableByTypeSerials = this.availableByTypeMeters
                         .filter((availableMeter) => this.checkIfUpdateFieldIsValid(availableMeter))
-                        .map((availableMeter) => availableMeter.SERIAL_NUMBER)
+                        .map((availableMeter) => availableMeter.serial_number)
                 }
             },
 
 	        async addAllMetersByTypeOnClick() {
                 for (const availableMeter of this.availableByTypeMeters) {
-			        if (!this.meters.find((meter) => meter.guid === availableMeter.GUID) &&
+			        if (!this.meters.find((meter) => meter.guid === availableMeter.guid) &&
                                                     this.checkIfUpdateFieldIsValid(availableMeter)) {
                         this.meters.push({
-                            type: availableMeter.METER_TYPE,
-                            serialNumber: availableMeter.SERIAL_NUMBER,
+                            type: availableMeter.meter_type,
+                            serialNumber: availableMeter.serial_number,
                             status: 0,
-                            guid: availableMeter.GUID
+                            guid: availableMeter.guid
                         })
                     }
                 }

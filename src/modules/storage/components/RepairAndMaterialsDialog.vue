@@ -19,13 +19,13 @@
                     v-model="tabModel"
                 >
                     <v-tab href="#materialInsertTab" class="p-2">Внесение материалов
-                        <v-chip label small v-if="repairMeters.length" :color="resultColor" class="ml-2">
+                        <v-chip label small v-if="repairMeters.length" :color="resultColorMaterials" class="ml-2">
                             {{ meterCount }}
                         </v-chip>
                     </v-tab>
                     <v-tab href="#materialStorageTab">Прием материалов</v-tab>
                     <v-tab href="#meterWorkabilityTab">Работоспособность
-                        <v-chip label small v-if="repairWorkMeters.length" :color="resultColor" class="ml-2">
+                        <v-chip label small v-if="repairWorkMeters.length" :color="resultColorWorkability" class="ml-2">
                             {{ meterCount }}
                         </v-chip></v-tab>
                 </v-tabs>
@@ -38,7 +38,7 @@
                                         :meters="repairMeters"
                                         :new-location="1"
                                         ref="addMeterTable"
-                                        :resultColor="resultColor"
+                                        :resultColor="resultColorMaterials"
                                         @onResetValidation="resetValidation"
                                         @onMeterCountUpdate="meterCountUpdate"
                                         @metersClear="metersClear"
@@ -68,7 +68,7 @@
                                 :meters="repairWorkMeters"
                                 :new-location="1"
                                 ref="addMeterTableWorkability"
-                                :resultColor="resultColor"
+                                :resultColor="resultColorWorkability"
                                 @onResetValidation="resetValidation"
                                 @onMeterCountUpdate="meterCountUpdate"
                                 @metersClear="metersClear"
@@ -152,7 +152,8 @@
 	        repairMaterials:  [],
 	        repairerStaffId: '',
 	        meterCount: '',
-	        resultColor: 'grey',
+	        resultColorMaterials: 'grey',
+	        resultColorWorkability: 'grey',
             tabModel: null,
             comment: '',
             isWorkable: true,
@@ -215,7 +216,8 @@
 				this.meterCount = ''
 				this.comment = ''
 				this.formSubmit = false
-				this.resultColor = this.colorGrey
+				this.resultColorMaterials = this.colorGrey
+				this.resultColorWorkability = this.colorGrey
 				this.$refs.addMeterTable.serialNumberClear()
 			},
 
@@ -241,8 +243,9 @@
                         updateStr
                     })
                     console.log(result)
-                    if (result && result.success) {
+                    if (result?.success) {
                         this.showNotification(`Операция выполнена успешно`, this.colorGreen)
+                        this.resultColorMaterials = this.colorGreen
                     } else {
 	                    this.formSubmit = false
                         this.showNotification(`Что то пошло не так при внесении материалов`, this.colorRed)
@@ -265,8 +268,8 @@
 		            this.formSubmit = true
 		            this.$refs.addMaterialTableStorage.setLoading(true)
                     const result = await this.insertMaterialToStorage(this.storageMaterials)
-                    console.log(result && result)
-                    if (result.success) {
+                    console.log(result)
+                    if (result?.success) {
                         this.showNotification(`Операция выполнена успешно`, this.colorGreen)
                     } else {
                         this.formSubmit = false
@@ -299,8 +302,9 @@
 			            updateStr
 		            })
 		            console.log(result)
-		            if (result && result.success) {
+		            if (result?.success) {
 			            this.showNotification(`Операция выполнена успешно`, this.colorGreen)
+			            this.resultColorWorkability = this.colorGreen
 		            } else {
 			            this.formSubmit = false
 			            this.showNotification(`Что то пошло не так при внесении материалов`, this.colorRed)

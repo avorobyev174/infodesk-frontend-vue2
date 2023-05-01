@@ -169,10 +169,9 @@ export const storage = {
 				commit('setMeterLoading', true)
 				const response = await get(
 					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meters`,
-					{ headers: {'authorization': $cookies.get('auth_token')} })
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
 				commit('setMeters', response.data)
-				console.log(response.data)
 				return response.data
 			} finally {
 				commit('setMeterLoading', false)
@@ -185,10 +184,9 @@ export const storage = {
 				const response = await post(
 					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meters`,
 					{ options },
-					{ headers: {'authorization': $cookies.get('auth_token')} })
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
 				commit('setMeters', response.data.rows)
-				//console.log(response.data)
 				return response.data.total
 			} finally {
 				commit('setMeterLoading', false)
@@ -198,35 +196,26 @@ export const storage = {
 		async fetchMeterTypes({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meter-types`,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			const meterTypes = response?.data
+				.map(type => ({ title: type.type_name, index: type.id, option: type.mnf_id }))
+				.sort((a, b) => a.title > b.title ? 1 : -1)
 			
-			commit('setMeterTypes',
-				response
-					.data
-					.map(type => { return { title: type.TYPE_NAME, index: type.TYPE_INDEX, option: type.MNF_ID } })
-					.sort((a, b) => a.title > b.title ? 1 : -1))
+			commit('setMeterTypes', meterTypes)
 		},
 		
 		async fetchMaterialsTypes({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/materials-types`,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
-			commit('setMaterialTypes', response.data.map(type => { return { id: type.ID, title: type.ITEM } }))
+			commit('setMaterialTypes', response.data.map(type => { return { id: type.id, title: type.item } }))
 		},
-		
-		async fetchEmployees({ state, commit }) {
-			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/employees`,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
-			
-			commit('setEmployees', response.data)
-		},
-		
+	
 		async fetchStorageEmployees({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/storage-employees`,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			const employees = response.data.map(emp => {
 				const nameArr = emp.name.trim().split(' ')
@@ -244,22 +233,21 @@ export const storage = {
 					this.state.serverUrl +
 					`/api/${ this.state.storage.serverModuleName }/filter`,
 					{ filters, options },
-					{ headers: {'authorization': $cookies.get('auth_token')} })
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
 				commit('setMeters', response.data.rows)
-				
 				return response.data.total
 			} finally {
 				commit('setMeterLoading', false)
 			}
 		},
 		
-		async fetchLogs({ state, commit }, GUID) {
+		async fetchLogs({ state, commit }, guid) {
 			try {
 				commit('setLogLoading', true)
 				const response = await get(
-					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/logs/${ GUID }`,
-					{ headers: {'authorization': $cookies.get('auth_token')} })
+					this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/logs/${ guid }`,
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
 					
 				commit('setLogs', response.data)
 			} finally {
@@ -271,7 +259,7 @@ export const storage = {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter`,
 				{ serialNumber, type },
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
@@ -280,7 +268,7 @@ export const storage = {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter-in-repair`,
 				{ serialNumber, type },
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: {' authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
@@ -383,15 +371,15 @@ export const storage = {
 		async fetchParseOptions({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/parse-options`,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			commit('setOptions', response.data)
 		},
 		
 		parseSerialNumber({ state, commit }, { parseOption, serialNumber }) {
 			const option = this.state.storage.options.find(option => parseOption === option.ID)
-			if (option && option.PARSE_OPTION) {
-				return option.PARSE_OPTION.split(',').reduce((sum, cur) => {
+			if (option && option.parse_option) {
+				return option.parse_option.split(',').reduce((sum, cur) => {
 					return sum += serialNumber[cur]
 				}, '')
 			} else {
@@ -416,16 +404,16 @@ export const storage = {
 		async getMeterTypesInRepair({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/get-meter-types-in-repair`,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
-			const meterTypesInRepair = response.data.map(type => type.METER_TYPE)
+			const meterTypesInRepair = response.data.map(type => type.meter_type)
 			commit('setMeterTypesInRepair', meterTypesInRepair)
 		},
 		
 		async getAllAvailableMetersFromRepair({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/get-available-meters-from-repair/`,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 			
@@ -434,7 +422,7 @@ export const storage = {
 		async getAllAvailableMetersByTypeFromRepair({ state, commit }, meterType) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/get-available-meters-from-repair/` + meterType,
-				{ headers: {'authorization': $cookies.get('auth_token')} })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 		
 			return response.data
 		},

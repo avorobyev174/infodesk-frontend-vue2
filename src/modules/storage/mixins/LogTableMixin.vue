@@ -3,7 +3,7 @@
 </template>
 
 <script>
-	import {mapGetters, mapState} from "vuex";
+	import { mapGetters, mapState } from "vuex";
 	import StorageMixin from "./StorageMixin"
 
 	export default {
@@ -115,11 +115,13 @@
 	        },
 
 	        getLVStateTitle(lvState) {
-		        return this.lvStates.find(state => lvState === state.value).text
+	        	const state = this.lvStates.find((state) => lvState === state.value)
+		        return state ? state.text : lvState
 	        },
 
 	        getOperationTitle(operation) {
-		        return this.operations.find(oper => operation === oper.value).text
+	        	const oper = this.operations.find((oper) => operation === oper.value)
+		        return oper ? oper.text : operation
 	        },
         }
 	}

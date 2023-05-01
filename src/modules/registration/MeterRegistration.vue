@@ -355,16 +355,16 @@ export default {
       e => this.showNotificationStandardError(e)
     )
 
-    document.onkeydown = () => {
-      const route = this.$route.name === 'Programming'
-      if (window.event.keyCode == 107 &&
-              this.$refs &&
-              this.$refs.addOrEditDialog &&
-              route)
-         this.$refs.addOrEditDialog.open()
-
-      if (window.event.keyCode == 18 && route)
+    document.onkeydown = (evt) => {
+      if (this.$route.name !== 'Programming') {
+        return
+      }
+      if (evt.key === '+' && this.$refs.addOrEditDialog) {
+        this.$refs.addOrEditDialog.open()
+      }
+      if (evt.key === 'Alt') {
         this.initialize()
+      }
     }
   },
   methods: {

@@ -1,6 +1,5 @@
 <template>
     <v-data-table
-        sort-by="id"
         height="31vh"
         :loading="loading"
         class="elevation-1 log-table"
@@ -20,22 +19,22 @@
         </template>
 
         <!-- Подмена значений таблицы на лэйблы -->
-        <template v-slot:item.DATETIME="{ item }">
-            {{ formatDate(item.DATETIME, true) }}
+        <template v-slot:item.datetime="{ item }">
+            {{ formatDate(item.datetime, true) }}
         </template>
-        <template v-slot:item.OPER_TYPE="{ item }">
-            {{ getOperationTitle(item.OPER_TYPE) }}
+        <template v-slot:item.oper_type="{ item }">
+            {{ getOperationTitle(item.oper_type) }}
         </template>
-        <template v-slot:item.ISSUING_PERSON="{ item }">
-            {{ getEmployeeTitleByStaffId(item.ISSUING_PERSON) }}
+        <template v-slot:item.issuing_person="{ item }">
+            {{ getEmployeeTitleByStaffId(item.issuing_person) }}
         </template>
-        <template v-slot:item.ACCEPTED_PERSON="{ item }">
-            {{ getEmployeeTitleByStaffId(item.ACCEPTED_PERSON) }}
+        <template v-slot:item.accepted_person="{ item }">
+            {{ getEmployeeTitleByStaffId(item.accepted_person) }}
         </template>
-        <template v-slot:item.UPDATE_FIELD="{ item }">
-            <div v-if="item.OPER_TYPE === 1 || item.OPER_TYPE === 2 || item.OPER_TYPE === 10 ">
+        <template v-slot:item.update_field="{ item }">
+            <div v-if="item.oper_type === 1 || item.oper_type === 2 || item.oper_type === 10 ">
                 <div
-                    v-for="(item, i) in parseUpdateCustomField(item.UPDATE_FIELD)"
+                    v-for="(item, i) in parseUpdateCustomField(item.update_field)"
                     :key="i"
                     class="m-2"
                 >
@@ -47,7 +46,7 @@
             </div>
             <div v-else>
                 <div
-                    v-for="(field, i) in parseUpdateField(item.UPDATE_FIELD)"
+                    v-for="(field, i) in parseUpdateField(item.update_field)"
                     :key="i"
                     class="m-2"
                 >
@@ -76,14 +75,14 @@
 				{
 					text: 'ID',
                     align: 'center',
-                    value: 'ID',
+                    value: 'id',
                     sortable: true,
                     class: 'header-color',
 					width: '80px'
                 },
 				{
 					text: 'Дата операции',
-					value: 'DATETIME',
+					value: 'datetime',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -91,7 +90,7 @@
 				},
 				{
 					text: 'Тип операции',
-					value: 'OPER_TYPE',
+					value: 'oper_type',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -99,7 +98,7 @@
 				},
 				{
 					text: 'Отдающий',
-					value: 'ISSUING_PERSON',
+					value: 'issuing_person',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -107,7 +106,7 @@
 				},
 				{
 					text: 'Принимающий',
-					value: 'ACCEPTED_PERSON',
+					value: 'accepted_person',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -115,7 +114,7 @@
 				},
 				{
 					text: 'Комментарий',
-					value: 'COMMENT_FIELD',
+					value: 'comment_field',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -124,7 +123,7 @@
 				},
 				{
 					text: 'Доп. информация',
-					value: 'UPDATE_FIELD',
+					value: 'update_field',
 					sortable: false,
 					align: 'center',
 					cellClass: 'table-small-cell',
@@ -133,7 +132,6 @@
 				},
 			]
 		}),
-		mounted() {},
         mixins: [ LogTableMixin ],
 		computed: {
 			...mapState({

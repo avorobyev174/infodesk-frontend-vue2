@@ -129,6 +129,7 @@
 	import StorageMixin from "../storage/mixins/StorageMixin"
 	import ReportStorageMixin from "./mixins/ReportStorageMixin"
     import StorageInputReportDialog from "./components/storage/StorageInputReportDialog"
+    import { dateFormat } from "../Utils"
 
 	export default {
 		name: "Reports",
@@ -192,6 +193,11 @@
 				this[ item.func ](item)
 			},
 
+			getIpAddressTitle(ipAddress) {
+				const ipAddr = this.ipAddresses.find(address => ipAddress === address.value)
+				return ipAddr ? ipAddr.text : ipAddress
+			},
+
 			async getAlphaReport(item) {
 				item.loading = true
 				try {
@@ -243,10 +249,10 @@
 					//console.log(response)
 					let editedResponse = response.map(row => {
 						return {
-							serialNumber: row.SERIAL_NUMBER,
-                            type: row.METER_TYPE,
-                            typeTitle: row.TYPE_NAME,
-                            date: this.dateFormat(row.date)
+							serialNumber: row.serial_number,
+                            type: row.meter_type,
+                            typeTitle: row.type_name,
+                            date: dateFormat(row.date)
 						}
 					})
 
@@ -361,18 +367,6 @@
 				} finally {
 					item.loading = false
 				}
-			},
-
-			dateFormat(dateToFormat) {
-				const date = new Date(dateToFormat)
-				let day = String(date.getDate())
-				let month = String(date.getMonth() + 1)
-				const year = date.getFullYear()
-
-				day = day.length < 2 ? day.padStart(2, '0') : day
-				month = month.length < 2 ? month.padStart(2, '0') : month
-
-				return `${ day }.${ month }.${ year }`
 			},
 
 			async getStorageReport(item) {

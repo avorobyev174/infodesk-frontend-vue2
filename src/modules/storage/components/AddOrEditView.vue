@@ -95,7 +95,7 @@
 	        comment: '',
             type: {},
 	        serialNumber: '',
-            passportNumber: ''
+            passportNumber: '',
         }),
 		computed: {
 			...mapGetters({
@@ -109,6 +109,8 @@
 		},
 		inject: [
 			'getMeterTypeTitle',
+			'formatDate',
+			'formatDateIso',
 		],
         mounted() {
 	        if (this.isEdit) {
@@ -152,7 +154,7 @@
             setData() {
 	            this.type = { index: this.typeTemp, title: this.getMeterTypeTitle(this.typeTemp) }
 	            this.serialNumber = this.serialNumberTemp
-	            this.calibrationDate = this.calibrationDateTemp ? this.getFormattedDate(this.calibrationDateTemp) : null
+	            this.calibrationDate = this.calibrationDateTemp ? this.formatDateIso(this.calibrationDateTemp) : null
 	            this.accuracyClass = this.accuracyClassTemp
 	            this.condition = this.conditionTemp
 	            this.interval = this.intervalTemp
@@ -183,24 +185,12 @@
 				        condition: this.condition,
 				        interval: this.interval,
 				        owner: this.owner,
-				        calibration: this.getFormattedDate(this.calibrationDate),
+				        calibration: this.formatDate(this.calibrationDate) === 'отсутствует' ? null : this.formatDate(this.calibrationDate),
 				        comment: this.comment,
 				        passportNumber: this.passportNumber === '' ? 0 : this.passportNumber,
 			        }
                 }
             },
-
-            getFormattedDate(dateToFormat) {
-	        	if (!dateToFormat)
-	        		return null
-
-	            const date = new Date(dateToFormat)
-                return `${ date.getFullYear() }-${ this.padStart(date.getMonth() + 1) }-${ this.padStart(date.getDate()) }`
-            },
-
-	        padStart(number) {
-		        return String(number).padStart(2, '0')
-            }
         }
 	}
 </script>

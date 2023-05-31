@@ -125,8 +125,7 @@
 			oldLocationColor: 'grey',
             isRouter: false,
 			personRules: [
-				v => !!v || 'Обязательно к заполнению',
-				v => v && !String(v).match('[^0-9]') || 'Должны присутствовать только цифры'
+				v => !String(v).match('[^0-9]') || 'Должны присутствовать только цифры'
 			],
 		}),
 		computed: {
@@ -211,14 +210,16 @@
                     return this.showNotification(`Для выполнения операции заполните таблицу`, this.colorOrange)
                 }
 
-                if (!this.isRouter) {
-	                this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
-                }
+                this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
                 this.acceptedPersonStaffId = this.staffId
 
-                if ((!this.isRouter && isNaN(this.issuingPersonStaffId)) || isNaN(this.acceptedPersonStaffId)) {
-                    return this.showNotification('Операция с неизвестным сотрудником не возможна', this.colorOrange)
+                if (isNaN(this.acceptedPersonStaffId)) {
+                    return this.showNotification('Операция с неизвестным принимающим сотрудником не возможна', this.colorOrange)
                 }
+
+		        if (this.issuingPerson && isNaN(this.issuingPersonStaffId)) {
+			        return this.showNotification('Операция с неизвестным отдающим сотрудником не возможна', this.colorOrange)
+		        }
 
                 try {
                     this.formSubmit = true
@@ -227,7 +228,7 @@
 
                     const res = await this.registration({
                         meters: this.regMeters,
-                        issuingPersonStaffId: this.isRouter ? 0 : this.issuingPersonStaffId,
+                        issuingPersonStaffId: this.isRouter || !this.issuingPerson ? 0 : this.issuingPersonStaffId,
                         acceptedPersonStaffId: this.acceptedPersonStaffId,
                         ...meterData
                     })

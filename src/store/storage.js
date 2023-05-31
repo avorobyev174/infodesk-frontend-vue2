@@ -254,7 +254,7 @@ export const storage = {
 				commit('setLogLoading', false)
 			}
 		},
-		
+
 		async checkMeterInDB({ state, commit }, { serialNumber, type }) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter`,
@@ -268,7 +268,7 @@ export const storage = {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/check-meter-in-repair`,
 				{ serialNumber, type },
-				{ headers: {' authorization': $cookies.get('auth_token') } })
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
@@ -377,7 +377,7 @@ export const storage = {
 		},
 		
 		parseSerialNumber({ state, commit }, { parseOption, serialNumber }) {
-			const option = this.state.storage.options.find(option => parseOption === option.ID)
+			const option = this.state.storage.options.find(option => parseOption === option.id)
 			if (option && option.parse_option) {
 				return option.parse_option.split(',').reduce((sum, cur) => {
 					return sum += serialNumber[cur]
@@ -449,6 +449,15 @@ export const storage = {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/insert-meter-work-status`,
 				{ meters, isWorkable, comment, updateStr },
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return response.data
+		},
+		
+		async editLogComment({ state, commit }, { comment, logId }) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/edit-log-comment`,
+				{ comment, logId },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data

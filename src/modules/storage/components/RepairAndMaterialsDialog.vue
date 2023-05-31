@@ -20,13 +20,13 @@
                 >
                     <v-tab href="#materialInsertTab" class="p-2">Внесение материалов
                         <v-chip label small v-if="repairMeters.length" :color="resultColorMaterials" class="ml-2">
-                            {{ meterCount }}
+                            {{ meterRepairCount }}
                         </v-chip>
                     </v-tab>
                     <v-tab href="#materialStorageTab">Прием материалов</v-tab>
                     <v-tab href="#meterWorkabilityTab">Работоспособность
                         <v-chip label small v-if="repairWorkMeters.length" :color="resultColorWorkability" class="ml-2">
-                            {{ meterCount }}
+                            {{ meterWorkCount }}
                         </v-chip></v-tab>
                 </v-tabs>
                 <v-card>
@@ -40,8 +40,8 @@
                                         ref="addMeterTable"
                                         :resultColor="resultColorMaterials"
                                         @onResetValidation="resetValidation"
-                                        @onMeterCountUpdate="meterCountUpdate"
-                                        @metersClear="metersClear"
+                                        @onMeterCountUpdate="meterRepairCountUpdate"
+                                        @metersClear="metersRepairClear"
                                         is-repair
                                         current-tab="materialInsertTab"
                                     ></add-meter-view>
@@ -70,8 +70,8 @@
                                 ref="addMeterTableWorkability"
                                 :resultColor="resultColorWorkability"
                                 @onResetValidation="resetValidation"
-                                @onMeterCountUpdate="meterCountUpdate"
-                                @metersClear="metersClear"
+                                @onMeterCountUpdate="meterWorkCountUpdate"
+                                @metersClear="metersWorkClear"
                                 is-repair
                                 current-tab="meterWorkabilityTab"
                             ></add-meter-view>
@@ -151,7 +151,8 @@
 	        storageMaterials:  [],
 	        repairMaterials:  [],
 	        repairerStaffId: '',
-	        meterCount: '',
+	        meterRepairCount: '',
+	        meterWorkCount: '',
 	        resultColorMaterials: 'grey',
 	        resultColorWorkability: 'grey',
             tabModel: null,
@@ -189,8 +190,12 @@
 				this.$refs.form.resetValidation()
 			},
 
-			meterCountUpdate(count) {
-				this.meterCount = count
+			meterRepairCountUpdate(count) {
+				this.meterRepairCount = count
+			},
+
+			meterWorkCountUpdate(count) {
+				this.meterWorkCount = count
 			},
 
 			open() {
@@ -202,10 +207,12 @@
 				this.clear()
 			},
 
-			metersClear() {
+			metersRepairClear() {
 				this.repairMeters = []
-				this.repairWorkMeters = []
             },
+			metersWorkClear() {
+				this.repairWorkMeters = []
+			},
 
 			clear() {
 				this.repairMeters = []
@@ -213,7 +220,8 @@
 				this.repairMaterials = []
 				this.repairWorkMeters = []
                 this.isWorkable = true
-				this.meterCount = ''
+				this.meterRepairCount = ''
+				this.meterWorkCount = ''
 				this.comment = ''
 				this.formSubmit = false
 				this.resultColorMaterials = this.colorGrey

@@ -150,7 +150,7 @@ export const registration = {
             }
         },
 
-        async editMeter({state, commit}, { id, serial_number, type, phase, icc, index, port, address, contact, ip_address, parent_id, gateway  }) {
+        async editMeter({state, commit}, { id, serial_number, type, phase, icc, index, port, address, contact, ip_address, parent_id, gateway }) {
             try {
                 commit('setLoading', true)
                 
@@ -343,7 +343,7 @@ export const registration = {
             return response.data
         },
 
-        async saveRefreshedMeterDataFromStek({ state, commit }, {id, data, personal_account, customer, customer_address, customer_phone, customer_email, customer_type}) {
+        async saveRefreshedMeterDataFromStek({ state, commit }, { id, data, personal_account, customer, customer_address, customer_phone, customer_email, customer_type, kftt}) {
             const response = await axios.put(
                 this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/save-refresh-meter-data-from-stek/` + id,
                 {
@@ -353,6 +353,7 @@ export const registration = {
                     customer_phone,
                     customer_email,
                     customer_type,
+                    kftt,
                     data: JSON.stringify(data)
                 },
                 { headers: { 'authorization': $cookies.get('auth_token') }})

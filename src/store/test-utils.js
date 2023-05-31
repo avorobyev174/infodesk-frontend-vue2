@@ -35,9 +35,9 @@ export const testUtils = {
         },
     
         async goTest2({state, commit}) {
-        
+            console.log('test2')
             const response = await axios.get(
-                this.state.serverUrl + `/api/test-utils/get-meter-test-connect2`,
+                this.state.serverUrl + `/api/test-utils/get-meter-test-connect4`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             console.log(response.data)

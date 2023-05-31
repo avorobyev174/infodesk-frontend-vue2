@@ -128,6 +128,13 @@
               @okButtonClickEvent="addPyramidLoadValue"
               @cancelButtonClickEvent="closeDialogAddPyramidLoadValue"
           />
+          <simple-dialog
+              :dialog-open="programmingDialogModel"
+              max-width="700px"
+              title="Вы уверены что хотите подтвердить изменение данных в пирамиде?"
+              @okButtonClickEvent="setProgrammingDone"
+              @cancelButtonClickEvent="closeProgrammingDoneDialog"
+          ></simple-dialog>
         </v-toolbar>
       </template>
 
@@ -157,6 +164,9 @@
           {{ getSmsTitleBySmsStatus(item.sms_status) }}
         </v-chip>
       </template>
+      <template v-slot:item.created="{ item }">
+          {{ formatDate(item.created) }}
+      </template>
       <template v-slot:item.type="{ item }">
         {{ getMeterTypeTitle(item.type) }}
       </template>
@@ -174,24 +184,23 @@
         <v-chip v-else :color="colorGreen">Загружен</v-chip>
       </template>
       <template v-slot:item.prog_value="{ item }">
-          <v-icon
-            v-if="item.prog_value === 0"
-            size="25"
-            class="ma-2"
-            :color="colorGrey"
-          >
-            mdi-checkbox-blank-circle-outline
-          </v-icon>
+        <v-tooltip bottom v-if="item.prog_value === 1">
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon
+              size="25"
+              class="ma-2"
+              v-bind="attrs"
+              v-on="on"
+              :color="colorBlue"
+              @click="openProgrammingDoneDialog(item)"
+            >
+              mdi-checkbox-marked-circle-outline
+            </v-icon>
+          </template>
+          <span>Подтвердить изменение данных</span>
+        </v-tooltip>
         <v-icon
-          v-else-if="item.prog_value === 1"
-          size="25"
-          class="ma-2"
-          :color="colorBlue"
-        >
-          mdi-checkbox-marked-circle-outline
-        </v-icon>
-        <v-icon
-          v-else
+          v-else-if="item.prog_value === 2"
           size="25"
           class="ma-2"
           :color="colorGreen"
@@ -199,8 +208,6 @@
           mdi-checkbox-marked-circle-plus-outline
         </v-icon>
       </template>
-
-      <!-- Когда нет данных -->
       <template v-slot:no-data>
         <v-btn
           color="primary"
@@ -228,6 +235,7 @@ import ExcelMenu from "./components/ExcelMenu"
 import RefreshDataFromStekToPyramidDialog from "./components/RefreshDataFromStekToPyramidDialog"
 import SimpleDialog from "../utils-components/SimpleDialog"
 import BrokenMetersDialog from "./components/BrokenMetersDialog"
+import RegistrationMixin from "../mixins/RegistrationMixin"
 
 export default {
   name: "MeterRegistration",
@@ -248,6 +256,8 @@ export default {
     brokenMetersDialog: BrokenMetersDialog
   },
   data: () => ({
+    programmingDialogModel: false,
+    currentItem: {},
     removeInPyramidLoadValueDialogDeleteModel: false,
     addInPyramidLoadValueDialogDeleteModel: false,
     removeOrAddInPyramidLoadValueItem: null,
@@ -261,29 +271,31 @@ export default {
     selectedHeaders: [],
     disableColumnActions: false,
     headers: [
-      { text: 'ID', align: 'center', value: 'id', index: 0},
-      { text: 'Тип', value: 'type', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 1 },
-      { text: 'Серийный номер', value: 'serial_number', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 2 },
-      { text: 'Фазность', value: 'phase', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 3 },
-      { text: 'Номер телефона(счетчик)', value: 'phone', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 4 },
-      { text: 'IP адрес', value: 'ip_address', sortable: true, align: 'center', cellClass: 'table-small-cell', index: 5 },
-      { text: 'Порт', value: 'port', align: 'center', cellClass: 'table-small-cell', index: 6 },
-      { text: 'ICC', value: 'icc', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 7 },
-      { text: 'IMEI', value: 'imei', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 8 },
-      { text: 'Статус', value: 'status', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 9 },
-      { text: 'Связной', value: 'contact', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 10 },
-      { text: 'Принадлежность ПУ', value: 'address', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 11 },
-      { text: 'Пирамида', value: 'in_pyramid', align: 'center', sortable: false, index: 12 },
-      { text: 'Номер лицевого', value: 'personal_account', sortable: true, align: 'center', cellClass: 'table-small-cell', index: 13 },
-      { text: 'Наименование', value: 'customer', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 14 },
-      { text: 'Тип клиента', value: 'customer_type', sortable: true, align: 'center', cellClass: 'table-small-cell', index: 15 },
-      { text: 'Адрес', value: 'customer_address', sortable: true, align: 'center', cellClass: 'table-small-cell', index: 16 },
-      { text: 'Номер телефона(клиент)', value: 'customer_phone', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 17 },
-      { text: 'Почта', value: 'customer_email', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 18 },
-      { text: 'Смс', value: 'sms_status', align: 'center', cellClass: 'table-small-cell', index: 19 },
-      { text: 'Шлюз', value: 'gateway', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 20 },
-      { text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center', cellClass: 'table-small-cell', index: 21},
-      { text: 'Действия', value: 'actions', sortable: false, align: 'center', cellClass: 'table-small-cell', index: 22 },
+      { text: 'ID', align: 'center', value: 'id' },
+      { text: 'Дата создания', align: 'center', value: 'created' },
+      { text: 'Тип', value: 'type', sortable: false, align: 'center', cellClass: 'table-small-cell', width: '150px' },
+      { text: 'Серийный номер', value: 'serial_number', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Фазность', value: 'phase', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Номер телефона(счетчик)', value: 'phone', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'IP адрес', value: 'ip_address', sortable: true, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Порт', value: 'port', align: 'center', cellClass: 'table-small-cell' },
+      { text: 'ICC', value: 'icc', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'IMEI', value: 'imei', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Статус', value: 'status', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Связной', value: 'contact', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Принадлежность ПУ', value: 'address', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Пирамида', value: 'in_pyramid', align: 'center', sortable: false },
+      { text: 'Номер лицевого', value: 'personal_account', sortable: true, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Наименование', value: 'customer', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Тип клиента', value: 'customer_type', sortable: true, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Адрес', value: 'customer_address', sortable: true, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Номер телефона(клиент)', value: 'customer_phone', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Почта', value: 'customer_email', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Смс', value: 'sms_status', align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Шлюз', value: 'gateway', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Коэффциент трансформации', value: 'kftt', sortable: true, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Действия', value: 'actions', sortable: false, align: 'center', cellClass: 'table-small-cell' },
     ],
     actions: [
       { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' },
@@ -332,6 +344,7 @@ export default {
   },
   created() {
     this.setCookies()
+    this.headers = this.headers.map((header, i) => ({ ... header, index: i }))
     $cookies.get('meter_registration_columns')
       ? this.changeColumnsVisibility($cookies.get('meter_registration_columns').split(',').map(column => parseInt(column)))
       : this.selectedHeaders = this.headers
@@ -343,17 +356,20 @@ export default {
       this.setFavoriteModuleColor('')
     }
   },
+  mixins: [ RegistrationMixin ],
   mounted() {
     if (!this.checkAuth())
       return
 
-    if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
+    if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
       this.$router.push('/')
+    }
 
-    this.fetchMeters(this.showMetersInPyramid).then(
-      result => {},
-      e => this.showNotificationStandardError(e)
-    )
+    try {
+      this.fetchMeters(this.showMetersInPyramid)
+    } catch (e) {
+      this.showNotificationStandardError(e)
+    }
 
     document.onkeydown = (evt) => {
       if (this.$route.name !== 'Programming') {
@@ -376,6 +392,9 @@ export default {
       'getNonActiveInPyramidMeters',
       'removeMeterPyramidLoadValue',
       'addMeterPyramidLoadValue',
+    ]),
+    ...mapActions('repair', [
+      'setProgrammingValue'
     ]),
 
     setCookies() {
@@ -414,10 +433,7 @@ export default {
 
     getStatusTitle(meterStatus) {
       const status = this.status.find(status => meterStatus === status.value)
-      if (status !== undefined)
-        return status.text
-      else
-        return null
+      return status ? status.text : meterStatus
     },
 
     getPhaseTitle(meterPhase) {
@@ -425,7 +441,8 @@ export default {
     },
 
     getIpAddressTitle(ipAddress) {
-      return this.ipAddresses.find(address => ipAddress === address.value).text
+      const isAddr = this.ipAddresses.find((address) => ipAddress === address.value)
+      return isAddr ? isAddr.text : ipAddress
     },
 
     //Обработчик события ручной загрузки данных
@@ -508,6 +525,27 @@ export default {
       this.showMetersInPyramid = !this.showMetersInPyramid
       this.showPyramidMeters()
     },
+
+    openProgrammingDoneDialog(item) {
+      this.programmingDialogModel = true
+      this.currentItem = item
+    },
+
+    async setProgrammingDone() {
+      this.closeProgrammingDoneDialog()
+      try {
+        const updatedMeter = await this.setProgrammingValue({ id: this.currentItem.id, value: 2 })
+        const mainUpdatedMeter = this.meters.find(mainMeter => updatedMeter.id === mainMeter.id)
+        Object.assign(mainUpdatedMeter, updatedMeter)
+        this.showNotification(`Информаця успешно обновлена`, this.colorGreen)
+      } catch (e) {
+        this.showNotificationStandardError(e)
+      }
+    },
+
+    closeProgrammingDoneDialog() {
+      this.programmingDialogModel = false
+    }
   }
 }
 </script>

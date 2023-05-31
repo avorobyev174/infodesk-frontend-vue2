@@ -173,17 +173,6 @@
                     flat
                     height="70px"
                 >
-                    <v-text-field
-                        v-model="search"
-                        append-icon="mdi-magnify"
-                        label="Поиск по серийному номеру"
-                        type="text"
-                        hide-details
-                        clearable
-                        class="search-text-input"
-                        @keydown.enter="doSearchOnEnter"
-                        @click:clear="searchOnClear"
-                    />
                     <v-spacer></v-spacer>
                     <main-menu
                         v-if="!isObserver"
@@ -560,23 +549,23 @@
 			},
 
 			//Обработка поиска
-            doSearchOnEnter() {
-				if (!this.search) {
-					return
-				}
-
-				this.isSearchMeterView = true
-	            const searchedMeters = this.meters.filter((meter) => String(meter.serial_number).includes(this.search))
-
-	            this.setSearchMetersView(searchedMeters)
-                this.totalMeters = this.searchMetersView.length
-            },
-
-            searchOnClear() {
-				if (this.isSearchMeterView) {
-					this.initializeMeters()
-				}
-            },
+            // doSearchOnEnter() {
+			// 	if (!this.search) {
+			// 		return
+			// 	}
+            //
+			// 	this.isSearchMeterView = true
+	        //     const searchedMeters = this.meters.filter((meter) => String(meter.serial_number).includes(this.search))
+            //
+	        //     this.setSearchMetersView(searchedMeters)
+            //     this.totalMeters = this.searchMetersView.length
+            // },
+            //
+            // searchOnClear() {
+			// 	if (this.isSearchMeterView) {
+			// 		this.initializeMeters()
+			// 	}
+            // },
 
 			//Инициализация компонента
             async initializeMeters() {

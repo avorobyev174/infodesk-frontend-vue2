@@ -53,47 +53,57 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-04 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
-                break;
-            case 23:
-                type = 'МИРТЕК - МИРТЕК-212-РУ';
-                password = '2843068834';
-                break;
+                break
             case 6:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
-                break;
+                break
             case 7:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-07 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
-                break;
-            case 18:
-                type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
-                password = '00000000';
-                user = 'Высокий уровень доступа (HLS)';
-                break;
+                break
             case 16:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ207 (СПОДЭС)';
                 password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
-                break;
+                break
+            case 18:
+                type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
+                password = '00000000';
+                user = 'Высокий уровень доступа (HLS)';
+                break
+            case 23:
+                type = 'МИРТЕК - МИРТЕК-212-РУ';
+                password = '2843068834';
+                break
+            case 31:
+            case 33:
+                type = 'МИРТЕК - МИРТЕК-232-РУ';
+                password = '2843068834';
+                break
             case 25:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ303 (СПОДЭС)';
                 password = '010703';
-                break;
+                break
             case 27:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ208 (СПОДЭС)';
-                break;
+                password = '1234567812345678';
+                user = 'Высокий уровень доступа (HLS)';
+                break
             case 28:
             case 29:
+            case 32:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ308 (СПОДЭС)';
-                break;
+                password = '1234567812345678';
+                user = 'Высокий уровень доступа (HLS)';
+                break
             case 30:
                 type = 'Приборы с поддержкой протокола СПОДЭС - РТМ-01D(B) (СПОДЭС)';
-                password = 'rotek00000000000';
+                password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
-                break;
+                break
             default :
                 type = 'Инкотекс - Меркурий 234';
                 password = '010703';
@@ -139,7 +149,7 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
             releaseAndVerificationDate,
             installDate,
             releaseAndVerificationDate,
-            [16, 25, 27, 28, 29, 5, 6, 7, 18, 20, 21, 22, 23].includes(meter.type) ? '' : '1',
+            [16, 25, 27, 28, 29, 5, 6, 7, 18, 20, 21, 22, 23, 30].includes(meter.type) ? '' : '1',
             '5',
             meter.kftt,
             '1',

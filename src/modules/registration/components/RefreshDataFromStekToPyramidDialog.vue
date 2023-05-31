@@ -65,19 +65,34 @@
                     </v-chip>
                     <span v-else> {{ item.oldMeterData.customer_address }}</span>
                 </template>
+                <template v-slot:item.oldMeterData.kftt="{ item }">
+                    <v-chip
+                        v-if="item.diff === 'diff' && item.oldMeterData.kftt !== parseInt(item.newMeterData.kftt)"
+                        :color="colorOrange"
+                    >
+                        {{ `${ item.oldMeterData.kftt ? item.oldMeterData.kftt : 'отсутствует'}`+ '  →  ' + item.newMeterData.kftt }}
+                    </v-chip>
+                    <v-chip
+                        v-else-if="item.diff === 'not_exist'"
+                        :color="colorRed"
+                    >
+                        {{ item.oldMeterData.kftt }}
+                    </v-chip>
+                    <span v-else> {{ item.oldMeterData.kftt }}</span>
+                </template>
                 <template v-slot:item.actualizeStatus="{ item }">
                     <v-chip v-if="item.actualizeStatus === 'нет'" :color="colorGrey">{{ item.actualizeStatus }}</v-chip>
                     <v-chip v-else-if="item.actualizeStatus === 'ошибка'" :color="colorRed">{{ item.actualizeStatus }}</v-chip>
                     <v-chip v-else :color="colorGreen"> {{ item.actualizeStatus }}</v-chip>
                 </template>
-                <template v-slot:header.readyToActualize >
+                <template v-slot:header.readyToActualize="{ header }">
                     <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
                             <button
                                 @click="selectAllClick"
                                 v-bind="attrs"
                                 v-on="on"
-                                style="margin-right: 8px"
+                                style="margin-right: 8px; text-align: left !important;"
                             >
                                 <v-icon v-if="selectAll">mdi-checkbox-marked</v-icon>
                                 <v-icon v-else="selectAll">mdi-checkbox-blank</v-icon>
@@ -133,11 +148,12 @@
             hide: false,
             selectAll: false,
             headers: [
-                { text: '', align: 'center', value: 'readyToActualize', sortable: false  },
+                { text: '', align: 'center', value: 'readyToActualize', sortable: false },
                 { text: 'Тип счетчика', align: 'center', value: 'oldMeterData.type', cellClass: 'table-small-cell', sortable: false  },
                 { text: 'Серийный номер', align: 'center', value: 'oldMeterData.serial_number', cellClass: 'table-small-cell', sortable: false },
                 { text: 'Номер лицевого', align: 'center', value: 'oldMeterData.personal_account', cellClass: 'table-small-cell', sortable: false },
-                { text: 'Адрес', align: 'center', value: 'oldMeterData.customer_address', cellClass: 'table-small-cell', sortable: false  },
+                { text: 'Адрес', align: 'center', value: 'oldMeterData.customer_address', cellClass: 'table-small-cell', sortable: false },
+                { text: 'Коэффициент трансформации', align: 'center', value: 'oldMeterData.kftt', cellClass: 'table-small-cell', sortable: false },
                 { text: 'Актуализирован', align: 'center', value: 'actualizeStatus', sortable: false},
             ],
             successActualize: false,
@@ -180,7 +196,7 @@
                     //console.log(this.refreshMeters)
                     this.setLoading(false)
 
-                    if (this.refreshMeters.length > 0) {
+                    if (this.refreshMeters.length) {
                         this.successNumber = `${ this.refreshMeters.length } / ${ data.total }`
 
                         if (this.refreshMeters.length) {
@@ -252,6 +268,7 @@
                                 customer_type: null,
                                 personal_account: null,
                                 serial_number: null,
+                                kftt: null,
                             }
 
                             let refreshMeter = meter.newMeterData ? meter.newMeterData : emptyMeter
@@ -266,8 +283,9 @@
                                         return updatedMeter.id === mainMeter.id
                                     })
 
-                                    if (mainUpdatedMeter)
-                                        Object.assign(mainUpdatedMeter, updatedMeter)
+                                    if (mainUpdatedMeter) {
+	                                    Object.assign(mainUpdatedMeter, updatedMeter)
+                                    }
 
                                     this.updatedMeters.push({ ...updatedMeter, diff, oldAddress: meter.oldMeterData.customer_address })
                                     meter.actualizeStatus = 'да'
@@ -286,8 +304,12 @@
                         //const notExistArray = this.updatedMeters.filter(m => m.diff === 'not_exist')
                         const deleteArray = this.updatedMeters
                         //console.log(diffArray.length + ' ' + deleteArray.length)
-                        if (diffArray.length) saveExcelFileForPyramid(diffArray, this.getIpAddressTitle)
-                        if (deleteArray.length) saveDeletedMeterDataFromStekToExcelFile(deleteArray, this.getMeterTypeTitle)
+                        if (diffArray.length) {
+	                        saveExcelFileForPyramid(diffArray, this.getIpAddressTitle)
+                        }
+                        if (deleteArray.length) {
+	                        saveDeletedMeterDataFromStekToExcelFile(deleteArray, this.getMeterTypeTitle)
+                        }
                         this.loading = false
                     }
                 } catch (e) {

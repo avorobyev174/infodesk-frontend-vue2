@@ -6,7 +6,7 @@
 	import { mapGetters } from "vuex"
 
 	export default {
-		name: "Utils",
+		name: "StorageMixin",
         computed: {
 			...mapGetters({
 				owners: 'storage/getOwners',

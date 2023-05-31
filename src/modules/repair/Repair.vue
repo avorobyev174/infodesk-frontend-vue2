@@ -98,7 +98,7 @@
         <simple-dialog
             :dialog-open="programmingDialogModel"
             max-width="700px"
-            title="Вы уверены что хотите подтвердить внесение данных?"
+            title="Вы уверены что хотите подтвердить загрузку в пирамиду данных?"
             @okButtonClickEvent="setProgrammingDone"
             @cancelButtonClickEvent="closeProgrammingDoneDialog"
         ></simple-dialog>
@@ -204,7 +204,7 @@
 	                this.showNotification(`ПКЭ успешно обновлен`, this.colorGreen)
                 } catch (e) {
 	                this.showNotificationStandardError(e)
-                }``
+                }
             },
 
 			closeProgrammingDoneDialog() {

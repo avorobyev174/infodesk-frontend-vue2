@@ -408,7 +408,7 @@
 			        const availableMeters = await this.getAllAvailableMetersFromRepair()
 			        for (const availableMeter of availableMeters) {
 			        	if (!this.meters.find(meter => meter.guid === availableMeter.guid) &&
-                                                                this.checkIfUpdateFieldIsValid(availableMeter)) {
+                                                                this.checkIfUpdateFieldIsValidForButtonAll(availableMeter)) {
 						        this.meters.push({
 							        type: availableMeter.meter_type,
 							        serialNumber: availableMeter.serial_number,
@@ -437,7 +437,7 @@
 	        async addAllMetersByTypeOnClick() {
                 for (const availableMeter of this.availableByTypeMeters) {
 			        if (!this.meters.find((meter) => meter.guid === availableMeter.guid) &&
-                                                    this.checkIfUpdateFieldIsValid(availableMeter)) {
+                                                    this.checkIfUpdateFieldIsValidForButtonAll(availableMeter)) {
                         this.meters.push({
                             type: availableMeter.meter_type,
                             serialNumber: availableMeter.serial_number,
@@ -454,13 +454,17 @@
 	        	if (availableMeter.updateField) {
 			        if (this.currentTab === 'materialInsertTab') {
 				        return !(availableMeter.updateField.includes('Используемые материалы:') ||
-					            availableMeter.updateField.includes('Статус ремонта:'))
+                            !availableMeter.updateField.includes('Статус ремонта:'))
 			        } else if (this.currentTab === 'meterWorkabilityTab') {
 				        return !availableMeter.updateField.includes('Статус ремонта:')
 			        }
                 }
 	        	return true
-            }
+            },
+
+	        checkIfUpdateFieldIsValidForButtonAll(availableMeter) {
+		        return availableMeter.updateField ? !availableMeter.updateField.includes('Статус ремонта:')	: true
+	        }
         },
 	}
 </script>

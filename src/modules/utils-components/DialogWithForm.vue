@@ -7,11 +7,10 @@
             @click:outside="$emit('cancelButtonClickEvent')"
     >
         <v-card>
-            <v-card-title>
+            <v-card-title class="pb-5">
                 <span class="m-auto text-h5 text-break text-center">{{ title }}</span>
             </v-card-title>
-
-            <v-card-text>
+            <v-card-text class="pb-0">
                 <v-form
                     ref="form"
                     v-model="formValid"

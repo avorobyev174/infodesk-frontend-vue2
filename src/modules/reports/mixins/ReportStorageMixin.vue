@@ -425,7 +425,8 @@
 	                        html += `<td>Итого</td>`
 	                        row.forEach((col) => {
 	                        	if (typeof col === 'object') {
-			                        html += `<td>${col[0]}</td><td>${col[1]}</td>`
+	                        		const [ isRepaired, isBroken ] = col
+			                        html += `<td>${ isRepaired }</td><td>${ isBroken }</td>`
 		                        } else {
 			                        html += `<td>${ col }</td>`
                                 }
@@ -435,9 +436,12 @@
 		                        if (i === 0) {
 			                        html += `<td>${  this.getMeterTypeTitle(col) }</td>`
 		                        } else {
-		                        	typeof col === 'object'
-			                            ? html += `<td>${ col[0] }</td><td>${ col[1] }</td>`
-                                        : html += `<td>${ col }</td>`
+			                        if (typeof col === 'object') {
+				                        const [ isRepaired, isBroken ] = col
+				                        html += `<td>${ isRepaired }</td><td>${ isBroken }</td>`
+			                        } else {
+				                        html += `<td>${ col }</td>`
+			                        }
 		                        }
 	                        })
                         }

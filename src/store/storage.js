@@ -21,7 +21,7 @@ export const storage = {
 			{ text: 'Монтаж', value: 4 },
 			{ text: 'Списание', value: 5 },
 			{ text: 'Поверка', value: 6 },
-			/*{ text: 'Объект', value: 7 },*/
+			{ text: 'Склад (ВХ)', value: 7 },
 			{ text: 'Окно выдачи потребителю', value: 8 },
 			{ text: 'Программирование(УИТ)', value: 9 },
 		],
@@ -40,9 +40,13 @@ export const storage = {
 			{ text: 'Выдача потребителю', value: 11 },
 			{ text: 'Выдача на программирование', value: 12 }
 		],
+		storageTypes: [
+			{ text: 'Склад', value: 0 },
+			{ text: 'Склад (ВХ)', value: 7 }
+		],
 		conditions: [
 			{ text: 'Новый', value: 0},
-			{ text: 'Б/у', value: 1}
+			{ text: 'Б/у', value: 1 }
 		],
 		intervals: [
 			{ text: '10', value: 10 },
@@ -126,6 +130,9 @@ export const storage = {
 		},
 		getOptions(state) {
 			return state.options
+		},
+		getStorageTypes(state) {
+			return state.storageTypes
 		},
 	},
 	mutations: {
@@ -280,12 +287,13 @@ export const storage = {
 			                   condition,
 			                   issuingPersonStaffId,
 			                   acceptedPersonStaffId,
+			                   storageType,
 			                   interval,
 			                   owner,
 			                   calibration,
 			                   passportNumber,
 			                   comment,
-			                   isRouter
+			                   isRouter,
 		                   }) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/registration`,
@@ -295,6 +303,7 @@ export const storage = {
 					condition,
 					acceptedPersonStaffId,
 					issuingPersonStaffId,
+					storageType,
 					interval,
 					owner,
 					calibration,

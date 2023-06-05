@@ -1,5 +1,6 @@
 <template>
     <div>
+        <slot name="storage-select"></slot>
         <v-combobox
             :items="types"
             item-text="title"

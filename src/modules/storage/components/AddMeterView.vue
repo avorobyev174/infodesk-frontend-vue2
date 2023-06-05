@@ -43,17 +43,17 @@
                     <v-icon :color="colorGreen" large>mdi-plus-thick</v-icon>
                 </v-btn>
                 <v-btn
-                        @click="meterDeleteButtonOnClick"
-                        :disabled="formSubmit"
-                        :class="isRouter ? 'round-button' : ''"
+                    @click="meterDeleteButtonOnClick"
+                    :disabled="formSubmit"
+                    :class="isRouter ? 'round-button' : ''"
                 >
                     <v-icon :color="colorRed" large>mdi-minus-thick</v-icon>
                 </v-btn>
                 <v-btn
-                        @click="scannerActiveOnClick"
-                        :disabled="formSubmit"
-                        v-show="!(isRepair || isRouter)"
-                        :class="!(isRepair || isRouter) ? 'round-button' : ''"
+                    @click="scannerActiveOnClick"
+                    :disabled="formSubmit"
+                    v-show="!(isRepair || isRouter)"
+                    :class="!(isRepair || isRouter) ? 'round-button' : ''"
                 >
                     <v-icon :color="scannerButtonColor" large>mdi-barcode-scan</v-icon>
                 </v-btn>
@@ -128,6 +128,9 @@
 	export default {
 		name: "AddMeterView",
         data: () => ({
+	        STORAGE_LOCATION: 0,
+	        REPAIR_LOCATION: 1,
+	        SECOND_STORAGE_LOCATION: 7,
 	        loading: false,
 	        headers: [
 		        {
@@ -223,7 +226,8 @@
 			...mapGetters({
 				types: 'storage/getMeterTypes',
 				options: 'storage/getOptions',
-				typesInRepair: 'storage/getMeterRepairTypes',
+				locations: 'storage/getLocations',
+				typesInRepair: 'storage/getMeterRepairTypes'
 			}),
 		},
         methods: {
@@ -237,12 +241,14 @@
 
             checkIsRouter() {
 	            if (this.isRouter) {
-		            this.meterTypes = this.types.filter(type => type.option === 41)
+		            this.meterTypes = this.types.filter((type) => type.option === 41)
 		            this.type = { index: 46, title: 'RTR512.10-6L/EY' }
 	            } else if (this.isRepair) {
 		            this.meterTypes =  this.types.filter(type => this.typesInRepair.includes(type.index))
 		            if (this.meterTypes.length) {
-			            this.type = { index: this.meterTypes[0].index, title: this.meterTypes[0].title }
+		            	const [ defaultMeterType ] = this.meterTypes
+		            	const { index, title } = defaultMeterType
+			            this.type = { index, title }
 		            }
 	                this.meterTypeOnChange()
 	            } else  {
@@ -253,13 +259,29 @@
             },
 
 	        checkLocation(meter) {
+	        	const storageLocations = [ this.STORAGE_LOCATION, this.SECOND_STORAGE_LOCATION ]
 	        	if (this.isRouter) {
-			        return (meter.oldLocation === 1 && this.newLocation !== 1) ||
-				        (meter.oldLocation !== 1 && this.newLocation === 1)
+			        return meter.oldLocation === this.REPAIR_LOCATION
+                        ? this.newLocation !== this.REPAIR_LOCATION
+                        : this.newLocation === this.REPAIR_LOCATION
+
+			        // return (meter.oldLocation === this.REPAIR_LOCATION && this.newLocation !== this.REPAIR_LOCATION) ||
+				    //     (meter.oldLocation !== this.REPAIR_LOCATION && this.newLocation === this.REPAIR_LOCATION)
                 } else {
-			        return (meter.oldLocation === 0 && this.newLocation !== 0) ||
-				        (meter.oldLocation !== 0 && this.newLocation === 0)
-                }
+                    const nonStorageLocations = this.locations
+                        .map((location) => location.value)
+                        .filter((location) => !storageLocations.includes(location))
+
+                    if (storageLocations.includes(meter.oldLocation)) {
+                    	return nonStorageLocations.includes(this.newLocation)
+                    } else {
+	                    return storageLocations.includes(this.newLocation)
+                    }
+			        // return (meter.oldLocation === this.STORAGE_LOCATION && this.newLocation !== this.STORAGE_LOCATION) ||
+				    //     (meter.oldLocation !== this.STORAGE_LOCATION && this.newLocation === this.STORAGE_LOCATION) ||
+				    //     (meter.oldLocation === this.SECOND_STORAGE_LOCATION && this.newLocation !== this.SECOND_STORAGE_LOCATION) ||
+				    //     (meter.oldLocation !== this.SECOND_STORAGE_LOCATION && this.newLocation === this.SECOND_STORAGE_LOCATION)
+		        }
 	        },
 
             setLoading(loading) {
@@ -286,9 +308,7 @@
 			        this.meters.splice(this.selectedMeterIndex, 1)
 			        this.$emit('onMeterCountUpdate', this.meters.length)
 		        } else {
-			        this.showNotification(
-				        'Операция уже завершена, редактирование списка не доступно',
-				        this.colorBlue)
+			        this.showNotification( 'Операция уже завершена, редактирование списка не доступно', this.colorBlue)
 		        }
 	        },
 
@@ -361,11 +381,15 @@
 
 				        await correct.play()
 
+                        const oldLocation = this.isRouter
+                            ? this.REPAIR_LOCATION
+                            : this.newLocation ? this.SECOND_STORAGE_LOCATION : this.STORAGE_LOCATION
+
 				        this.meters.unshift({
 					        type: meterType,
 					        serialNumber: this.serialNumber,
 					        status: 0,
-					        oldLocation: this.isRouter ? 1: 0
+					        oldLocation
 				        })
 			        } else {
 			        	//прием выдача
@@ -380,15 +404,19 @@
 						        this.colorOrange)
 				        }
 
-				        const oldLocation = meterInDb[0].meter_location
-				        const guid = meterInDb[0].guid
-                        const meter = { type: meterType, serialNumber: this.serialNumber }
+				        const [ dbMeter ] = meterInDb
+                        const { meter_location, guid } = dbMeter
+				        // const oldLocation = meterInDb[0].meter_location
+				        // const guid = meterInDb[0].guid
+                        const meter = { type: meterType, serialNumber: this.serialNumber, guid }
 
 				        await correct.play()
 
-				        this.isRepair
-					        ? this.meters.unshift({ ...meter, guid })
-                            : this.meters.unshift({ ...meter, status: 0, oldLocation, guid })
+				        // this.isRepair
+					    //     ? this.meters.unshift({ ...meter, guid })
+                        //     : this.meters.unshift({ ...meter, status: 0, oldLocation, guid })
+
+				        this.meters.unshift(this.isRepair ? { ...meter } : { ...meter, status: 0, oldLocation: meter_location })
                     }
 
                     this.$emit('onMeterCountUpdate', this.meters.length)

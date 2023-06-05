@@ -30,6 +30,17 @@
                             ref="addOrEditView"
                             :is-router="isRouter"
                             >
+                                <template v-slot:storage-select>
+                                    <v-select
+                                        v-show="!isRouter"
+                                        v-model="storageType"
+                                        :items="storageTypes"
+                                        item-text="text"
+                                        item-value="value"
+                                        label="Тип склада"
+                                        :disabled="formSubmit"
+                                    />
+                                </template>
                                 <template v-slot:issuing-person-input>
                                     <v-text-field
                                         v-show="!isRouter"
@@ -48,7 +59,7 @@
                     <add-meter-view
                         :form-submit="formSubmit"
                         :meters="regMeters"
-                        :new-location="0"
+                        :new-location="storageType"
                         ref="addMeterTable"
                         @onResetValidation="resetValidation"
                         @onMeterCountUpdate="meterCountUpdate"
@@ -122,6 +133,7 @@
 			formValid: true,
 			formSubmit: false,
 			regMeters:  [],
+			storageType: 0,
 			oldLocationColor: 'grey',
             isRouter: false,
 			personRules: [
@@ -139,6 +151,7 @@
 			}),
 			...mapGetters({
 				staffId: 'getStaffId',
+				storageTypes: 'storage/getStorageTypes',
 			}),
 		},
         props: {
@@ -176,6 +189,9 @@
 
 	        open(isRouter) {
 	        	this.isRouter = isRouter
+                if ([ 124911, 23745 ].includes(this.staffId)) {
+	                this.storageType = 7
+                }
 		        this.dialogModel = true
 	        },
 
@@ -230,6 +246,7 @@
                         meters: this.regMeters,
                         issuingPersonStaffId: this.isRouter || !this.issuingPerson ? 0 : this.issuingPersonStaffId,
                         acceptedPersonStaffId: this.acceptedPersonStaffId,
+	                    storageType: this.storageType,
                         ...meterData
                     })
 

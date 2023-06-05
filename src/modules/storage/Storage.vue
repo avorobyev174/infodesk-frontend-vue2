@@ -50,7 +50,7 @@
                     <div class="header-filter-wrapper header-filter-serial-number-wrapper">
                         <v-text-field
                             class="p-3 pt-5 pb-0"
-                            label="Введите фильтр"
+                            label="Введите серийный номер"
                             append-icon="mdi-filter-check"
                             variant="solo"
                             @click:append="doFilter(`serialNumber`)"
@@ -302,7 +302,7 @@
 				{
 					text: 'Тип',
                     value: 'meter_type',
-                    sortable: false,
+                    sortable: true,
                     align: 'center',
                     cellClass: 'table-small-cell',
                     index: 1,
@@ -548,25 +548,6 @@
 				this.selectedHeaders = this.headers.filter(header => columns.includes(header.index))
 			},
 
-			//Обработка поиска
-            // doSearchOnEnter() {
-			// 	if (!this.search) {
-			// 		return
-			// 	}
-            //
-			// 	this.isSearchMeterView = true
-	        //     const searchedMeters = this.meters.filter((meter) => String(meter.serial_number).includes(this.search))
-            //
-	        //     this.setSearchMetersView(searchedMeters)
-            //     this.totalMeters = this.searchMetersView.length
-            // },
-            //
-            // searchOnClear() {
-			// 	if (this.isSearchMeterView) {
-			// 		this.initializeMeters()
-			// 	}
-            // },
-
 			//Инициализация компонента
             async initializeMeters() {
 				this.isSearchMeterView = false
@@ -686,7 +667,7 @@
     }
 
     .header-filter-serial-number-wrapper {
-        width: 250px;
+        width: 285px;
     }
 
     .header-filter-type-wrapper {

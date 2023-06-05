@@ -2,7 +2,7 @@
     <!-- Диалог приема/выдачи -->
     <v-dialog
         v-model="dialogModel"
-        max-width="1100px"
+        max-width="1200px"
         @click:outside="close"
         @keydown.esc="close"
     >
@@ -30,6 +30,15 @@
                             item-text="text"
                             item-value="value"
                             label="Тип операции"
+                            :disabled="formSubmit"
+                        />
+                        <v-select
+                            v-show="currentOperation === STORAGE_OPERATION"
+                            v-model="storageType"
+                            :items="storageTypes"
+                            item-text="text"
+                            item-value="value"
+                            label="Тип склада"
                             :disabled="formSubmit"
                         />
                         <v-text-field
@@ -123,8 +132,15 @@
 	        AddMeterView
         },
         data: () => ({
+	        STORAGE_LOCATION: 0,
+	        REPAIR_LOCATION: 1,
+	        SECOND_STORAGE_LOCATION: 7,
+	        EMPTY_STAFF_ID: 0,
 	        oldLocationColor: 'green',
 	        resultColor: 'grey',
+	        STORAGE_OPERATION: 9,
+	        REPAIR_OPERATION: 1,
+	        storageType: 0,
             meterCount: '',
             dialogOperations: [],
             dialogModel: false,
@@ -174,6 +190,7 @@
                 locations: 'storage/getLocations',
 	            operations: 'storage/getOperations',
 	            staffId: 'getStaffId',
+	            storageTypes: 'storage/getStorageTypes',
             }),
         },
 	    watch: {
@@ -181,12 +198,17 @@
 		        this.newLocation = operation
 		        switch (operation) {
 			        //case 5: this.needAcceptedPerson = false; break
-			        case 9:	this.newLocation = 0; break
+			        case 9:	this.newLocation = this.storageType; break
 			        case 11:  this.newLocation = 8; break
 			        case 12:  this.newLocation = 9; break
 		        }
 		        this.changeDefaultPerson(operation)
 		        this.resetValidation()
+            },
+		    storageType(newVal) {
+	        	if (this.currentOperation === this.STORAGE_OPERATION) {
+			        this.newLocation = newVal
+		        }
             },
 		    dialogModel: function (newVal) {
 			    if (newVal) {
@@ -224,12 +246,28 @@
 	        },
 
 	        checkIfMeterLocationValid(meter) {
+		        // if (this.isRouter) {
+			    //     return (meter.oldLocation === 1 && this.newLocation !== 1) ||
+				//         (meter.oldLocation !== 1 && this.newLocation === 1)
+		        // } else {
+			    //     return (meter.oldLocation === 0 && this.newLocation !== 0) ||
+				//         (meter.oldLocation !== 0 && this.newLocation === 0)
+		        // }
+		        const storageLocations = [ this.STORAGE_LOCATION, this.SECOND_STORAGE_LOCATION ]
 		        if (this.isRouter) {
-			        return (meter.oldLocation === 1 && this.newLocation !== 1) ||
-				        (meter.oldLocation !== 1 && this.newLocation === 1)
+			        return meter.oldLocation === this.REPAIR_LOCATION
+				        ? this.newLocation !== this.REPAIR_LOCATION
+				        : this.newLocation === this.REPAIR_LOCATION
 		        } else {
-			        return (meter.oldLocation === 0 && this.newLocation !== 0) ||
-				        (meter.oldLocation !== 0 && this.newLocation === 0)
+			        const nonStorageLocations = this.locations
+				        .map((location) => location.value)
+				        .filter((location) => !storageLocations.includes(location))
+
+			        if (storageLocations.includes(meter.oldLocation)) {
+				        return nonStorageLocations.includes(this.newLocation)
+			        } else {
+				        return storageLocations.includes(this.newLocation)
+			        }
 		        }
 	        },
 
@@ -240,10 +278,13 @@
             open(isRouter) {
 	            this.isRouter = isRouter
                 if (this.isRouter) {
-	                this.currentOperation = 1
+	                this.currentOperation = this.REPAIR_OPERATION
 	                this.dialogOperations = this.operations.filter(operation => operation.routerOperation)
                 } else {
 	                this.dialogOperations = this.operations.filter(operation => !operation.notAcceptOrIssueOperation)
+	                if ([ 124911, 23745 ].includes(this.staffId)) {
+		                this.storageType = 7
+	                }
                 }
 
 	           	this.dialogModel = true
@@ -256,8 +297,9 @@
 
 	        clear() {
 	        	this.meterCount = ''
-		        this.currentOperation = this.isRouter ? 1: 9
-		        this.newLocation = this.isRouter ? 1: 0
+		        this.currentOperation = this.isRouter ? this.REPAIR_OPERATION : this.STORAGE_OPERATION
+		        this.newLocation = this.isRouter ? this.REPAIR_LOCATION : this.STORAGE_LOCATION
+		        this.storageType = 0
 		        this.issuingPerson = ''
 		        this.acceptedPerson = ''
 		        this.comment = ''
@@ -293,12 +335,12 @@
 		        }
 
 		        if (this.isRouter) {
-			        if (this.currentOperation !== 1) {
-				        this.acceptedPersonStaffId = 0
+			        if (this.currentOperation !== this.REPAIR_OPERATION) {
+				        this.acceptedPersonStaffId = this.EMPTY_STAFF_ID
 				        this.issuingPersonStaffId = this.staffId
 			        } else {
 				        this.acceptedPersonStaffId = this.staffId
-				        this.issuingPersonStaffId = 0
+				        this.issuingPersonStaffId = this.EMPTY_STAFF_ID
 			        }
 		        }
 

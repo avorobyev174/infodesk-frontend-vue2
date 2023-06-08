@@ -34,6 +34,7 @@
 			        'getCurrentCountByLocationReport',
 			        'getRepairCountAndMaterialReport',
 			        'getSpentByYearReport',
+			        'getMaterialSpentByMonthReport'
 		        ]),
 
 		    async showStorageReport(report) {
@@ -47,6 +48,7 @@
 				    case 9: return this.showEmpGroupLogsByPeriodStorageReport(report)
 				    case 10: return this.showCurrentCountByLocationStorageReport(report)
 				    case 11: return this.showRepairAndMaterialStorageReport(report)
+				    case 12: return this.showSpentMaterialsByMonthStorageReport(report)
 			    }
 		    },
 
@@ -241,8 +243,6 @@
 					    data.push(record)
 				    }
 
-				    this.$refs.storageInputReportDialog.close()
-
 				    this.$refs.resultShowReportDialog.open(
 					    {
 						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
@@ -277,8 +277,6 @@
 					    }
 				    })
 
-				    this.$refs.storageInputReportDialog.close()
-
 				    this.$refs.resultShowReportDialog.open(
 					    {
 						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
@@ -310,8 +308,6 @@
                             issuing_person: this.getEmployeeTitleByStaffId(row.issuing_person),
                             accepted_person: this.getEmployeeTitleByStaffId(row.accepted_person)
 					    }))
-
-				    this.$refs.storageInputReportDialog.close()
 
 				    this.$refs.resultShowReportDialog.open(
 					    {
@@ -345,8 +341,6 @@
 					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
 				    }))
 
-				    this.$refs.storageInputReportDialog.close()
-
 				    this.$refs.resultShowReportDialog.open(
 					    {
 						    titles: [ 'Дата', 'Тип ПУ', 'Количество', 'Тип операции', 'Отдающий', 'Принимающий' ],
@@ -377,8 +371,6 @@
 					    issuingPerson: this.getEmployeeTitleByStaffId(row.issuingPerson),
 					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
 				    }))
-
-				    this.$refs.storageInputReportDialog.close()
 
 				    this.$refs.resultShowReportDialog.open(
 					    {
@@ -474,7 +466,36 @@
 	            } catch (e) {
 		            this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
 	            }
-            }
+            },
+
+		    async showSpentMaterialsByMonthStorageReport({ startDate, endDate, title }) {
+			    try {
+				    const response = await this.getMaterialSpentByMonthReport({ startDate, endDate })
+				    this.$refs.storageInputReportDialog.close()
+
+				    if (!response.length) {
+					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+				    }
+
+				    const data = response.map((row) => ({
+					    ...row,
+					    item_id: this.getMaterialTypeTitle(row.item_id),
+				    }))
+
+				    this.$refs.resultShowReportDialog.open(
+					    {
+						    titles: [ 'Материал', 'Количество' ],
+						    dialogTitle: title,
+						    additional: `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    data
+					    },
+					    500,
+					    800
+				    )
+			    } catch (e) {
+				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			    }
+		    },
         }
     }
 </script>

@@ -135,6 +135,7 @@
 		            case 3:
 		            	reportInputData = {	type: this.type.index, serialNumber: this.serialNumber };
 		            	break
+                    case 12:
 		            case 4:
 		            	reportInputData = {	startDate: this.startDate, endDate: this.endDate };
 		            	break

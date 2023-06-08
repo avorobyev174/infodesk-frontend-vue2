@@ -484,10 +484,11 @@
 				        return !(availableMeter.updateField.includes('Используемые материалы:') ||
                             !availableMeter.updateField.includes('Статус ремонта:'))
 			        } else if (this.currentTab === 'meterWorkabilityTab') {
-				        return !availableMeter.updateField.includes('Статус ремонта:')
+				        return availableMeter.updateField.includes('Используемые материалы:') &&
+                            !availableMeter.updateField.includes('Статус ремонта:')
 			        }
                 }
-	        	return true
+                return this.currentTab === 'materialInsertTab'
             },
 
 	        checkIfUpdateFieldIsValidForButtonAll(availableMeter) {

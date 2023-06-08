@@ -49,7 +49,7 @@
                 {id: 4, title: 'Групповая отправка смс', onClick: 'groupSmsSend', icon: 'mdi-email-arrow-right', color: 'primary', disabled: false},
                 {id: 5, title: 'Получить все статусы смс после групповой отправки', onClick: 'groupSmsStatusCheck', icon: 'mdi-email-check', color: 'primary', disabled: false},
                 {id: 6, title: 'Актуализировать данные из СТЭКа', onClick: 'actualizeFromStek', icon: 'mdi-database-import', color: 'primary', disabled: false},
-                {id: 8, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', disabled: false},
+                {id: 8, title: 'Видимость колонок', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', disabled: false},
                 //{id: 9, title: 'Показать/Скрыть загруженные в Пирамиду', localOnClick: 'showHidePyramidMeters', icon: 'mdi-pyramid', color: 'primary', disabled: false, show: true},
                 {id: 10, title: 'Показать список утилизированных', onClick: 'showBrokenMeters', icon: 'mdi-alert-remove', color: 'primary', disabled: false, show: true},
             ],

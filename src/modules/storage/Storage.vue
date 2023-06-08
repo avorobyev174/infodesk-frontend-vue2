@@ -179,7 +179,8 @@
                         class="pr-2"
                         @acceptOrIssue="$refs.acceptOrIssueDialog.open(false)"
                         @register="$refs.registerDialog.open(false)"
-                        @showHideColums="$refs.showHideColumnsDialog.open()"
+                        @showHideColumns="$refs.showHideColumnsDialog.open()"
+                        @showHideAllMeters="showHideAllMeters"
                         @routerRegister="$refs.registerDialog.open(true)"
                         @routerAcceptOrIssue="$refs.acceptOrIssueDialog.open(true)"
                         @repairOrMaterialsAdd="$refs.repairAndMaterialsDialog.open()"
@@ -401,7 +402,8 @@
             filters: {},
             searchMeters: [],
 			actions: [],
-            isObserver: false
+            isObserver: false,
+            isRepairShowAllFilter: false
 		}),
 		created() {
 			this.setCookies()
@@ -553,7 +555,7 @@
 				this.isSearchMeterView = false
                 try {
 	                if (this.roles?.storage_module === 'repairer') {
-		                this.options.role = 'repairer'
+		                this.options.role = this.isRepairShowAllFilter ? 'keeper' : 'repairer'
 	                }
 
 	                this.totalMeters = await this.fetchMetersPerPage(this.options)
@@ -592,7 +594,7 @@
                 } else {
                 	try {
 		                if (this.roles?.storage_module === 'repairer') {
-			                this.options.role = 'repairer'
+			                this.options.role = this.isRepairShowAllFilter ? 'keeper' : 'repairer'
 		                }
 
 		                this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
@@ -606,6 +608,7 @@
 				this.filterBySerialNumber = ''
 				this.filterByType = []
 				this.filterByLocation = []
+				this.filterByOwner = []
             },
 
             checkAllFilters() {
@@ -618,16 +621,15 @@
                 }
 
 	            this.filterByType.length
-		            ? this.filters['types'] = this.filterByType.map(type => type.index)
+		            ? this.filters['types'] = this.filterByType.map((type) => type.index)
 	                : delete this.filters['types']
 
-
 	            this.filterByLocation.length
-                    ? this.filters['locations'] = this.filterByLocation.map(loc => loc.value)
+                    ? this.filters['locations'] = this.filterByLocation.map((loc) => loc.value)
                     : delete this.filters['locations']
 
 	            this.filterByOwner.length
-		            ? this.filters['owners'] = this.filterByOwner.map(owner => owner.staffId)
+		            ? this.filters['owners'] = this.filterByOwner.map((owner) => owner.staffId)
 		            : delete this.filters['owners']
             },
 
@@ -635,6 +637,17 @@
 				this.filterBySerialNumber = ''
 				this.doFilter()
 			},
+
+			async showHideAllMeters(actionType) {
+                if (actionType === 'show') {
+                    this.isRepairShowAllFilter = true
+                } else {
+                    this.options.page = 1
+	                this.isRepairShowAllFilter = false
+                    this.resetFilters()
+                }
+                await this.initializeMeters()
+            }
 		},
 	}
 </script>

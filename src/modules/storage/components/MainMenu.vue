@@ -22,7 +22,7 @@
             <v-list-item
                 v-for="(action, i) in actions"
                 :key="i"
-                @click="$emit(action.onClick)"
+                @click="action.onClick ? $emit(action.onClick) : localFuncCall(action)"
                 v-show="action.visible"
             >
                 <v-list-item-icon>
@@ -51,7 +51,8 @@
 	            { id: 3, title: 'Регистрация маршрутизатора', onClick: 'routerRegister', icon: 'mdi-plus-thick', color: 'primary', visible: true },
 	            { id: 4, title: 'Прием/Выдача маршрутизатора', onClick: 'routerAcceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
 	            { id: 5, title: 'Ремонт/Прием материалов', onClick: 'repairOrMaterialsAdd', icon: 'mdi-cog', color: 'primary', visible: true },
-	            { id: 6, title: 'Показать/Скрыть колонки', onClick: 'showHideColums', icon: 'mdi-eye', color: 'primary', visible: true },
+	            { id: 6, title: 'Видимость колонок', onClick: 'showHideColumns', icon: 'mdi-eye', color: 'primary', visible: true },
+	            { id: 7, title: 'Показать все счетчики', localOnClick: 'showHideAllMeters', icon: 'mdi-eye-check', color: 'primary', visible: true, type: 'show' },
             ],
         }),
 		computed: {
@@ -65,10 +66,31 @@
 		        this.actions[2].visible = false
 		        this.actions[3].visible = false
 		        this.actions[4].visible = false
+		        this.actions[6].visible = false
 	        }
 	        if (this.roles && this.roles.storage_module && this.roles.storage_module === 'repairer') {
 		        this.actions[0].visible = false
 		        this.actions[1].visible = false
+	        }
+        },
+        methods: {
+	        localFuncCall(action) {
+		        switch(action.id) {
+			        case 7: this.showHideAllMeters(action); break
+		        }
+	        },
+	        showHideAllMeters(action) {
+		        this.$emit('showHideAllMeters', action?.type)
+
+		        if (action.icon === 'mdi-eye-remove') {
+			        action.icon = 'mdi-eye-check'
+			        action.title = 'Показать все счетчики'
+			        action.type = 'show'
+		        } else {
+			        action.icon = 'mdi-eye-remove'
+			        action.title = 'Скрыть все счетчики'
+			        action.type = 'hide'
+		        }
 	        }
         }
 	}

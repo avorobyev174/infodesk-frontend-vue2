@@ -55,7 +55,7 @@
                         v-if="item.diff === 'diff' && item.oldMeterData.customer_address !== item.newMeterData.customer_address"
                         :color="colorOrange"
                     >
-                        {{ `${item.oldMeterData.customer_address ? item.oldMeterData.customer_address : 'отсутствует'}`+ '  →  ' + item.newMeterData.customer_address }}
+                        {{ `${item.oldMeterData.customer_address ? item.oldMeterData.customer_address : 'отсутствует' }`+ '  →  ' + item.newMeterData.customer_address }}
                     </v-chip>
                     <v-chip
                         v-else-if="item.diff === 'not_exist'"

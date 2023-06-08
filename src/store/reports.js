@@ -164,6 +164,15 @@ export const reports = {
         
             return response.data
         },
+    
+        async getMaterialSpentByMonthReport({ state, commit }, { startDate, endDate }) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-spent-by-month-report`,
+                { startDate, endDate },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
     },
     namespaced: true
 }

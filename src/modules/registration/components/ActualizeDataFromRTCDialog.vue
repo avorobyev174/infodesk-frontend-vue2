@@ -93,13 +93,16 @@
                             }
                         })
 
-                        if (!find) meter.actualizeStatus = 'не найден в базе ростелекома'
+                        if (!find) {
+	                        meter.actualizeStatus = 'не найден в базе ростелекома'
+                        }
                     })
 
-                    if (this.actualizeMeters.length > 0)
+                    if (this.actualizeMeters.length)
                         this.dialogModel = true
-                    else
-                        this.showNotification('В базе ростелекома не найдено подходящих счетчиков для актуализации', this.colorOrange)
+                    else {
+	                    this.showNotification('В базе ростелекома не найдено подходящих счетчиков для актуализации', this.colorOrange)
+                    }
                 } catch (e) {
                     this.showNotificationComponentError(this.componentTitle, e)
                 }
@@ -111,7 +114,7 @@
 
                 if (!this.successActualize) {
                     //console.log(this.actualizeMeters)
-                    this.actualizeMeters.forEach(meter => {
+                    this.actualizeMeters.forEach((meter) => {
                         //сохранение данных в бд и замена данных в главной таблице
                         this.updateMeterDataFromRTC(meter).then(
                             result => {

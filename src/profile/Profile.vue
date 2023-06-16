@@ -13,7 +13,7 @@
             </v-avatar>
             <div class="pl-5">
                 <p class="text-h5 profile__full-name mb-1"> {{ fullName }} </p>
-                <p class="profile__job-title">{{ jobTitle }}</p>
+                <p class="job-title">{{ jobTitle }}</p>
                 <v-btn color="primary" @click="changePasswordDialogOpen">Сменить пароль</v-btn>
             </div>
         </div>
@@ -24,37 +24,44 @@
 </template>
 
 <script>
-    import { mapActions } from "vuex";
-    import ChangePasswordDialog from "./components/ChangePasswordDialog";
+    import { mapActions } from "vuex"
+    import ChangePasswordDialog from "./components/ChangePasswordDialog"
 
     export default {
         name: 'Profile',
         components: {
-	        ChangePasswordDialog: ChangePasswordDialog
+	        ChangePasswordDialog
         },
-        inject: ['showNotificationStandardError', 'checkAuth'],
+        inject: [ 'showNotificationError', 'checkAuth' ],
         data: () => ({
             photoUrl: '',
             fullName: 'неизвестно',
             jobTitle: 'неизвестно',
         }),
         mounted() {
-            if (!this.checkAuth())
-                return
-
-            this.getData()
+            if (!this.checkAuth()) {
+	            return
+            }
+            this.setProfileData()
         },
         methods: {
-            ...mapActions('profile', ['getProfileData']),
-            async getData() {
-                const info = await this.getProfileData()
-                if (info.length === 0)
-                    return
+            ...mapActions('profile', [ 'getProfileData' ]),
 
-                this.photoUrl = this.$store.state.serverUrl + `/images/${info[0].photo_url}`
-                this.fullName = info[0].full_name
-                this.jobTitle = info[0].job_title
+            async setProfileData() {
+            	try {
+                    const info = await this.getProfileData()
+                    if (!info) {
+                        return
+                    }
+                    const { photo_url, full_name, job_title } = info
+                    this.photoUrl = this.$store.state.serverUrl + `/images/${ photo_url }`
+                    this.fullName = full_name
+                    this.jobTitle = job_title
+	            } catch (e) {
+                    this.showNotificationError(e)
+	            }
             },
+
 	        changePasswordDialogOpen() {
             	this.$refs.reportDialog.open()
             }
@@ -67,7 +74,7 @@
         display: flex;
     }
 
-    .profile__job-title {
+    .job-title {
         color: rgba(0, 0, 0, 0.6);
         font-size: 14px;
     }

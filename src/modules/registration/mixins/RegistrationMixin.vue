@@ -9,7 +9,10 @@
 		name: "RegistrationMixin",
 		computed: {
 			...mapGetters({
-
+				phases: 'registration/getPhases',
+				status: 'registration/getStatus',
+				smsStatus: 'registration/getSmsStatus',
+				ipAddresses: 'registration/getIpAddress',
 			})
 		},
 		methods: {
@@ -67,6 +70,36 @@
 				}
 
 				return `${ year }-${ month }-${ day }`
+			},
+
+			getSmsColorByStatus(smsStatus) {
+				const smsSt = this.smsStatus.find((status) => smsStatus === status.value)
+				return smsSt ? smsSt.color : smsStatus
+			},
+
+			getSmsTitleBySmsStatus(smsStatus) {
+				const smsSt = this.smsStatus.find((status) => smsStatus === status.value)
+				return smsSt ? smsSt.title : smsStatus
+			},
+
+			getMeterTypeTitle(meterType) {
+				const mType = this.types.find((type) => meterType === type.value)
+				return mType ? mType.text : meterType
+			},
+
+			getStatusTitle(meterStatus) {
+				const status = this.status.find((status) => meterStatus === status.value)
+				return status ? status.text : meterStatus
+			},
+
+			getPhaseTitle(meterPhase) {
+				const mPhase = this.phases.find((phase) => meterPhase === phase.value)
+				return mPhase ? mPhase.text : meterPhase
+			},
+
+			getIpAddressTitle(ipAddress) {
+				const isAddr = this.ipAddresses.find((address) => ipAddress === address.value)
+				return isAddr ? isAddr.text : ipAddress
 			},
 		}
 	}

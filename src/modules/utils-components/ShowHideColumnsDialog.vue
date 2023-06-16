@@ -61,12 +61,12 @@
 	            required: true
             }
         },
-        inject: ['showNotification', 'showNotificationError'],
+        inject: [ 'showNotification', 'showNotificationError' ],
         computed: {
-            ...mapState(['colorBlue', 'colorGreen'])
+            ...mapState([ 'colorBlue', 'colorGreen' ])
         },
         methods: {
-            ...mapActions('registration', ['saveSettings']),
+            ...mapActions('registration', [ 'saveSettings' ]),
             open() {
                 this.columns = this.selectedHeaders.map(header => header.index)
                 this.dialogModel = true
@@ -86,6 +86,18 @@
                 }
 	            if (this.moduleName === 'storage') {
 		            $cookies.set('meter_storage_columns', this.columns, '4h')
+
+		            this.saveSettings(this.columns).then(
+			            response =>  {
+				            this.showNotification(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены', this.colorGreen)
+				            this.dialogModel = false
+			            },
+			            e => this.showNotificationError('Ошибка при обновлении или создании настроек колонок', e)
+		            )
+		            this.$emit('changeColumns', this.columns)
+	            }
+	            if (this.moduleName === 'service') {
+		            $cookies.set('meter_service_columns', this.columns, '4h')
 
 		            this.saveSettings(this.columns).then(
 			            response =>  {

@@ -57,14 +57,14 @@
               required: true
           }
         },
-        inject: ['showNotification', 'showNotificationError', 'moduleName'],
+        inject: [ 'showNotification', 'showNotificationError', 'moduleName' ],
         computed: {
-            ...mapState(['colorBlue', 'colorGreen'])
+            ...mapState([ 'colorBlue', 'colorGreen' ])
         },
         methods: {
             ...mapActions('registration', ['saveSettings']),
             open() {
-                this.columns = this.selectedHeaders.map(header => header.index)
+                this.columns = this.selectedHeaders.map((header) => header.index)
                 this.dialogModel = true
             },
             save() {

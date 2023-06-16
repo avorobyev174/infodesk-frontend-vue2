@@ -15,6 +15,7 @@ import Welcome from "../modules/Welcome"
 import Admin from "../modules/Admin"
 import Storage from "../modules/storage/Storage"
 import Repair from "../modules/repair/Repair"
+import Service from "../modules/service/Service"
 
 Vue.use(VueRouter)
 
@@ -88,6 +89,11 @@ const routes = [
     path: '/repair',
     name: 'Repair',
     component: Repair
+  },
+  {
+    path: '/service',
+    name: 'Service',
+    component: Service
   },
   {
     path: "*",

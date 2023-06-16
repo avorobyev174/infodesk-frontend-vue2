@@ -107,7 +107,8 @@
 
 <script>
 	import SimpleDialog from "../utils-components/SimpleDialog"
-	import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
+	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+	import RegistrationMixin from "../registration/mixins/RegistrationMixin"
 
 	export default {
 		name: "Repair",
@@ -145,20 +146,26 @@
         },
 		inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
         mounted() {
-	        if (!this.checkAuth())
+	        if (!this.checkAuth()) {
 		        return
+	        }
 
-	        if (!this.activeModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
+	        if (!this.activeModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
 		        this.$router.push('/')
+	        }
 
 	        this.initializeMeters()
 
-	        document.onkeydown = () => {
-		        const route = this.$route.name === 'Repair'
-		        if (window.event.keyCode === 18 && route)
+	        document.onkeydown = (evt) => {
+		        if (this.$route.name !== 'Repair') {
+			        return
+		        }
+		        if (evt.key === 'Alt') {
 			        this.initializeMeters()
+		        }
 	        }
         },
+		mixins: [ RegistrationMixin ],
 		created() {
 			const isFavorite = $cookies.get('common_favorite_module')
 
@@ -172,23 +179,19 @@
 		        'fetchMeters',
                 'setProgrammingValue'
 	        ]),
+			...mapActions('registration', [
+				'fetchTypes'
+			]),
 
-	        initializeMeters() {
-		        this.fetchMeters().then(
-			        result => {
-				        this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
-			        },
-			        e => this.showNotificationStandardError(e)
-		        )
+	        async initializeMeters() {
+				try {
+					await this.fetchTypes()
+					await this.fetchMeters()
+					this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
+                } catch (e) {
+					this.showNotificationStandardError(e)
+				}
 	        },
-
-			getMeterTypeTitle(meterType) {
-				return this.types.find(type => meterType === type.value).text
-			},
-
-			getIpAddressTitle(ipAddress) {
-				return this.ipAddresses.find(address => ipAddress === address.value).text
-			},
 
 			openProgrammingDoneDialog(item) {
 				this.programmingDialogModel = true

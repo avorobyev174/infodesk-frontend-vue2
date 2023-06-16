@@ -5,14 +5,18 @@
                 <div class="col">
                     <h5 class="mx-auto text-sm-h6 text-wrap text-center mt-2">Разделение зарегистрированных счетчиков по типу</h5>
                     <apex-chart
-                            v-show="typeSeries"
-                            type="donut"
-                            ref="pieTypesChart"
-                            :options="registrationTypesOptions"
-                            :series="typeSeries"
-                            height="350"
+                        v-show="typeSeries"
+                        type="donut"
+                        ref="pieTypesChart"
+                        :options="registrationTypesOptions"
+                        :series="typeSeries"
+                        height="350"
                     />
                 </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
                 <div class="col">
                     <h5 class="mx-auto text-sm-h6 text-wrap text-center mt-2">Разделение не загруженных в пирамиду счетчиков по типу</h5>
                     <apex-chart
@@ -526,7 +530,7 @@
         customerTypeSeries: [],
         regSeries: [],
         streetSeries: [],
-        streetsChartHeight: 20000,
+        streetsChartHeight: 30000,
         addInPyramidSeries: [],
         componentTitle: 'Графики данных',
         windowWidth: 0,
@@ -540,40 +544,45 @@
 	    $cookies.get('common_favorite_module') === '/charts' ? this.setFavoriteModuleColor(this.colorGold) : this.setFavoriteModuleColor('')
     },
     mounted() {
-        if (!this.checkAuth())
-            return
+        if (!this.checkAuth()) {
+	        return
+        }
 
-	    if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
+	    if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
 		    this.$router.push('/')
+	    }
 
 	    this.setBackgroundImage(false)
 
         this.registrationCustomerTypesOptions = { ...this.registrationTypesOptions }
-
-        setTimeout(()=> {
-            this.getMeterRegistrationChartSeries()
-            this.getMeterInPyramidChartSeries()
-            this.getMeterRegistrationTypesChartSeries()
-            this.getMeterRegistrationStreetsChartSeries()
-            this.getMeterRegistrationCustomerTypeChartSeries()
-            this.getMeterRegistrationNotInPyramidTypeChartSeries()
-            this.getMeterRegistrationInPyramidCountChartSeries()
-            this.getMeterRegistrationActiveInPyramidChartSeries()
-        }, 250)
-
+	    this.fetchTypes().then(
+		    result => {
+			    setTimeout(()=> {
+				    this.getMeterRegistrationChartSeries()
+				    this.getMeterInPyramidChartSeries()
+				    this.getMeterRegistrationTypesChartSeries()
+				    this.getMeterRegistrationStreetsChartSeries()
+				    this.getMeterRegistrationCustomerTypeChartSeries()
+				    this.getMeterRegistrationNotInPyramidTypeChartSeries()
+				    this.getMeterRegistrationInPyramidCountChartSeries()
+				    this.getMeterRegistrationActiveInPyramidChartSeries()
+			    }, 250)
+		    },
+		    error => this.showNotificationStandardError(error)
+	    )
         this.windowWidth = window.innerWidth
     },
     watch: {
-        windowWidth(newVal, oldVal) {
-            this.registrationTypesOptions.legend.position,
-                this.registrationCustomerTypesOptions.legend.position = newVal < 1000 ? 'top' : 'left'
-
+        windowWidth(newVal) {
+            this.registrationCustomerTypesOptions.legend.position = newVal < 1000 ? 'top' : 'left'
             this.$refs.pieTypesChart.updateOptions(this.registrationTypesOptions)
             this.$refs.pieCustomerTypesChart.updateOptions(this.registrationCustomerTypesOptions)
         }
     },
     computed: {
-        ...mapGetters('registration', ['getTypes']),
+	    ...mapGetters({
+		    types: 'registration/getTypes',
+	    }),
     },
     methods: {
         ...mapMutations(['setFavoriteModuleColor']),
@@ -588,8 +597,11 @@
                 'getMeterRegistrationInPyramidCountChartData',
                 'getMeterRegistrationActiveInPyramidChartData'
             ]),
+	    ...mapActions('registration', [
+		    'fetchTypes',
+	    ]),
 
-        resize(e) {
+        resize() {
             this.windowWidth = window.innerWidth
         },
 
@@ -602,8 +614,8 @@
 
                 response.forEach(record => {
                     total += parseInt(record.count)
-                    series.push([new Date(record.day), record.count])
-                    seriesTotal.push([new Date(record.day), total])
+                    series.push([ new Date(record.day), record.count ])
+                    seriesTotal.push([ new Date(record.day), total ])
                 })
 
                 this.regSeries = [
@@ -626,7 +638,7 @@
                 response.forEach(record => {
                     total += parseInt(record.count)
                     const time = new Date(record.day).getTime()
-                    series.push([time, record.count])
+                    series.push([ time, record.count ])
                     seriesTotal.push([time, total])
                 })
 
@@ -646,16 +658,15 @@
                 let series = []
                 let labels = []
 
-                response.forEach(record => {
+                response.forEach((record) => {
                     series.push(parseInt(record.count))
                     labels.push(this.getMeterTypeTitle(record.type))
                 })
 
                 this.typeSeries = series
                 if (this.$refs && this.$refs.pieTypesChart)
-                    this.$refs.pieTypesChart.updateOptions({labels: labels})
+                    this.$refs.pieTypesChart.updateOptions({ labels: labels })
             } catch (e) {
-	            console.log(e)
                 this.showNotificationComponentError(this.componentTitle + '(Разделение зарегистрированных счетчиков по типу)', e)
             }
         },
@@ -671,12 +682,11 @@
                     record.customer_type === null
                         ? labels.push('Отсутствует')
                         : labels.push((record.customer_type))
-
                 })
 
                 this.customerTypeSeries = series
                 if (this.$refs && this.$refs.pieCustomerTypesChart)
-                    this.$refs.pieCustomerTypesChart.updateOptions({labels: labels})
+                    this.$refs.pieCustomerTypesChart.updateOptions({ labels: labels })
             } catch (e) {
                 this.showNotificationComponentError(this.componentTitle, e)
             }
@@ -741,7 +751,6 @@
 
             try {
                 const response = await this.getMeterRegistrationStreetsChartData()
-                //console.log(response)
                 let streetMap = new Map()
 
                 response
@@ -755,7 +764,7 @@
                             ? streetMap.set(street, streetMap.get(street) + 1)
                             : streetMap.set(street, 1)
                     })
-                //console.log(streetMap)
+
                 streetMap = new Map([ ...streetMap ]
                     .sort((a, b) => { return b[1] - a[1] }))
 
@@ -782,11 +791,12 @@
 			                    }
 		                    ]
 	                    })
-                    } else
+                    } else {
 	                    data.push({
 		                    x: address,
 		                    y: countNow,
 	                    })
+                    }
                 })
 
                 this.planProgress = `Выполнение плана: ${ totalNow }/${ totalPlan }`
@@ -808,8 +818,9 @@
                 })
 
                 this.notInPyramidTypeSeries = series
-                if (this.$refs && this.$refs.pieNotInPyramidTypeChart)
-                    this.$refs.pieNotInPyramidTypeChart.updateOptions({labels})
+                if (this.$refs && this.$refs.pieNotInPyramidTypeChart) {
+	                this.$refs.pieNotInPyramidTypeChart.updateOptions({ labels })
+                }
             } catch (e) {
 	            console.log(e)
                 this.showNotificationComponentError(this.componentTitle + '(Разделение не загруженных в пирамиду счетчиков по типу)', e)
@@ -825,8 +836,9 @@
                 response.forEach(record => series.push(parseInt(record.count)))
 
                 this.inPyramidCountSeries = series
-                if (this.$refs && this.$refs.pieInPyramidCountChart)
-                    this.$refs.pieInPyramidCountChart.updateOptions({labels})
+                if (this.$refs && this.$refs.pieInPyramidCountChart) {
+	                this.$refs.pieInPyramidCountChart.updateOptions({labels})
+                }
             } catch (e) {
                 this.showNotificationComponentError(this.componentTitle, e)
             }
@@ -836,19 +848,20 @@
             try {
                 const response = await this.getMeterRegistrationActiveInPyramidChartData()
                 let labels = ['Есть показания', 'Нет показаний']
-                //console.log(response)
 
-                this.activeInPyramidCountSeries = [response.withData, response.total - response.withData]
-                if (this.$refs && this.$refs.pieActiveInPyramidCountChart)
-                    this.$refs.pieActiveInPyramidCountChart.updateOptions({labels})
+                this.activeInPyramidCountSeries = [ response.withData, response.total - response.withData ]
+                if (this.$refs && this.$refs.pieActiveInPyramidCountChart) {
+	                this.$refs.pieActiveInPyramidCountChart.updateOptions({ labels })
+                }
             } catch (e) {
                 this.showNotificationComponentError(this.componentTitle, e)
             }
         },
 
-        getMeterTypeTitle(meterType) {
-            return this.getTypes.find(type => meterType === type.value).text
-        },
+	    getMeterTypeTitle(meterType) {
+		    const mType = this.types.find((type) => meterType === type.value)
+		    return mType ? mType.text : meterType
+	    },
     }
   }
 </script>

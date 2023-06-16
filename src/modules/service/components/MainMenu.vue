@@ -12,15 +12,16 @@
                 v-bind="attrs"
                 v-on="on"
                 height="40px"
+                class="mr-2"
             >
-                <v-icon size="30px">mdi-file-excel</v-icon>
+                <v-icon size="30px">mdi-menu</v-icon>
             </v-btn>
         </template>
         <v-list>
             <v-list-item
                 v-for="(action, i) in actions"
                 :key="i"
-                @click="action.onClick ? $emit(action.onClick) : localFuncCall(action)"
+                @click="$emit(action.onClick)"
             >
                 <v-list-item-icon>
                     <v-icon
@@ -38,33 +39,27 @@
 
 <script>
     export default {
-        name: "ExcelMenu",
+        name: "MainMenu",
         data: () => ({
             actions: [
-                {
-                	id: 1,
-                    title: 'Скачать excel файл для загрузки в Пирамиду',
-                    onClick: 'saveExcelDataToPyramid',
-                    icon: 'mdi-file-upload',
-                    color: 'primary'
-                },
-                {
-                	id: 2,
-                    title: 'Скачать excel файл с обновленными счетчиками в СТЭКе',
-                    onClick: 'saveExcelRefreshDataToPyramid',
-                    icon: 'mdi-file-refresh',
-                    color: 'primary'
-                },
+                { id: 1, title: 'Обновить', onClick: 'refresh', icon: 'mdi-refresh', color: 'primary', disabled: false },
+                { id: 2, title: 'Видимость колонок', onClick: 'showHideColumns', icon: 'mdi-eye', color: 'primary', disabled: false },
             ],
         }),
         methods: {
-
 
         }
     }
 </script>
 
 <style scoped>
+    .active {
+        display: none;
+    }
+
+    .hidden {
+        display: flex;
+    }
 
     .v-list-item__icon:first-child {
         margin-right: 10px !important;

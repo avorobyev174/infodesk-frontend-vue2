@@ -77,7 +77,7 @@
             reason: 1,
             comment: '',
             reasons: [
-                {text: 'Не исправен', value: 1},
+                { text: 'Не исправен', value: 1 },
             ],
             serialNumber: '',
             type: '',
@@ -89,47 +89,45 @@
                 required: true
             },
         },
-        inject: ['getMeterTypeTitle', 'showNotification', 'showNotificationError'],
+        inject: [ 'getMeterTypeTitle', 'showNotification', 'showNotificationError' ],
         methods: {
-            ...mapActions('registration', ['markMeter']),
+            ...mapActions('registration', [ 'markMeter' ]),
             open(item) {
                 this.item = item
                 this.serialNumber = item.serial_number
                 this.type = this.getMeterTypeTitle(item.type)
                 this.dialogModel = true
             },
+
             close() {
                 this.dialogModel = false
                 this.comment = ''
             },
-            marked() {
-                this.markMeter({meter: this.item, reason: this.reason, comment: this.comment}).then(
-                    data => {
-                        const markedMeter = data[0]
 
-                        const updatedMainMeter = this.meters.find((meter) => {
-                            return markedMeter.id === meter.id
-                        })
-                        console.log(updatedMainMeter)
+            async marked() {
+            	try {
+		            const meterData = await this.markMeter({ meter: this.item, reason: this.reason, comment: this.comment })
+		            const [ markedMeter ] = meterData
 
-                        markedMeter.address = 'СНЯТ'
-                        markedMeter.sms_id = null
-                        markedMeter.sms_status = 1
-                        markedMeter.customer = null
-                        markedMeter.customer_address = null
-                        markedMeter.customer_phone = null
-                        markedMeter.customer_type = null
-                        markedMeter.customer_email = null
-                        markedMeter.in_pyramid = 0
-                        markedMeter.loaded = null
-                        markedMeter.personal_account = null
+		            const updatedMainMeter = this.meters.find((meter) => markedMeter.id === meter.id)
 
-                        Object.assign(updatedMainMeter, markedMeter)
-                        this.dialogModel = false
-                    }
-                ).catch(
-                    e => this.showNotificationError('Произошла ошибка при утилизации счетчка', e)
-                )
+		            markedMeter.address = 'СНЯТ'
+		            markedMeter.sms_id = null
+		            markedMeter.sms_status = 1
+		            markedMeter.customer = null
+		            markedMeter.customer_address = null
+		            markedMeter.customer_phone = null
+		            markedMeter.customer_type = null
+		            markedMeter.customer_email = null
+		            markedMeter.in_pyramid = 0
+		            markedMeter.loaded = null
+		            markedMeter.personal_account = null
+
+		            Object.assign(updatedMainMeter, markedMeter)
+		            this.dialogModel = false
+                } catch (e) {
+		            this.showNotificationError('Произошла ошибка при утилизации счетчка', e)
+	            }
             }
         }
     }

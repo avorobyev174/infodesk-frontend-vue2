@@ -86,13 +86,13 @@
 	                this.actualizeMeters.length = 0
                     this.showNotification('Ожидаем ответа от базы СТЭКа, пожалуйста подождите (ожидаемое время 2-3 мин)', this.colorBlue)
                     this.setLoading(true)
-                    this.meters.forEach(meter => {
-                        if (meter.personal_account === null) {
+                    this.meters.forEach((meter) => {
+                        if (!meter.personal_account) {
 	                        this.actualizeMeters.push({ ...meter, actualizeStatus: 'нет' })
                         }
                     })
 
-                    if (this.actualizeMeters.length > 0) {
+                    if (this.actualizeMeters.length) {
 	                    this.updatedMeters = await this.actualizeMetersDataFromStek()
 
                         if (!this.updatedMeters.length) {
@@ -100,9 +100,9 @@
                             this.close()
                         } else {
                             this.actualizeMeters =
-                                this.actualizeMeters.filter(meter => {
+                                this.actualizeMeters.filter((meter) => {
                                     let updMeter = this.updatedMeters
-                                        .find(updatedMeter => updatedMeter.serial_number === meter.serial_number)
+                                        .find((updatedMeter) => updatedMeter.serial_number === meter.serial_number)
 
                                     if (!updMeter) {
 	                                    return false
@@ -152,7 +152,7 @@
                                     result => {
                                         const updatedMeter = result.data
                                         const mainUpdatedMeter = this.meters
-                                            .find(mainMeter => updatedMeter.id === mainMeter.id)
+                                            .find((mainMeter) => updatedMeter.id === mainMeter.id)
 
                                         Object.assign(mainUpdatedMeter, updatedMeter)
                                         meter.actualizeStatus = 'да'

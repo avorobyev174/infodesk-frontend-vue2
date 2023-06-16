@@ -235,7 +235,7 @@ import ExcelMenu from "./components/ExcelMenu"
 import RefreshDataFromStekToPyramidDialog from "./components/RefreshDataFromStekToPyramidDialog"
 import SimpleDialog from "../utils-components/SimpleDialog"
 import BrokenMetersDialog from "./components/BrokenMetersDialog"
-import RegistrationMixin from "../mixins/RegistrationMixin"
+import RegistrationMixin from "./mixins/RegistrationMixin"
 
 export default {
   name: "MeterRegistration",
@@ -308,9 +308,10 @@ export default {
       { title: 'Актуализировать данные из СТЕКа', action: 'actualizeDataFromStek', icon: 'mdi-database-import' },
     ]
   }),
-  inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
+  inject: [ 'showNotification', 'showNotificationStandardError', 'checkAuth' ],
   provide: function () {
     return {
+      formatDate: this.formatDate,
       getMeterTypeTitle: this.getMeterTypeTitle,
       getPhaseTitle: this.getPhaseTitle,
       getStatusTitle: this.getStatusTitle,
@@ -322,11 +323,7 @@ export default {
   computed: {
     ...mapGetters({
       meters: 'registration/getMeters',
-      phases: 'registration/getPhases',
       types: 'registration/getTypes',
-      status: 'registration/getStatus',
-      smsStatus: 'registration/getSmsStatus',
-      ipAddresses: 'registration/getIpAddress',
       getCookies: 'getCookies'
     }),
     ...mapState({
@@ -361,15 +358,14 @@ export default {
     if (!this.checkAuth())
       return
 
-    if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
+    if (!this.$store.getters.getActiveModules.filter((module) => module.name === this.$route.name.toLowerCase()).length) {
       this.$router.push('/')
     }
 
-    try {
-      this.fetchMeters(this.showMetersInPyramid)
-    } catch (e) {
-      this.showNotificationStandardError(e)
-    }
+    this.fetchTypes().then(
+        result => this.fetchMeters(this.showMetersInPyramid),
+        error => this.showNotificationStandardError(error)
+    )
 
     document.onkeydown = (evt) => {
       if (this.$route.name !== 'Programming') {
@@ -378,16 +374,17 @@ export default {
       if (evt.key === '+' && this.$refs.addOrEditDialog) {
         this.$refs.addOrEditDialog.open()
       }
+
       if (evt.key === 'Alt') {
         this.initialize()
       }
     }
   },
   methods: {
-    ...mapMutations('registration', ['setMeters']),
     ...mapMutations(['setFavoriteModuleColor']),
     ...mapActions('registration', [
       'fetchMeters',
+      'fetchTypes',
       'fetchBrokenMeters',
       'getNonActiveInPyramidMeters',
       'removeMeterPyramidLoadValue',
@@ -398,8 +395,9 @@ export default {
     ]),
 
     setCookies() {
-      if (this.getCookies)
-        this.settings.forEach(setting => this.checkAndSetCookieValue(setting))
+      if (this.getCookies) {
+        this.settings.forEach((settings) => this.checkAndSetCookieValue(settings))
+      }
     },
 
     //Обработка куки
@@ -409,52 +407,27 @@ export default {
         const module = this.getCookies[this.moduleName]
         if (module) {
           const cookie = module.find(cookie => cookie.settings === settings)
-          if (cookie)
+          if (cookie) {
             $cookies.set(cookieName, cookie.value, '4h')
+          }
         }
       }
     },
 
     changeColumnsVisibility(columns) {
-      this.selectedHeaders = this.headers.filter(header => columns.includes(header.index))
-    },
-
-    getSmsColorByStatus(smsStatus) {
-      return this.smsStatus.find(status => smsStatus === status.value).color
-    },
-
-    getSmsTitleBySmsStatus(smsStatus) {
-      return this.smsStatus.find(status => smsStatus === status.value).title
-    },
-
-    getMeterTypeTitle(meterType) {
-      return this.types.find(type => meterType === type.value).text
-    },
-
-    getStatusTitle(meterStatus) {
-      const status = this.status.find(status => meterStatus === status.value)
-      return status ? status.text : meterStatus
-    },
-
-    getPhaseTitle(meterPhase) {
-      return this.phases.find(phase => meterPhase === phase.value).text
-    },
-
-    getIpAddressTitle(ipAddress) {
-      const isAddr = this.ipAddresses.find((address) => ipAddress === address.value)
-      return isAddr ? isAddr.text : ipAddress
+      this.selectedHeaders = this.headers.filter(({ index }) => columns.includes(index))
     },
 
     //Обработчик события ручной загрузки данных
-    initialize() {
-      this.fetchMeters(this.showMetersInPyramid).then(
-        result => {
-          this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
-          this.showPyramidIconColor = this.showMetersInPyramid ? 'primary' : 'grey'
-          this.showPyramidToolTipTitle = this.showMetersInPyramid ? 'Скрыть загруженные в пирамиду' : 'Показать загруженные в пирамиду'
-        },
-        e => this.showNotificationStandardError(e)
-      )
+    async initialize() {
+      try {
+        await this.fetchMeters(this.showMetersInPyramid)
+        this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
+        this.showPyramidIconColor = this.showMetersInPyramid ? 'primary' : 'grey'
+        this.showPyramidToolTipTitle = this.showMetersInPyramid ? 'Скрыть загруженные в пирамиду' : 'Показать загруженные в пирамиду'
+      } catch (e) {
+        this.showNotificationStandardError(e)
+      }
     },
 
     showPyramidMeters() {

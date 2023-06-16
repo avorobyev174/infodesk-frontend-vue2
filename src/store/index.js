@@ -14,15 +14,19 @@ import { reports } from "@/store/reports"
 import { search } from "@/store/search"
 import { storage } from "@/store/storage"
 import { repair } from "@/store/repair"
+import { service } from "@/store/service"
 
 import router from '../router/index.js'
+import { get } from "axios"
 
 export default new Vuex.Store({
   state: {
       sideBarState: true,
       staffId: 0,
+      accountId: 0,
       roles: null,
       activeModules: [],
+      accounts: {},
       isUserLogin: false,
       colorRed: 'red lighten-1',
       colorBlue: 'blue lighten-1',
@@ -39,47 +43,75 @@ export default new Vuex.Store({
       getSideBarState(state) {
           return state.sideBarState
       },
+      
       getActiveModules(state) {
         return state.activeModules
       },
+      
       isLogin(state) {
         return state.isUserLogin
       },
+      
       getCookies(state) {
         return state.cookies
       },
+      
       getFavoriteModuleColor(state) {
         return state.favoriteModuleColor
       },
+      
       getStaffId(state) {
           return state.staffId
       },
+      
       getRoles(state) {
           return state.roles
-      }
+      },
+    
+      getAccounts(state) {
+          return state.accounts
+      },
+    
+      getAccountId(state, accountId) {
+          return state.accountId
+      },
   },
 
   mutations: {
       setSideBarState(state, sideBarState) {
         state.sideBarState = sideBarState
       },
+      
       setActiveModules(state, activeModules) {
         state.activeModules = activeModules
       },
+      
       login(state, isUserLogin) {
         state.isUserLogin = isUserLogin
       },
+      
       setCookies(state, cookies) {
         state.cookies = cookies
       },
+      
       setFavoriteModuleColor(state, color) {
         state.favoriteModuleColor = color
       },
+      
       setStaffId(state, staffId) {
           state.staffId = staffId
       },
+    
+      setAccountId(state, accountId) {
+          state.accountId = accountId
+      },
+      
       setRoles(state, roles) {
           state.roles = roles
+      },
+    
+      setAccounts(state, accounts) {
+          state.accounts = accounts
       },
   },
 
@@ -87,21 +119,21 @@ export default new Vuex.Store({
     async loginUser({state, commit}, { authToken, roleToken, cookies }) {
       $cookies.set('auth_token', authToken, '4h')
       $cookies.set('role_token', roleToken, '4h')
-
+    
       commit('login', true)
       commit('setCookies', cookies)
-
+    
       let redirect = '/'
-
+    
       if (cookies && cookies.common && cookies.common.length) {
-        cookies.common.forEach(c => {
-          if (c.settings === 'favorite_module') {
-            redirect = c.value
-            $cookies.set(`common_${c.settings}`, c.value, '4h')
+        cookies.common.forEach((cookie) => {
+          if (cookie.settings === 'favorite_module') {
+            redirect = cookie.value
+            $cookies.set(`common_${ cookie.settings }`, cookie.value, '4h')
           }
         })
       }
-
+    
       await router.push(redirect)
     },
     
@@ -110,8 +142,16 @@ export default new Vuex.Store({
       $cookies.remove('role_token')
       commit('login', false)
       await router.push('/login')
+    },
+    
+    async fetchAccounts({ state, commit }) {
+        const response = await get(
+            this.state.serverUrl + `/api/common/accounts`,
+            { headers: { 'authorization': $cookies.get('auth_token') } })
+        commit('setAccounts', response.data)
     }
   },
+
   modules: {
     registration,
     charts,
@@ -122,6 +162,7 @@ export default new Vuex.Store({
     search,
     reports,
     storage,
-    repair
+    repair,
+    service,
   }
 })

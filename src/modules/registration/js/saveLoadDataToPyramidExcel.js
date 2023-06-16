@@ -1,17 +1,7 @@
 import * as XLSX from 'xlsx/xlsx.mjs'
 import { saveAs } from 'file-saver'
-
-function stringToArrayBuffer(str) {
-    let buf = new ArrayBuffer(str.length)
-    let view = new Uint8Array(buf)
-    for (let i = 0; i < str.length; i++)
-        view[i] = str.charCodeAt(i) & 0xFF
-    return buf
-}
-
-function validDate(x) {
-    return String(x).padStart(2, '0')}
-
+import { stringToArrayBuffer, dateFormat } from "../../Utils"
+const ACCURACY_CLASSES_TYPES = [ 107, 116, 113, 114, 115, 139, 143, 105, 144, 140, 141, 142, 111, 117, 119, 120 ]
 export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
     let pyramidMeterArray = []
     let pyramidIndividualArray = []
@@ -28,84 +18,84 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
         address = address.replaceAll('.',' ')
         const date = new Date(meter.created)
         const yesterdayDate = new Date(date.setDate(date.getDate() - 1))
-        const installDate = `${ validDate(date.getDate()) }.${ validDate(date.getMonth() + 1) }.${ date.getFullYear() }`
-        const releaseAndVerificationDate = `${ validDate(yesterdayDate.getDate()) }.${ validDate(yesterdayDate.getMonth() + 1) }.${ yesterdayDate.getFullYear() }`
-        const accuracyClass = [ 16, 25, 27, 28, 29, 5, 6, 7, 18, 20, 21, 22, 23, 30, 31, 33 ].includes(meter.type) ? '' : '1'
+        const installDate = `${ dateFormat(date) }`
+        const releaseAndVerificationDate = `${ dateFormat(yesterdayDate) }`
+        const accuracyClass = ACCURACY_CLASSES_TYPES.includes(meter.type) ? '' : '1'
         let user = ''
         let type = ''
         let password = ''
         switch (meter.type) {
-            case 2:
-            case 9:
-            case 11:
-            case 12:
-            case 13:
-            case 15:
-            case 19:
+            case 133:
+            case 134:
+            case 136:
+            case 137:
+            case 126:
+            case 128:
+            case 129:
                 type = 'Приборы с поддержкой протокола СПОДЭС - Меркурий 204 (СПОДЭС)';
                 password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
                 break;
-            case 5:
-            case 20:
-            case 21:
-            case 22:
-            case 26:
+            case 139:
+            case 140:
+            case 141:
+            case 142:
+            case 131:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-04 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            case 6:
+            case 143:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            case 7:
+            case 105:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-07 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            case 16:
+            case 107:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ207 (СПОДЭС)';
                 password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            case 18:
+            case 144:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            case 23:
+            case 111:
                 type = 'МИРТЕК - МИРТЕК-212-РУ';
                 password = '2843068834';
                 break
-            case 31:
-            case 33:
+            case 119:
+            case 120:
                 type = 'МИРТЕК - МИРТЕК-232-РУ';
                 password = '2843068834';
                 break
-            case 25:
+            case 116:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ303 (СПОДЭС)';
                 password = '010703';
                 break
-            case 27:
+            case 113:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ208 (СПОДЭС)';
                 password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            case 28:
-            case 29:
-            case 32:
+            case 114:
+            case 115:
+            case 122:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ308 (СПОДЭС)';
                 password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            case 30:
+            case 117:
                 type = 'Приборы с поддержкой протокола СПОДЭС - РТМ-01D(B) (СПОДЭС)';
                 password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
                 break
-            default :
+            default:
                 type = 'Инкотекс - Меркурий 234';
                 password = '010703';
                 user = 'На запись';
@@ -176,16 +166,17 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
         let individualFullNameArray = data[0].split(' ')
 
         if (individualFullNameArray.length > 3) {
-            individualFullNameArray = individualFullNameArray.filter(el => { if (el) return el })
+            individualFullNameArray = individualFullNameArray.filter(el => el)
         }
 
-        while (individualFullNameArray.length < 3)
+        while (individualFullNameArray.length < 3) {
             individualFullNameArray.push('')
+        }
 
         data.shift()
-        return [index + 1, ...individualFullNameArray, ...data]
+        return [ index + 1, ...individualFullNameArray, ...data ]
     })
-    pyramidBusinessArray = pyramidBusinessArray.map((data, index) => [index + 1, ...data])
+    pyramidBusinessArray = pyramidBusinessArray.map((data, index) => [ index + 1, ...data ])
 
     let workBook = XLSX.utils.book_new()
     let tableMeters = []
@@ -377,6 +368,10 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
         { s: { r: 0, c: 7 }, e: { r: 0, c: 8 }}
     ]
 
-    let workBookOut = XLSX.write(workBook, {bookType:'xlsx',  type: 'binary'})
-    saveAs(new Blob([stringToArrayBuffer(workBookOut)],{type:"application/octet-stream"}), 'pyramid.xlsx')
+    const workBookOut = XLSX.write(workBook, { bookType:'xlsx',  type: 'binary' })
+    saveAs(new Blob(
+        [ stringToArrayBuffer(workBookOut) ],
+        { type: 'application/octet-stream' }),
+        'pyramid.xlsx'
+    )
 }

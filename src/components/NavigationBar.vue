@@ -86,7 +86,6 @@
         colorGold: state => state.colorGold,
       }),
       isWelcomePage () {
-        //console.log(this.$route.name)
         return this.$route.name === 'Welcome'
       }
     },
@@ -105,7 +104,6 @@
           this.setFavoriteModuleColor(this.colorGold)
           route = this.$route.fullPath
           $cookies.set('common_favorite_module', route, '3h')
-          console.log(route)
         } else {
           this.setFavoriteModuleColor('')
           $cookies.remove('common_favorite_module')

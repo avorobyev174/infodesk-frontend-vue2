@@ -171,9 +171,9 @@
                 required: true
             }
         },
-        inject: ['showNotification', 'showNotificationComponentError', 'getMeterTypeTitle', 'getIpAddressTitle'],
+        inject: [ 'showNotification', 'showNotificationComponentError', 'getMeterTypeTitle', 'getIpAddressTitle' ],
         computed: {
-            ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue']),
+            ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue' ]),
             okButtonTitle() {
                 return this.successActualize ? 'Скачать excel файл для удаления' : 'Актуализировать'
             },
@@ -182,8 +182,8 @@
 	        }
         },
         methods: {
-            ...mapMutations('registration', ['setLoading']),
-            ...mapActions('registration', ['refreshMetersDataFromStek','saveRefreshedMeterDataFromStek']),
+            ...mapMutations('registration', [ 'setLoading' ]),
+            ...mapActions('registration', [ 'refreshMetersDataFromStek','saveRefreshedMeterDataFromStek' ]),
             //Обработчик открытия диалога актуализации из стэка
             async open() {
                 try {
@@ -191,7 +191,7 @@
                     this.setLoading(true)
 
                     const data = await this.refreshMetersDataFromStek()
-                    this.refreshMeters = data.diff.map(m =>  { return { ...m, actualizeStatus: 'нет'} })
+                    this.refreshMeters = data.diff.map(m => ({ ...m, actualizeStatus: 'нет'}))
 
                     //console.log(this.refreshMeters)
                     this.setLoading(false)
@@ -274,7 +274,6 @@
                             let refreshMeter = meter.newMeterData ? meter.newMeterData : emptyMeter
                             const diff = meter.diff
                             refreshMeter = { ...refreshMeter, id: meter.oldMeterData.id, data: meter.oldMeterData }
-                            console.log(refreshMeter)
                             //сохранение данных в бд и замена данных в главной таблице
                             this.saveRefreshedMeterDataFromStek(refreshMeter).then(
                                 result => {
@@ -326,13 +325,11 @@
             },
 
 	        showAllListMeters() {
-		        //console.log(this.refreshOtherMeters)
 		        this.showAllList = !this.showAllList
 		        this.refreshMeters =
                     this.showAllList
 		            ? this.refreshMeters.concat(this.refreshOtherMeters)
                     : this.refreshMeters.filter(m => m.readyToActualize)
-		        console.log(this.refreshMeters)
             }
         },
     }

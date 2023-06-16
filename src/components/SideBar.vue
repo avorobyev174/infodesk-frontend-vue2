@@ -60,36 +60,30 @@
 </template>
 
 <script>
-  import {mapGetters, mapState} from "vuex";
-  import jwt from "jsonwebtoken";
+  import { mapGetters, mapState } from "vuex"
+  import jwt from "jsonwebtoken"
 
   export default {
       data: () => ({
           modules: [
-              { title: 'Склад', icon: 'mdi-meter-electric-outline', url: '/storage', name: 'storage'},
-              { title: 'Программирование', icon: 'mdi-desktop-classic', url: '/programming', name: 'programming'},
-              { title: 'ОРБ', icon: 'mdi-progress-pencil', url: '/repair', name: 'repair'},
-              { title: 'Поиск', icon: 'mdi-card-search-outline', url: '/search', name: 'search'},
-              { title: 'Графики', icon: 'mdi-chart-bar', url: '/charts', name: 'charts'},
-              { title: 'Отчеты', icon: 'mdi-file-excel', url: '/reports', name: 'reports'},
-              { title: 'Карта', icon: 'mdi-map', url: '/map', name: 'map'},
-              { title: 'Утилиты', icon: 'mdi-cog-outline', url: '/test-utils', name: 'test-utils'},
-              { title: 'Управление', icon: 'mdi-shield-crown-outline', url: '/admin', name: 'admin'},
+              { title: 'Склад', icon: 'mdi-meter-electric-outline', url: '/storage', name: 'storage' },
+              { title: 'Программирование', icon: 'mdi-desktop-classic', url: '/programming', name: 'programming' },
+              { title: 'Поручения', icon: 'mdi-clipboard-text-multiple-outline', url: '/service', name: 'service' },
+              { title: 'ОРБ', icon: 'mdi-progress-pencil', url: '/repair', name: 'repair' },
+              { title: 'Поиск', icon: 'mdi-card-search-outline', url: '/search', name: 'search' },
+              { title: 'Графики', icon: 'mdi-chart-bar', url: '/charts', name: 'charts' },
+              { title: 'Отчеты', icon: 'mdi-file-excel', url: '/reports', name: 'reports' },
+              { title: 'Карта', icon: 'mdi-map', url: '/map', name: 'map' },
+              { title: 'Утилиты', icon: 'mdi-cog-outline', url: '/test-utils', name: 'test-utils' },
+              { title: 'Управление', icon: 'mdi-shield-crown-outline', url: '/admin', name: 'admin' },
           ],
           availableModules: [],
           drawer: true,
       }),
-      inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
+      inject: [ 'showNotification', 'showNotificationStandardError', 'showNotificationError', 'checkAuth' ],
       computed: {
-        ...mapGetters(['getSideBarState', 'getSideBarActiveModules']),
-        ...mapState({
-          colorBlue: state => state.colorBlue,
-          colorRed: state => state.colorRed,
-          colorGreen: state => state.colorGreen,
-          colorOrange: state => state.colorOrange,
-          colorGrey: state => state.colorGrey,
-          colorGold: state => state.colorGold,
-        }),
+        ...mapGetters([ 'getSideBarState', 'getSideBarActiveModules' ]),
+        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
       },
       created() {
          try {
@@ -101,10 +95,11 @@
 
             const modulesArr = options.access_modules.split(',').map(m => m.trim())
             const staffId = options.staff_id
+            const accId = options.acc_id
             const roles = JSON.parse(options.roles)
 
             if (modulesArr.length) {
-                this.availableModules = this.modules.filter(i => modulesArr.includes(i.name))
+                this.availableModules = this.modules.filter((module) => modulesArr.includes(module.name))
                 this.$store.commit('setActiveModules', this.availableModules)
             }
             if (staffId) {
@@ -113,8 +108,11 @@
             if (roles) {
                 this.$store.commit('setRoles', roles)
             }
+           if (accId) {
+             this.$store.commit('setAccountId', accId)
+           }
          } catch (e) {
-           this.showNotification('Не получены настройки роли с сервера', this.colorRed)
+           this.showNotificationError('Что то пошло не так при получении настроек с сервера')
          }
       },
   }

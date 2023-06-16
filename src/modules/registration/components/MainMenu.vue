@@ -77,6 +77,7 @@
     .active {
         display: none;
     }
+
     .hidden {
         display: flex;
     }

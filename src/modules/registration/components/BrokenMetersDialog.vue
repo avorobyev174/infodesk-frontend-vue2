@@ -47,7 +47,7 @@
                     <span>Данные не найдены</span>
                 </template>
                 <template v-slot:item.created="{ item }">
-                    {{ getDateTime(item.created) }}
+                    {{ formatDate(item.created) }}
                 </template>
                 <template v-slot:item.acc_id="{ item }">
                     {{ getAccountTitle(item.acc_id) }}
@@ -96,19 +96,23 @@
             meters: [],
             accounts: []
         }),
-        inject: ['showNotification', 'showNotificationComponentError', 'showNotificationStandardError', 'getMeterTypeTitle' ],
+        inject: [
+        	'showNotification',
+            'showNotificationComponentError',
+            'showNotificationStandardError',
+            'getMeterTypeTitle',
+            'formatDate',
+        ],
         computed: {
             ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue'])
         },
         methods: {
-            ...mapActions('registration', ['fetchBrokenMeters']),
+            ...mapActions('registration', [ 'fetchBrokenMeters' ]),
             //Обработчик открытия диалога актуализации из ростелекома
             async open() {
                 try {
-                    //получаем список сим карт с данных от ростелекома и обновляем данные в диалоге
                     let response = await this.fetchBrokenMeters()
-                    //console.log(response)
-                    this.meters = response.meters.map(row => { return {...row, data: JSON.parse(row.data)}})
+                    this.meters = response.meters.map((row) => ({ ...row, data: JSON.parse(row.data) }))
                     this.accounts = response.accounts
 
                     if (this.meters.length) {
@@ -129,29 +133,15 @@
             },
 
             getAccountTitle(accountId) {
-                const fullName = this.accounts.find(acc => acc.id === accountId).full_name
+                const fullName = this.accounts.find((acc) => acc.id === accountId).full_name
                 const fullNameArr = fullName.split(' ')
-                return `${fullNameArr[0]} ${fullNameArr[1].slice(0, 1)}. ${fullNameArr[2].slice(0, 1)}.`
+                return `${ fullNameArr[0] } ${ fullNameArr[1].slice(0, 1) }. ${ fullNameArr[2].slice(0, 1) }.`
             },
 
             //Обработчик закрытия диалога актуализации
             close() {
                 this.dialogModel = false
             },
-
-            getDateTime(dateTime) {
-                const date = new Date(dateTime)
-                const year = date.getFullYear()
-                let month = String(date.getMonth() + 1)
-                let day = String(date.getDate())
-                const hours = date.getHours()
-                const minutes = date.getMinutes()
-                const seconds = date.getSeconds()
-                //return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`
-                day = day.length < 2 ? day.padStart(2, '0') : day
-                month = month.length < 2 ? month.padStart(2, '0') : month
-                return `${day}.${month}.${year}`
-            }
         }
     }
 </script>

@@ -9,39 +9,39 @@ export const registration = {
             { text: '3-ф', value: 3 },
         ],
         types: [
-            { text: 'Меркурий 204 ARTM-02 POBH.G', value: 1 }, // при добавлении нового типа счетчика, добавь информацию
-            { text: 'Меркурий 204 ARTM2-02 DPOBH.G1', value: 2 }, // по парсингу серийного номера в AddOrEditDialog
-            { text: 'Меркурий 234 ARTM2-02 POBR.G', value: 3 }, //плюс нужно ли на бэкенде отправлять смс?
-            { text: 'Меркурий 234 ARTM2-03 PBR.G', value: 4 }, //после актуализации РТК + актуализация СТЭК(разделение на типы)
-            { text: 'МИР С-04.10-230-5(100)-GRPZ1F-KQ-G-D', value: 5 }, //при выгрузке в Excel для пирамиды
-            { text: 'МИР С-05.10-230-5(80)-G-KNQ-D', value: 6 },
-            { text: 'МИР С-07.05S-230-5(10)-GR-Q-G-D', value: 7 },
-            { text: 'Меркурий 203.2T GROB', value: 8 },
-            { text: 'Меркурий 204 ARTM-02 DPOBR.G', value: 9 },
-            { text: 'Меркурий 204 ARTM-02 POBR.G', value: 10 },
-            { text: 'Меркурий 204 ARTM2-02 DPOBH.G', value: 11 },
-            { text: 'Меркурий 204 ARTM2-02 DPOBR.G1', value: 12 },
-            { text: 'Меркурий 234 ARTM-03 DPBR.G', value: 13 },
-            { text: 'Меркурий 234 ARTM2-00 PBR.G', value: 14 },
-            { text: 'Меркурий 234 ARTM2-02 DPOBR.G', value: 15 },
-            { text: 'Энергомера СЕ207 R7.849.2.OG.QUVLF GS01', value: 16 },
-            { text: 'Меркурий 204 ARTM-02 POB.G', value: 17 },
-            { text: 'МИР C-05.10-230-5(80)-G2Z1B-KNQ-E-D', value: 18 },
-            { text: 'Меркурий 234 ARTM2-03 DPBR.G', value: 19 },
-            { text: 'МИР С-04.10-230-5(100)-Z1B-KNQ-E-D', value: 20 },
-            { text: 'МИР С-04.10-230-5(100)-GPZ1F-KNQ-E-D', value: 21 },
-            { text: 'МИР С-04.10-230-5(100)-GZ1B-KNQ-E-D', value: 22 },
-            { text: 'МИРТЕК-212-РУ-W9', value: 23 },
-            { text: 'Меркурий 234 ARTM-02 PB.G', value: 24 },
-            { text: 'Энергомера СЕ303 S31746 JGVZ', value: 25 },
-            { text: 'Меркурий 234 ARTM2-02 DPOBR.G1', value: 26 },
-            { text: 'Энергомера CE208 S7.846.2.OG.QYUVFLZ GS01 SPDS', value: 27 },
-            { text: 'Энергомера CE308 S34.746.OG.QYUVLFZ GS01 SPDS 3', value: 28 },
-            { text: 'Энергомера CE308 S31.543.OAG.SYUVJLFZ GS01 SPDS', value: 29 },
-            { text: 'РОТЕК РТМ-01 D2D3Y-31Y20-O21IS', value: 30 },
-            { text: 'МИРТЕК-232-РУ-W32-A1R1', value: 31 },
-            { text: 'Энергомера CE308 S31.503.OAG.SYUVJLFZ GS01 SPDS', value: 32 },
-            { text: 'МИРТЕК-232-РУ-W32-A0,5R1', value: 33 },
+            // { text: 'Меркурий 204 ARTM-02 POBH.G', value: 1 }, // при добавлении нового типа счетчика, добавь информацию
+            // { text: 'Меркурий 204 ARTM2-02 DPOBH.G1', value: 2 }, // по парсингу серийного номера в AddOrEditDialog
+            // { text: 'Меркурий 234 ARTM2-02 POBR.G', value: 3 }, //плюс нужно ли на бэкенде отправлять смс?
+            // { text: 'Меркурий 234 ARTM2-03 PBR.G', value: 4 }, //после актуализации РТК + актуализация СТЭК(разделение на типы)
+            // { text: 'МИР С-04.10-230-5(100)-GRPZ1F-KQ-G-D', value: 5 }, //при выгрузке в Excel для пирамиды
+            // { text: 'МИР С-05.10-230-5(80)-G-KNQ-D', value: 6 },
+            // { text: 'МИР С-07.05S-230-5(10)-GR-Q-G-D', value: 7 },
+            // { text: 'Меркурий 203.2T GROB', value: 8 },
+            // { text: 'Меркурий 204 ARTM-02 DPOBR.G', value: 9 },
+            // { text: 'Меркурий 204 ARTM-02 POBR.G', value: 10 },
+            // { text: 'Меркурий 204 ARTM2-02 DPOBH.G', value: 11 },
+            // { text: 'Меркурий 204 ARTM2-02 DPOBR.G1', value: 12 },
+            // { text: 'Меркурий 234 ARTM-03 DPBR.G', value: 13 },
+            // { text: 'Меркурий 234 ARTM2-00 PBR.G', value: 14 },
+            // { text: 'Меркурий 234 ARTM2-02 DPOBR.G', value: 15 },
+            // { text: 'Энергомера СЕ207 R7.849.2.OG.QUVLF GS01', value: 16 },
+            // { text: 'Меркурий 204 ARTM-02 POB.G', value: 17 },
+            // { text: 'МИР C-05.10-230-5(80)-G2Z1B-KNQ-E-D', value: 18 },
+            // { text: 'Меркурий 234 ARTM2-03 DPBR.G', value: 19 },
+            // { text: 'МИР С-04.10-230-5(100)-Z1B-KNQ-E-D', value: 20 },
+            // { text: 'МИР С-04.10-230-5(100)-GPZ1F-KNQ-E-D', value: 21 },
+            // { text: 'МИР С-04.10-230-5(100)-GZ1B-KNQ-E-D', value: 22 },
+            // { text: 'МИРТЕК-212-РУ-W9', value: 23 },
+            // { text: 'Меркурий 234 ARTM-02 PB.G', value: 24 },
+            // { text: 'Энергомера СЕ303 S31746 JGVZ', value: 25 },
+            // { text: 'Меркурий 234 ARTM2-02 DPOBR.G1', value: 26 },
+            // { text: 'Энергомера CE208 S7.846.2.OG.QYUVFLZ GS01 SPDS', value: 27 },
+            // { text: 'Энергомера CE308 S34.746.OG.QYUVLFZ GS01 SPDS 3', value: 28 },
+            // { text: 'Энергомера CE308 S31.543.OAG.SYUVJLFZ GS01 SPDS', value: 29 },
+            // { text: 'РОТЕК РТМ-01 D2D3Y-31Y20-O21IS', value: 30 },
+            // { text: 'МИРТЕК-232-РУ-W32-A1R1', value: 31 },
+            // { text: 'Энергомера CE308 S31.503.OAG.SYUVJLFZ GS01 SPDS', value: 32 },
+            // { text: 'МИРТЕК-232-РУ-W32-A0,5R1', value: 33 },
         ],
         status: [
             { text: 'Действующий', value: 2 },
@@ -85,14 +85,16 @@ export const registration = {
         getIpAddress(state) {
             return state.ipAddress
         },
-       
     },
     mutations: {
         setMeters(state, meters) {
-            state.meters = meters;
+            state.meters = meters
         },
         setLoading(state, bool) {
             state.isMetersLoading = bool
+        },
+        setTypes(state, types) {
+            state.types = types
         },
     },
     actions: {
@@ -100,17 +102,26 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.post(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/meters`,
+                    this.state.serverUrl + `/api/${ this.state.registration.serverModuleName }/meters`,
                     { inPyramid: inPyramid },
                     { headers: { 'authorization': $cookies.get('auth_token') } })
-
+                
                 commit('setMeters', response.data)
                 return response.data
             } finally {
                 commit('setLoading', false)
             }
         },
+    
+        async fetchTypes({ state, commit }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${ this.state.registration.serverModuleName }/meter-types`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
 
+            const meterTypes = response.data.map((type) => ({ value: type.id, text: type.type_name }))
+            commit('setTypes', meterTypes)
+        },
+    
         async addMeter({ state, commit }, { serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway }) {
             try {
                 commit('setLoading', true)

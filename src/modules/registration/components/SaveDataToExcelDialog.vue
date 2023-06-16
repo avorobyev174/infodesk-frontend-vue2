@@ -161,19 +161,18 @@
                         let house =
                             addressArray[1]
                                 ? addressArray[2]
-                                    ? `${addressArray[1]}, ${addressArray[2]}`
-                                    : `${addressArray[1]}`
+                                    ? `${ addressArray[1]}, ${addressArray[2] }`
+                                    : `${ addressArray[1] }`
                                 : addressArray[0]
 
                         meter.calculatedHouse = house
                         meter.readyToLoad = false
                         this.availableMetersArray.push(Object.assign({}, meter))
-	                    console.log(this.availableMetersArray)
                         this.availableStreetsArray.push(house)
                     }
                 })
 
-                if (this.availableMetersArray.length > 0) {
+                if (this.availableMetersArray.length) {
                     this.dialogModel = true
                     this.defaultMetersArray = this.availableMetersArray
                 }
@@ -189,8 +188,9 @@
                 this.availableMetersArray = []
                 this.defaultMetersArray.length = []
                 this.availableStreetsArray.length = []
-                if (this.$refs.addressSelect)
-                    this.$refs.addressSelect.reset()
+                if (this.$refs.addressSelect) {
+	                this.$refs.addressSelect.reset()
+                }
                 this.selectAll = false
                 this.hide = false
             },
@@ -200,11 +200,11 @@
             },
 
             groupAddressOnChange(houses) {
-                if (houses.length !== 0) {
+                if (houses.length) {
                     let selectedMeters = []
-                    houses.forEach(house => {
-                        selectedMeters = selectedMeters.concat(this.defaultMetersArray
-                                                                    .filter(meter => house === meter.calculatedHouse))
+                    houses.forEach((house) => {
+                    	const metersArray = this.defaultMetersArray.filter((meter) => house === meter.calculatedHouse)
+                        selectedMeters = selectedMeters.concat(metersArray)
                     })
                     this.availableMetersArray = selectedMeters
                 } else {
@@ -214,7 +214,7 @@
 
             saveDataToExcel() {
                 let preUpdateArray = this.availableMetersArray
-                        .filter(meter => meter.in_pyramid === 0 && meter.loaded === null)
+                        .filter(meter => meter.in_pyramid === 0 && !meter.loaded)
                 if (!preUpdateArray.length) {
                     this.showNotification('Нет подходящих записей для выгрузки в excel', this.colorOrange)
                     return
@@ -223,37 +223,35 @@
             },
 
             selectAllClick() {
-                this.availableMetersArray = this.availableMetersArray.map(meter => {
-                    let readyToLoad = meter.in_pyramid === 1 && meter.loaded !== null ? false : !this.selectAll
-                    return {...meter, readyToLoad: readyToLoad}
+                this.availableMetersArray = this.availableMetersArray.map((meter) => {
+                    const readyToLoad = meter.in_pyramid === 1 && meter.loaded ? false : !this.selectAll
+                    return { ...meter, readyToLoad: readyToLoad }
                 })
                 this.selectAll = !this.selectAll
             },
 
             async approveLoadedExcelData() {
                 let preUpdateArray = this.availableMetersArray
-                                .filter(meter => meter.readyToLoad && meter.in_pyramid === 0 && meter.loaded === null)
+                                .filter(meter => meter.readyToLoad && meter.in_pyramid === 0 && !meter.loaded)
 
                 if (!preUpdateArray.length) {
                     this.showNotification('Нет подходящих записей для подтверждения загрузки', this.colorOrange)
                     return
                 }
 
-                this.updateMeterAfterLoadInPyramid(preUpdateArray.map(meter => meter.id)).then(
+                this.updateMeterAfterLoadInPyramid(preUpdateArray.map((meter) => meter.id)).then(
                     data => {
                         for (const record of data) {
                             //Обновление записи в текущем интерфейсе выбранных счетчиков по адресу
-                            const updatedMeter = this.availableMetersArray.find(meter => record.id === meter.id)
+                            const updatedMeter = this.availableMetersArray.find((meter) => record.id === meter.id)
                             Object.assign(updatedMeter, record)
 
                             //Обновление записи в главном интерфейсе
-                            const updatedMainMeter = this.meters.find((meter) => {
-                                return record.id === meter.id
-                            })
+                            const updatedMainMeter = this.meters.find((meter) => record.id === meter.id)
                             Object.assign(updatedMainMeter, record)
 
                             //Обновление записи в дефолтном списке счетчиков (при условии очищения списка адресов)
-                            const updatedDefaultMeter = this.defaultMetersArray.find(meter => record.id === meter.id)
+                            const updatedDefaultMeter = this.defaultMetersArray.find((meter) => record.id === meter.id)
                             Object.assign(updatedDefaultMeter, record)
                         }
                         this.showNotification('Подтверждение данных прошло успешно', this.colorGreen)

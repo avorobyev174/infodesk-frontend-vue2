@@ -1,16 +1,8 @@
 import * as XLSX from 'xlsx/xlsx.mjs'
 import { saveAs } from 'file-saver'
-
-function stringToArrayBuffer(str) {
-    let buf = new ArrayBuffer(str.length)
-    let view = new Uint8Array(buf)
-    for (let i = 0; i < str.length; i++)
-        view[i] = str.charCodeAt(i) & 0xFF
-    return buf
-}
+import { stringToArrayBuffer } from "../../Utils.js"
 
 export default function saveNonActivePyramidMetersToExcelFile(meters, getIpAddressTitle) {
-    console.log(meters)
     let nonActiveMetersArray = []
 
     meters.forEach((meter) => {
@@ -29,7 +21,7 @@ export default function saveNonActivePyramidMetersToExcelFile(meters, getIpAddre
     let tableMeters = []
 
     //Заголовки таблицы счетчиков
-    tableMeters.push(['Серийный номер', 'IP', 'Порт', 'Сим карта', 'Адрес'])
+    tableMeters.push([ 'Серийный номер', 'IP', 'Порт', 'Сим карта', 'Адрес' ])
 
     tableMeters = tableMeters.concat(nonActiveMetersArray)
 
@@ -43,6 +35,10 @@ export default function saveNonActivePyramidMetersToExcelFile(meters, getIpAddre
         { width: 25 }, { width: 15 }, { width: 10 }, { width: 20 }, { width: 35 },
     ]
 
-    let workBookOut = XLSX.write(workBook, {bookType:'xlsx',  type: 'binary'})
-    saveAs(new Blob([stringToArrayBuffer(workBookOut)],{type:"application/octet-stream"}), 'nonActivePyramid.xlsx')
+    let workBookOut = XLSX.write(workBook, { bookType:'xlsx',  type: 'binary'})
+    saveAs(
+        new Blob([ stringToArrayBuffer(workBookOut)],
+        { type: 'application/octet-stream' }),
+        'nonActivePyramid.xlsx'
+    )
 }

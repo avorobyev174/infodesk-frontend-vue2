@@ -205,9 +205,14 @@ export const storage = {
 				this.state.serverUrl + `/api/${ this.state.storage.serverModuleName }/meter-types`,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			const meterTypes = response?.data
-				.map(type => ({ title: type.type_name, index: type.id, option: type.mnf_id }))
+				.map(({ id, type_name, mnf_id, is_archive }) => ({
+					title: type_name,
+					index: id,
+					option: mnf_id,
+					isArchive: is_archive
+				}))
 				.sort((a, b) => a.title > b.title ? 1 : -1)
-			
+			console.log(meterTypes)
 			commit('setMeterTypes', meterTypes)
 		},
 		

@@ -195,7 +195,7 @@
 			'showNotificationStandardError',
 		],
         async mounted() {
-	        this.checkIsRouter()
+	        this.fillTypes()
 	        this.scannerButtonColor = this.colorBlue
 	        if (this.isRepair) {
 		        this.headers = this.headers.slice(0, this.headers.length - 1)
@@ -207,11 +207,11 @@
 				this.scannerButtonColor = newVal ? this.colorBlue : this.colorGrey
 			},
 			isRouter() {
-				this.checkIsRouter()
+				this.fillTypes()
 			},
 			isRepair() {
 				this.headers = this.headers.slice(0, this.headers.length - 1)
-				this.checkIsRouter()
+				this.fillTypes()
             }
 		},
 		computed: {
@@ -239,7 +239,7 @@
 		        'getAllAvailableMetersByTypeFromRepair',
 	        ]),
 
-            checkIsRouter() {
+            fillTypes() {
 	            if (this.isRouter) {
 		            this.meterTypes = this.types.filter((type) => type.option === 41)
 		            this.type = { index: 46, title: 'RTR512.10-6L/EY' }
@@ -252,7 +252,10 @@
 		            }
 	                this.meterTypeOnChange()
 	            } else  {
-		            this.meterTypes = this.types.slice()
+                    this.meterTypes = this.isRegister
+                        ? this.types.filter((type) => !type.isArchive)
+                        : this.types.slice()
+
 		            this.type = { index: 121, title: 'AIU5' }
 	            }
 

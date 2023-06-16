@@ -24,13 +24,19 @@ export default {
         MainContent,
         NotificationSnackBar
     },
-	mounted() {
+	async mounted() {
         $cookies.get('auth_token')
             ? this.$store.commit('login', true)
             : this.$store.commit('login', false)
+
+        try {
+        	await this.fetchAccounts()
+        } catch (e) {
+            this.showNotificationError(e)
+        }
     },
     computed: {
-        ...mapGetters(['isLogin'])
+        ...mapGetters(['isLogin', ])
     },
     provide: function () {
         return {
@@ -42,7 +48,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['logoutUser']),
+        ...mapActions([ 'logoutUser', 'fetchAccounts' ]),
         showNotification(text, color) {
             this.$refs.notificationManager.showNotification(text, color)
         },

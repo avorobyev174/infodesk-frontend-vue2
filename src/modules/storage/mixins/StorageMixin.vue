@@ -76,7 +76,6 @@
 	        },
 
 	        getMeterTypeTitle(meterType) {
-		        console.log(123)
 		        const type = this.types.find(type => parseInt(meterType) === type.index)
 		        return type ? type.title : meterType
 	        },

@@ -17,6 +17,7 @@ function dateFormat(dateToFormat) {
 	
 	return `${ day }.${ month }.${ year }`
 }
+
 function formatDate(dateToFormat, withTime) {
 	if (!dateToFormat) {
 		return 'отсутствует'

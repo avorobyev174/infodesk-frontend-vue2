@@ -1,161 +1,262 @@
 <template>
-  <div ref='googleMap' class='google-map'>
-    <div ref="controlPanel">
-      <control-panel/>
+    <div>
+        <v-navigation-drawer
+            v-model="mapDrawerModel"
+            absolute
+            temporary
+            right
+            width="400"
+            class="programm-list"
+        >
+            <v-select
+                v-model="currentMapItem"
+                :items="mapItems"
+                item-text="title"
+                item-value="value"
+                @change="mapItemChanged"
+                label="Выберите программу отображения"
+            />
+            <v-combobox
+                :items="mkdProgrammTypes"
+                item-text="title"
+                item-value="value"
+                label="Выберите объем ОДПУ в мес(кВт*ч)"
+                v-model="currentMkdProgrammTypes"
+                clearable
+                multiple
+                @change="mkdProgrammTypeChanged"
+            >
+            </v-combobox>
+            <v-btn
+                color="primary"
+                width="100%"
+                @click="show"
+                :disabled="!currentMapItem"
+            >
+               Показать
+            </v-btn>
+        </v-navigation-drawer>
+        <v-fab-transition>
+            <v-btn
+                color="primary"
+                dark
+                absolute
+                right
+                fab
+                class="arrow"
+                icon
+                @click="mapDrawerModel = !mapDrawerModel"
+            >
+                <v-icon x-large>mdi-chevron-left-box</v-icon>
+            </v-btn>
+        </v-fab-transition>
+        <div class="legend">
+            <v-chip
+                v-for="({ title, color }, index) in currentMkdProgrammTypes"
+                :key="index"
+                :color="color"
+            >
+                {{ title }}
+            </v-chip>
+        </div>
+        <gmap-map
+            :center="center"
+            :zoom="12"
+            ref='googleMap'
+            class='google-map'
+            :options="mapOptions"
+        >
+<!--            <gmap-cluster-->
+<!--                :gridSize="30"-->
+<!--                :zoomOnClick="true"-->
+<!--                :minimumClusterSize="5"-->
+<!--            >-->
+<!--            <gmap-marker-->
+<!--                :key="index"-->
+<!--                v-for="(m, index) in markers"-->
+<!--                :position="m"-->
+<!--                @click="center=m"-->
+<!--                :clickable="true"-->
+<!--                :icon="markerOptions"-->
+<!--                :title="m.title"-->
+<!--            >-->
+<!--            </gmap-marker>-->
+                <gmap-custom-marker
+                    v-for="({ color, position, address, volume }, index) in markers"
+                    :key="index"
+                    :marker="position"
+                    ref="marker"
+                >
+                    <v-tooltip top :color="colorGrey">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                                v-bind="attrs"
+                                v-on="on"
+                                :color="color"
+                            >
+                                mdi-home-circle
+                            </v-icon>
+                        </template>
+                        <div style="text-align: center">
+                            <span style="display: block">{{ address }}</span>
+                            <span style="display: block">{{ `Объем: ${ volume } кВТ*ч` }}</span>
+                        </div>
+                    </v-tooltip>
+                </gmap-custom-marker>
+<!--            </gmap-cluster>-->
+        </gmap-map>
     </div>
-  </div>
 </template>
 
 <script>
-import controlPanel from "@/modules/map/components/ControlPanel";
-import {mapMutations, mapState} from "vuex";
+import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+import { gmapApi } from 'vue2-google-maps'
+import GmapCluster from 'vue2-google-maps/dist/components/cluster'
+import GmapCustomMarker from 'vue2-gmap-custom-marker'
+
 export default {
-  name: "Map",
-  components: {
-    controlPanel
-  },
-  props: {
-
-  },
-  data() {
-    return {
-      bounds: new google.maps.LatLngBounds(), // Авто масштабирование карты
-      mapOptions: {
-        center: { lat: 53.41295, lng: 58.99823 },
-        mapTypeControl: true,
-        zoomControl: true,
-        zoom: 11,
-        mapTypeControlOptions: {
-          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-          position: google.maps.ControlPosition.UP_LEFT
+    name: "Map",
+    components: {
+	    GmapCluster,
+	    GmapCustomMarker
+    },
+    data: () => ({
+	    mapDrawerModel: false,
+	    center: { lat: 53.41295, lng: 58.99823 },
+        markers: [],
+        filteredMarkers: [],
+	    markerOptions: {
+		    url: require(''),
+		    scaledSize: { width: 20, height: 20, f: 'px', b: 'px' },
+	    },
+        mapOptions: {
+            disableDefaultUi: true,
+            scaleControl: true,
+            streetViewControl: false,
+            rotateControl: false,
+            fullscreenControl: false,
+            scrollwheel: true,
+            clickableIcons: true
         },
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        fullscreenControl: true,
-        fullscreenControlOptions: {
-          position: google.maps.ControlPosition.UP_RIGHT
-        },
-        streetViewControl: true,
-        streetViewControlOptions: {
-          position: google.maps.ControlPosition.BOTTOM_LEFT
-        }
-      },
-      locations: {
-        locations: [
-          {id: 1, lat: 53.41295, lng: 58.99823, name_point: 'A', title: 'text on hover'}
+        currentMapItem: null,
+        mapItems: [
+            { title: 'МКД План обследования по нормативу', value: 1 },
         ],
-      },
-      objects: [],
-      householdMarkers: [],
-      map: null
-    }
-  },
-  created() {
-    const isFavorite = $cookies.get('common_favorite_module')
-    if (isFavorite === '/map') {
-      this.setFavoriteModuleColor(this.colorGold)
-    } else {
-      this.setFavoriteModuleColor('')
-    }
-  },
-  inject: ['checkAuth'],
-  computed: {
-    ...mapState({
-      loading: state => state.registration.isMetersLoading,
-      colorBlue: state => state.colorBlue,
-      colorRed: state => state.colorRed,
-      colorGreen: state => state.colorGreen,
-      colorOrange: state => state.colorOrange,
-      colorGrey: state => state.colorGrey,
-      colorGold: state => state.colorGold,
+	    currentMkdProgrammTypes: [],
+        mkdProgrammTypes: [
+	        { title: '0 - 300', value: 1, color: 'green lighten-1' },
+	        { title: '301 - 1000', value: 2, color: '#ecc700' },
+	        { title: '1001 - 5000', value: 3, color: 'orange lighten-1' },
+	        { title: '> 5000', value: 4, color: 'red lighten-1' },
+        ],
+	    mkdProgrammMarkers: []
     }),
-  },
-  methods: {
-    ...mapMutations(['setFavoriteModuleColor']),
-    initMap() {
-      const  { imgClusterUrl, locations } = this.locations
+	created() {
+		this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/map' ? this.colorGold : '')
+	},
+	async mounted() {
+		if (!this.checkAuth()) {
+			return
+		}
 
-      this.map = new google.maps.Map(this.$refs.googleMap, {
-        ...this.mapOptions
-      })
-      // let markers = locations.map((location) => {
-      //   // set locations for auto zoom map
-      //   const setLocations = new google.maps.LatLng(location.lat, location.lng)
-      //   this.bounds.extend(setLocations)
-      //
-      //   // set Markers on Map
-      //   return new google.maps.Marker({
-      //     position: location,
-      //     map: map,
-      //     label: location.name_point,
-      //     title: location.title  + ' ' + location.name_point,
-      //   })
-      // })
-      //
-      // let markerCluster = new MarkerClusterer(map, markers)
-
-      //map.fitBounds(this.bounds)
+		if (!this.activeModules.filter((module) => module.name === this.$route.name.toLowerCase()).length) {
+			this.$router.push('/')
+		}
+	},
+    inject: [ 'showNotification', 'showNotificationError', 'showNotificationStandardError', 'checkAuth' ],
+    computed: {
+	    ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
+	    ...mapGetters({
+		    addresses: 'map/getAddresses',
+		    activeModules: 'getActiveModules',
+	    }),
+	    google: gmapApi
     },
-    createControlPanelObjects() {
-      this.objects.push({title: 'Бытовые потребители', name: 'household',
-        //markers: this.householdMarkers
-      });
-      this.objects.push({
-        title: 'Бытовые потребители (не матрица)',
-        name: 'householdNonMatrix',
-        //markers: householdNonMatrixMarkers
-      });
-      this.objects.push({
-        title: 'Новые бытовые потребители (не матрица)',
-        name: 'newHouseholdNonMatrix',
-        //markers: newHouseholdNonMatrixMarkers
-      });
-      // this.objects.push({title: 'Поселки', name: 'township', markers: townShipMarkers});
-      // this.objects.push({title: 'ТП', name: 'ts', markers: TSMarkers});
-      // this.objects.push({title: 'Фильтры', name: 'filters', markers: filterMarkers});
-      // this.objects.push({title: 'Юр.Лица(Матрица)', name: 'corpPersons', markers: circles});
-      // this.objects.push({title: 'Программа (Меркурий 206)', name: 'replaceMeters', markers: circles});
-      // this.objects.push({title: 'Раб. счетчики', name: 'workMeters', markers: workCircles});
-      // this.objects.push({title: 'Не раб. счетчики', name: 'notWorkMeters', markers: notWorkCircles});
-      // this.objects.push({title: 'Инвестпрограмма', name: 'investProgramm', markers: investProgramm});
+    methods: {
+        ...mapMutations([ 'setFavoriteModuleColor' ]),
+	    ...mapActions('map', [
+		    'fetchAddresses',
+	    ]),
 
+	    initializeMap() {
+		    //console.log(this.$refs.googleMap)
+		    // this.$refs.googleMap.$mapPromise.then((map) => {
+			//     map.controls[ this.google.maps.ControlPosition.TOP_CENTER  ].push(this.createColorLegendDiv())
+		    // })
+		    //this.$refs.googleMap.$mapObject.controls[ this.google.maps.ControlPosition.TOP_CENTER  ].push(this.createColorLegendDiv())
+	    },
+
+	    mapItemChanged() {
+            switch (this.currentMapItem) {
+	            case 1: this.initMkdProgramm(); break
+            }
+        },
+
+	    mkdProgrammTypeChanged() {
+            this.filteredMarkers = this.currentMkdProgrammTypes.map(({ value }) => {
+	            switch (value) {
+		            case 1: return this.mkdProgrammMarkers
+                            .filter(({ volume }) => volume <= 300)
+                            .map((marker) => ({ ...marker, color: this.colorGreen }))
+		            case 2: return this.mkdProgrammMarkers
+                            .filter(({ volume }) => volume > 300 && volume <= 1000)
+	                        .map((marker) => ({ ...marker, color: this.colorGold }))
+		            case 3: return this.mkdProgrammMarkers
+                            .filter(({ volume }) => volume > 1000 && volume <= 5000)
+	                        .map((marker) => ({ ...marker, color: this.colorOrange }))
+		            case 4: return this.mkdProgrammMarkers
+                            .filter(({ volume }) => volume > 5000)
+	                        .map((marker) => ({ ...marker, color: this.colorRed }))
+	            }
+            }).flat()
+	    },
+
+	    async initMkdProgramm() {
+		    await this.fetchAddresses()
+		    this.mkdProgrammMarkers = this.addresses.map(({ lat, lng, address, volume }) => ({
+			    address: address.slice(14),
+                volume: parseInt(volume),
+			    position: { lat, lng }
+		    }))
+		    console.log(this.mkdProgrammMarkers)
+        },
+
+        show() {
+        	this.markers = this.filteredMarkers
+            this.mapDrawerModel = false
+        }
     },
-    createControlPanelDiv() {
-      // var controlPanelDiv = document.createElement('div');
-      // controlPanelDiv.id = "controlPanel";
-      // controlPanelDiv.className = 'controlPanelDiv';
-      //
-      // this.objects.forEach(function (object) {
-      //   if (object.name === 'corpPersons') {
-      //     controlPanelDiv.appendChild(createDivWithActionCheckBox(object, false));
-      //     //вызывается после загрузки карты, назначает обработчик corpPersons
-      //     google.maps.event.addListenerOnce(map, 'tilesloaded', addPopoverWithFormFilter);
-      //   } else if (object.name === 'replaceMeters' || object.name === "investProgramm") {
-      //     controlPanelDiv.appendChild(createDivWithActionCheckBox(object, false));
-      //     google.maps.event.addListenerOnce(map, 'tilesloaded', addPopoverWithFilter);
-      //   } else
-      //     controlPanelDiv.appendChild(createDivWithActionCheckBox(object, true));
-      // });
-      //
-      // return controlPanelDiv;
-      return this.$refs.div1
-    }
-  },
-  mounted() {
-    if (!this.checkAuth())
-      return
-
-    if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
-      this.$router.push('/')
-
-    this.initMap()
-    this.createControlPanelObjects();
-    this.map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(this.$refs.controlPanel);
-  }
 }
 </script>
 
 <style scoped>
-  .google-map {
-    height: calc(100vh - 50px);
-  }
+    .google-map {
+        height: calc(100vh - 50px);
+    }
+
+    .arrow {
+        top: 40vh;
+        right: 25px;
+    }
+
+    .programm-list {
+        padding: 20px;
+    }
+
+    .legend {
+        position: absolute;
+        top: 10px;
+        left: 45vw;
+        z-index: 1;
+        display: flex;
+        gap: 5px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .active {
+        display: block;
+    }
 </style>

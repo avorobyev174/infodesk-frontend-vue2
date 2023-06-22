@@ -50,6 +50,7 @@
                        @openEventList="openEventList"
                        @refreshAssignments="refreshAssignments"
                        @acceptAssignment="assignmentAccept"
+                       @editAssignmentContacts="openEditContactsDialog"
                     />
                     <show-hide-columns-dialog
                         ref="showHideColumnsDialog"
@@ -61,9 +62,9 @@
                 </v-toolbar>
             </template>
             <template v-slot:item.status="{ item }" >
-                <v-chip v-if="item.status === 0" :color="colorGrey">Зарегистрировано</v-chip>
-                <v-chip v-else-if="item.status === 1" :color="colorBlue">В работе</v-chip>
-                <v-chip v-else-if="item.status === 2" :color="colorGreen">Закрыто</v-chip>
+                <v-chip v-if="item.status === 1" :color="colorGrey">Зарегистрировано</v-chip>
+                <v-chip v-else-if="item.status === 2" :color="colorBlue">В работе</v-chip>
+                <v-chip v-else-if="item.status === 3" :color="colorGreen">Закрыто</v-chip>
             </template>
             <template v-slot:item.meter_ip_address="{ item }" >
                 {{ getIpAddressTitle(item.meter_ip_address) }}
@@ -86,7 +87,31 @@
         </v-data-table>
         <event-list
             ref="eventList"
+            :assignments="assignments"
         />
+        <v-dialog
+            v-model="editContactsDialogModel"
+            max-width="500px"
+        >
+            <v-card>
+                <v-card-title>
+                    <span class="mx-auto text-h5 text-center text-break">Редактирование контактных данных</span>
+                </v-card-title>
+                <v-card-text class="pt-2 pb-1">
+                    <v-text-field v-model="contacts" label="Контактные данные"></v-text-field>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        text
+                        color="primary"
+                        @click="saveContacts"
+                    >
+                        Сохранить
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-card>
 </template>
 
@@ -109,6 +134,8 @@
         },
         data: () => ({
 	        search: '',
+	        editContactsDialogModel: false,
+            contacts: '',
 	        selectedHeaders: [],
 	        headers: [
 		        {
@@ -218,33 +245,47 @@
 			        index: 7,
                 },
 	        ],
-            currentItem: null
+            currentItem: null,
         }),
 		mixins: [ RegistrationMixin, CommonMixin ],
 		inject: [ 'showNotification', 'showNotificationError', 'showNotificationStandardError', 'checkAuth' ],
+        provide: function () {
+	        return {
+		        formatDate: this.formatDate,
+		        getAssignmentEventTypeTitle: this.getAssignmentEventTypeTitle,
+		        getAssignmentEventTypeValue: this.getAssignmentEventTypeValue,
+		        getAccountFullName: this.getAccountFullName,
+		        getAssignmentCloseEventTypeTitle: this.getAssignmentCloseEventTypeTitle,
+	        }
+        },
         created() {
-	        // this.setCookies()
 	        this.headers = this.headers.map((header, i) => ({ ... header, index: i }))
 	        $cookies.get('meter_service_columns')
-		        ? this.changeColumnsVisibility($cookies.get('meter_service_columns').split(',').map(column => parseInt(column)))
+		        ? this.changeColumnsVisibility($cookies.get('meter_service_columns')
+                    .split(',')
+                    .map((column) => parseInt(column)))
 		        : this.selectedHeaders = this.headers
 
             this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/service' ? this.colorGold : '')
         },
 		async mounted() {
+			if (!this.checkAuth()) {
+				return
+			}
+
+			if (!this.activeModules.filter((module) => module.name === this.$route.name.toLowerCase()).length) {
+				this.$router.push('/')
+			}
+
 			try {
 				await this.fetchTypes()
-				this.fetchAssignments()
+				await this.fetchAssignments()
             } catch (e) {
-			    this.showNotificationError(e)
+			    this.showNotificationStandardError(e)
 			}
 
 			document.onkeydown = (evt) => {
-				if (this.$route.name !== 'Service') {
-					return
-				}
-
-				if (evt.key === 'Alt') {
+				if (this.$route.name === 'Service' && evt.key === 'Alt') {
 					this.refreshAssignments()
 				}
 			}
@@ -253,7 +294,9 @@
 	        ...mapGetters({
 		        assignments: 'service/getAssignments',
 		        types: 'registration/getTypes',
-		        accountId: 'getAccountId',
+		        currentAccountId: 'getAccountId',
+		        dictionaries: 'getDictionaries',
+		        activeModules: 'getActiveModules',
 	        }),
 	        ...mapState('service', [
 	        	'loading'
@@ -268,6 +311,7 @@
 			...mapActions('service', [
 				'fetchAssignments',
 				'acceptAssignment',
+				'saveAssignmentContacts',
             ]),
 	        ...mapActions('registration', [
 		        'fetchTypes',
@@ -284,29 +328,49 @@
                     Object.assign(oldAssignment, updatedAssignment)
 	                this.showNotification(`Поручение успешно принято`, this.colorGreen)
                 } catch (e) {
-	                this.showNotificationError(e)
+	                this.showNotificationStandardError(e)
                 }
             },
 
-            openActionMenu(e, item) {
+            openActionMenu(e, { item }) {
 	            e.preventDefault()
                 this.currentItem = item
                 const { actionMenu } = this.$refs
-	            actionMenu.open(item, this.accountId, e.clientX, e.clientY)
+	            actionMenu.open(item, this.currentAccountId, e.clientX, e.clientY)
             },
 
             openEventList() {
-	            console.log(this.currentItem)
-	            this.$refs.eventList.open(this.currentItem, this.accountId)
+	            this.$refs.eventList.open(this.currentItem, this.currentAccountId)
             },
 
 	        refreshAssignments() {
 		        try {
 			        this.fetchAssignments()
 		        } catch (e) {
-			        this.showNotificationError(e)
+			        this.showNotificationStandardError(e)
 		        }
-            }
+            },
+
+	        async openEditContactsDialog() {
+		        this.editContactsDialogModel = true
+                const { customer_contacts } = this.currentItem
+		        this.contacts = customer_contacts
+	        },
+
+	        async saveContacts() {
+		        try {
+			        const assignment = await this.saveAssignmentContacts({
+				        assignmentId: this.currentItem?.id,
+				        contacts: this.contacts
+			        })
+			        const oldAssignment = this.assignments.find((assign) => assign.id === assignment.id)
+			        Object.assign(oldAssignment, assignment)
+		        } catch (e) {
+			        this.showNotificationStandardError(e)
+		        } finally {
+			        this.editContactsDialogModel = false
+		        }
+	        },
         }
 	}
 </script>

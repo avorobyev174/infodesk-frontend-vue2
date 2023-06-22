@@ -31,6 +31,9 @@ export default {
 
         try {
         	await this.fetchAccounts()
+        	await this.fetchAssignmentEventTypes()
+        	await this.fetchDictionaries()
+	        console.log('mounted app')
         } catch (e) {
             this.showNotificationError(e)
         }
@@ -48,7 +51,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions([ 'logoutUser', 'fetchAccounts' ]),
+        ...mapActions([ 'logoutUser', 'fetchAccounts', 'fetchAssignmentEventTypes', 'fetchDictionaries' ]),
         showNotification(text, color) {
             this.$refs.notificationManager.showNotification(text, color)
         },

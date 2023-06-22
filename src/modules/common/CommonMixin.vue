@@ -7,11 +7,25 @@
 
 	export default {
 		name: "CommonMixin",
+        data: () => ({
+	        assignmentEventTypes: [],
+	        assignmentCloseReasonTypes: [],
+	        accounts: [],
+        }),
 		computed: {
-			...mapGetters({
-				accounts: 'getAccounts'
-			})
+			...mapGetters({	dictionaries: 'getDictionaries' })
 		},
+        mounted() {
+			const {
+				assignmentEventTypes,
+                assignmentCloseReasonTypes,
+                accounts
+			} = this.dictionaries
+
+            this.assignmentEventTypes = assignmentEventTypes
+            this.assignmentCloseReasonTypes = assignmentCloseReasonTypes
+            this.accounts = accounts
+        },
 		methods: {
 			formatDate(dateToFormat, withTime) {
 				if (!dateToFormat) {
@@ -77,6 +91,16 @@
                 }
                 return accountId
 			},
+
+			getAssignmentEventTypeTitle(value) {
+				const assignmentEventType = this.assignmentEventTypes.find((eventType) => eventType.id === value)
+                return assignmentEventType ? assignmentEventType.title : value
+			},
+
+			getAssignmentCloseEventTypeTitle(value) {
+				const assignmentCloseEventType = this.assignmentCloseReasonTypes.find((closeEventType) => closeEventType.id === value)
+				return assignmentCloseEventType ? assignmentCloseEventType.title : value
+			}
 		}
 	}
 </script>

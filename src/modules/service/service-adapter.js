@@ -1,4 +1,5 @@
 import { formatDate } from '../Utils.js'
+import { AssignmentEventTypes } from  '../../const.js'
 
 const assignmentToState = (
 	{
@@ -32,6 +33,27 @@ const assignmentToState = (
 		status,
 		statusReason: status_reason
 	})
+
+const assignmentEventToState = (
+	{
+		id,
+		type,
+		created,
+		owner_id,
+		description,
+		assignment_id
+	}) => ({
+		id,
+		type: formatDate(type),
+		created: formatDate(created),
+		ownerId: owner_id,
+		description,
+		assignment_id
+	})
+
+function f() {
+
+}
 
 export {
 	assignmentToState

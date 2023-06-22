@@ -5,6 +5,7 @@
         :position-y="y"
         absolute
         offset-y
+        @click:outside="actions = defaultActions"
     >
         <v-list>
             <v-list-item
@@ -35,7 +36,7 @@
             currentItem: {},
 	        x: 0,
 	        y: 0,
-            actions: [
+            defaultActions: [
                 {
                 	id: 1,
                     title: 'Открыть список событий',
@@ -52,23 +53,33 @@
 	            },
                 {
                 	id: 3,
-                    title: 'Закрыть поручение',
-                    onClick: 'saveExcelRefreshDataToPyramid',
-                    icon: 'mdi-clipboard-remove-outline',
+                    title: 'Редактировать контактные данные',
+                    onClick: 'editAssignmentContacts',
+                    icon: 'mdi-clipboard-edit-outline',
                     color: 'primary'
                 },
             ],
+            actions: []
         }),
         methods: {
-            open({ item }, accId, x, y) {
+            open(item, currentAccountId, x, y) {
                 this.currentItem = item
-	            this.actions = this.actions.map((action) => {
-	            	if (!item.emp_id && [ 1, 3 ].includes(action.id)) {
+	            this.actions = this.defaultActions.map((action) => {
+	            	// зарегистрировано - нельзя просматривать список событий и редактировать
+	            	if (item.status === 1 && !item.owner_id && [ 1, 3 ].includes(action.id)) {
 	            		return { ...action, disabled: true }
-                    } else if (item.emp_id && [ 3 ].includes(action.id) && item.emp_id !== accId) {
+                    // в работе - нельзя редактировать, если не исполнитель
+                    } else if (item.status === 2 &&
+                                item.owner_id &&
+                                [ 3 ].includes(action.id) &&
+                                item.owner_id !== currentAccountId
+                    ) {
 	            		return { ...action, disabled: true }
+                    // закрыто - нельзя редактировать и принять
+                    } else if (item.status === 3 && [ 2, 3 ].includes(action.id)) {
+			            return { ...action, disabled: true }
                     }
-	            	return { ...action, disabled: false }
+	            	return { ...action }
                 })
                 this.x = x
                 this.y = y

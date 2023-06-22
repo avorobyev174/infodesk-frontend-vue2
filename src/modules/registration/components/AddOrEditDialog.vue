@@ -334,6 +334,7 @@
                 if (length > 3) {
                     let contact = 0
                     switch (this.editedItem.type) {
+                    	//Меркурий 234
                         case 133:
                         case 134:
                         case 136:
@@ -342,6 +343,7 @@
                         case 127:
                         case 128:
                         case 138:
+                        case 145:
                             contact = parseInt(serialNumber.substr(-3));
                             if (contact < 17) {
                                 while (contact < 17)
@@ -355,6 +357,7 @@
                                 }
                             }
                             break
+                        //МИР
                         case 139:
                         case 143:
                         case 105:
@@ -367,6 +370,7 @@
 	                            contact = contact.padStart(5, '1000')
                             }
 	                        break
+                        //ЭНЕРГОМЕРА
 	                    case 116:
 		                    contact = serialNumber.substr(-9)
 		                    break

@@ -7,9 +7,17 @@ import router from './router'
 import store from './store'
 import vueCookies from 'vue-cookies'
 import VueApexCharts from 'vue-apexcharts'
+import * as VueGoogleMaps from 'vue2-google-maps'
 
 Vue.use(vueCookies)
 Vue.use(VueApexCharts)
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: 'AIzaSyA5YHPeIYpXJ8lR-howwVjHmJvtNcUhHIA',
+    region: 'RU',
+    language: 'ru',
+  }
+})
 
 new Vue({
   router,

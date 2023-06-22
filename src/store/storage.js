@@ -212,7 +212,6 @@ export const storage = {
 					isArchive: is_archive
 				}))
 				.sort((a, b) => a.title > b.title ? 1 : -1)
-			console.log(meterTypes)
 			commit('setMeterTypes', meterTypes)
 		},
 		

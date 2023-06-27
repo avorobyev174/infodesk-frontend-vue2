@@ -199,6 +199,16 @@
 		        show: false,
 		        open: true,
 	        },
+	        checkVerificationReport: {
+		        id: 13,
+		        name: 'Проверка счетчиков выданных на поверку',
+		        download: false,
+		        description: 'Проверка счетчиков выданных на поверку по серийному номеру',
+		        func: 'getStorageReport',
+		        loading: false,
+		        show: false,
+		        open: true,
+	        },
         }),
         methods: {
             getReportItems() {
@@ -239,6 +249,7 @@
 					            this.storageGroupLogsByEmployeeReport,
 					            this.repairAndMaterialsReport,
 					            this.spentMaterialsReport,
+					            this.checkVerificationReport,
 				            ],
 			            },
                     ]
@@ -258,6 +269,7 @@
 					            this.storageLogsByEmployeeReport,
 					            this.storageInOutByEmployeeReport,
 					            this.storageGroupLogsByEmployeeReport,
+					            this.checkVerificationReport,
 				            ],
 			            },
 		            ]

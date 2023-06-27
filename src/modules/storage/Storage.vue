@@ -2,7 +2,6 @@
     <v-card>
         <v-data-table
             :loading="loading"
-            sort-by="id"
             height="43vh"
             class="elevation-1 meter-table"
             single-select
@@ -647,7 +646,7 @@
                     this.resetFilters()
                 }
                 await this.initializeMeters()
-            }
+            },
 		},
 	}
 </script>

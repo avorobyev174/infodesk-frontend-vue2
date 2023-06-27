@@ -97,12 +97,11 @@
 </template>
 
 <script>
-    import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
-    import saveLastTimeDataToExcelFile from "./alpha/js/saveLastTimeDataToExcel";
+    import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
 
     export default {
         name: 'Search',
-        data: ()=>({
+        data: () => ({
             show: false,
             serialNumber: '',
             meterType: '',
@@ -118,7 +117,7 @@
         }),
         inject: ['showNotification', 'showNotificationStandardError', 'checkAuth', 'setBackgroundImage'],
         computed: {
-            ...mapGetters('registration', ['getTypes']),
+            ...mapGetters('registration', [ 'getTypes' ]),
             ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue']),
 
             lastDateTitle() {
@@ -126,26 +125,23 @@
             }
         },
         mounted() {
-            if (!this.checkAuth())
-                return
+            if (!this.checkAuth()) {
+	            return
+            }
 
-	        if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
-	        	this.$router.push('/')
+	        if (!this.$store.getters.getActiveModules.filter(({ name }) => name === this.$route.name.toLowerCase()).length) {
+		        this.$router.push('/')
+	        }
 
 	        this.setBackgroundImage(true)
         },
         created() {
             const isFavorite = $cookies.get('common_favorite_module')
-
-            if (isFavorite === '/search') {
-                this.setFavoriteModuleColor(this.colorGold)
-            } else {
-                this.setFavoriteModuleColor('')
-            }
+            this.setFavoriteModuleColor(isFavorite === '/search' ? this.colorGold : '')
         },
         methods: {
-            ...mapActions('search', ['getMeterBySerialNumber']),
-            ...mapMutations(['setFavoriteModuleColor']),
+            ...mapActions('search', [ 'getMeterBySerialNumber' ]),
+            ...mapMutations([ 'setFavoriteModuleColor' ]),
 
             async getMeterData() {
                 if (!this.$refs.form.validate()) {

@@ -2,7 +2,7 @@
     <div class="pr-3">
         <div class="add-panel">
             <v-combobox
-                :items="materialTypes"
+                :items="availableMaterialTypes"
                 item-text="title"
                 item-value="id"
                 label="Тип"
@@ -36,7 +36,7 @@
         <v-data-table
             fixed-header
             class="pl-1"
-            :items="storageMaterials"
+            :items="materials"
             single-select
             :headers="headers"
             item-key="materialType"
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-	import { mapActions, mapGetters, mapState } from "vuex";
+	import { mapActions, mapGetters, mapState } from "vuex"
 
 	export default {
 		name: "AddMaterialView",
@@ -83,16 +83,30 @@
 		        },
 	        ],
 	        count: '',
-	        materialType: { id: 6, title: 'Батарейка 3V CR2032' },
+	        materialType: null,
 	        selectedMaterialIndex: 0,
-	        metersWithLetters: [  ],
+	        availableMaterialTypes: [],
+	        commonMaterials: [ 8, 9, 10, 13 ],
+	        specificMaterials: {
+		        3 : [ 2, 6 ],
+		        4 : [ 2 ],
+		        6 : [ 2 ],
+		        7 : [ 2 ],
+		        12 : [ 1, 5 ],
+		        16 : [ 1, 5 ],
+		        29 : [ 1, 5 ],
+		        33 : [ 1, 5 ],
+		        35 : [ 1, 5, 6, 14 ],
+		        46 : [ 4, 6, 7, 12 ],
+		        47 : [ 1, 5, 14 ],
+	        },
         }),
         props: {
 	        formSubmit: {
 		        type: Boolean,
 		        required: true
 	        },
-	        storageMaterials: {
+	        materials: {
 		        type: Array,
                 required: true
             },
@@ -103,22 +117,15 @@
 			'getMaterialTypeTitle',
 		],
 		computed: {
-			...mapState({
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
-			...mapGetters({
-				materialTypes: 'storage/getMaterialTypes',
-			}),
+			...mapState([ 'colorGreen', 'colorRed', 'colorBlue' ]),
+			...mapGetters({ materialTypes: 'storage/getMaterialTypes', }),
 		},
-        methods: {
-	        ...mapActions('storage', [
-		        'checkMeterInDB',
-	        ]),
+        mounted() {
+			this.availableMaterialTypes = this.materialTypes.slice(0)
+	        this.materialType = this.availableMaterialTypes[0]
+        },
+		methods: {
+	        ...mapActions('storage', [ 'checkMeterInDB', ]),
 
 	        selectRow(item, row) {
 		        this.selectedMaterialIndex = row.index
@@ -127,13 +134,12 @@
 
 	        materialAddButtonOnClick() {
 		        if (!this.formSubmit) {
-			        const usedMaterial = this.storageMaterials.find(material => material.materialType === this.materialType.id)
+			        const usedMaterial = this.materials.find(({ materialType }) => materialType === this.materialType.id)
                     const count = parseInt(this.count)
 
 		        	!usedMaterial && count > 0
-				        ? this.storageMaterials.unshift({ materialType: this.materialType.id, count })
+				        ? this.materials.unshift({ materialType: this.materialType.id, count })
 				        : usedMaterial.count += count
-
 		        } else {
 			        this.showNotification('Операция уже завершена, редактирование списка не доступно', this.colorBlue)
 		        }
@@ -141,7 +147,7 @@
 
 	        materialDeleteButtonOnClick() {
 		        if (!this.formSubmit) {
-			        this.storageMaterials.splice(this.selectedMaterialIndex, 1)
+			        this.materials.splice(this.selectedMaterialIndex, 1)
 		        } else {
 			        this.showNotification('Операция уже завершена, редактирование списка не доступно', this.colorBlue)
 		        }
@@ -150,6 +156,14 @@
 	        setLoading(loading) {
 		        this.loading = loading
 	        },
+
+	        changeAvailableMaterials(meterType) {
+		        this.availableMaterialTypes = this.materialTypes.filter((materialType) => {
+                    const specificMaterials = this.specificMaterials[ meterType ]
+                    return (specificMaterials?.includes(materialType.id)) || this.commonMaterials.includes(materialType.id)
+                })
+                this.materialType = this.availableMaterialTypes[0]
+            },
         },
 	}
 </script>

@@ -42,7 +42,8 @@
                     />
                     <v-spacer/>
                     <main-menu
-                        @refresh="refreshAssignments"
+                        @refreshAssignments="refreshAssignments"
+                        @openAssignmentsLogsDialog="openAssignmentsLogsDialog"
                         @showHideColumns="$refs.showHideColumnsDialog.open()"
                     />
                     <action-menu
@@ -62,13 +63,14 @@
                 </v-toolbar>
             </template>
             <template v-slot:item.status="{ item }" >
-                <v-chip v-if="item.status === 1" :color="colorGrey">Зарегистрировано</v-chip>
-                <v-chip v-else-if="item.status === 2" :color="colorBlue">В работе</v-chip>
-                <v-chip v-else-if="item.status === 3" :color="colorGreen">Закрыто</v-chip>
+                <v-chip :color="getAssignmentEventTypeColor(item.status)">
+                    {{ getAssignmentEventTypeTitle(item.status) }}
+                    <v-icon v-if="item.old_last_data_date">mdi-clipboard-alert-outline</v-icon>
+                </v-chip>
             </template>
-            <template v-slot:item.meter_ip_address="{ item }" >
-                {{ getIpAddressTitle(item.meter_ip_address) }}
-            </template>}
+<!--            <template v-slot:item.meter_ip_address="{ item }" >-->
+<!--                {{ getIpAddressTitle(item.meter_ip_address) }}-->
+<!--            </template>}-->
             <template v-slot:item.last_data_date="{ item }" >
                 {{ formatDate(item.last_data_date) }}
             </template>
@@ -78,10 +80,10 @@
             <template v-slot:item.meter_type="{ item }" >
                 {{ getMeterTypeTitle(item.meter_type) }}
             </template>
-            <template v-slot:item.meter_sim_status="{ item }">
-                {{ getStatusTitle(item.meter_sim_status) }}
-            </template>
-            <template v-slot:item.emp_id="{ item }">
+<!--            <template v-slot:item.meter_sim_status="{ item }">-->
+<!--                {{ getStatusTitle(item.meter_sim_status) }}-->
+<!--            </template>-->
+            <template v-slot:item.owner_id="{ item }">
                 {{ item.owner_id ? getAccountFullName(item.owner_id) : 'отсутствует' }}
             </template>
         </v-data-table>
@@ -112,17 +114,20 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        <service-update-logs-dialog
+            ref="ServiceUpdateLogsDialog"
+        />
     </v-card>
 </template>
 
 <script>
 	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
-	import RegistrationMixin from "../registration/mixins/RegistrationMixin"
     import ActionMenu from "./components/ActionMenu"
     import EventList from "./components/EventList"
     import MainMenu from "./components/MainMenu"
     import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
 	import CommonMixin from "../common/CommonMixin"
+    import ServiceUpdateLogsDialog from "./components/ServiceUpdateLogsDialog"
 
 	export default {
 		name: "Service",
@@ -130,11 +135,13 @@
 	        EventList,
 			ActionMenu,
             MainMenu,
-	        ShowHideColumnsDialog
+	        ShowHideColumnsDialog,
+	        ServiceUpdateLogsDialog
         },
         data: () => ({
 	        search: '',
 	        editContactsDialogModel: false,
+	        logsDialogModel: false,
             contacts: '',
 	        selectedHeaders: [],
 	        headers: [
@@ -143,7 +150,6 @@
 			        align: 'center',
 			        value: 'id',
 			        sortable: true,
-			        index: 0,
 			        width: '80px',
 		        },
 		        {
@@ -152,23 +158,20 @@
 			        sortable: true,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 8
 		        },
 		        {
 			        text: 'Статус',
 			        align: 'center',
 			        value: 'status',
 			        sortable: true,
-			        index: 0,
 			        width: '80px',
 		        },
 		        {
 			        text: 'Исполнитель',
-			        value: 'emp_id',
+			        value: 'owner_id',
 			        sortable: true,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 8
 		        },
 		        {
 			        text: 'Тип',
@@ -176,7 +179,6 @@
 			        sortable: true,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 1,
 			        width: '160px'
 		        },
 		        {
@@ -185,7 +187,6 @@
 			        sortable: false,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 2,
 			        width: '160px'
 		        },
 		        {
@@ -194,7 +195,6 @@
 			        sortable: true,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 8
 		        },
 		        {
 		        	text: 'IP адрес',
@@ -202,23 +202,28 @@
                     sortable: true,
                     align: 'center',
                     cellClass: 'table-small-cell',
-			        index: 3,
 			        width: '160px'
                 },
+		        {
+			        text: 'Связной',
+			        value: 'meter_contact',
+			        sortable: true,
+			        align: 'center',
+			        cellClass: 'table-small-cell',
+		        },
 		        {
 			        text: 'Сим карта',
 			        value: 'meter_phone',
 			        sortable: false,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 4
 		        },
 		        {
 		        	text: 'Статус сим карты',
                     value: 'meter_sim_status',
                     sortable: true,
                     align: 'center',
-                    cellClass: 'table-small-cell'
+                    cellClass: 'table-small-cell',
                 },
 		        {
 			        text: 'Номер лицевого',
@@ -226,7 +231,6 @@
 			        sortable: false,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 5,
 		        },
 		        {
 			        text: 'Адрес',
@@ -234,7 +238,6 @@
 			        sortable: true,
 			        align: 'center',
 			        cellClass: 'table-small-cell',
-			        index: 6,
 		        },
 		        {
 		        	text: 'Контактные данные',
@@ -242,20 +245,20 @@
                     sortable: false,
                     align: 'center',
                     cellClass: 'table-small-cell',
-			        index: 7,
                 },
 	        ],
             currentItem: null,
         }),
-		mixins: [ RegistrationMixin, CommonMixin ],
+		mixins: [ CommonMixin ],
 		inject: [ 'showNotification', 'showNotificationError', 'showNotificationStandardError', 'checkAuth' ],
         provide: function () {
 	        return {
 		        formatDate: this.formatDate,
 		        getAssignmentEventTypeTitle: this.getAssignmentEventTypeTitle,
-		        getAssignmentEventTypeValue: this.getAssignmentEventTypeValue,
 		        getAccountFullName: this.getAccountFullName,
 		        getAssignmentCloseEventTypeTitle: this.getAssignmentCloseEventTypeTitle,
+		        getAssignmentEventTypeColor: this.getAssignmentEventTypeColor,
+		        getMeterTypeTitle: this.getMeterTypeTitle,
 	        }
         },
         created() {
@@ -280,6 +283,7 @@
 			try {
 				await this.fetchTypes()
 				await this.fetchAssignments()
+				await this.fetchAssignmentsLogs()
             } catch (e) {
 			    this.showNotificationStandardError(e)
 			}
@@ -293,15 +297,13 @@
         computed: {
 	        ...mapGetters({
 		        assignments: 'service/getAssignments',
-		        types: 'registration/getTypes',
 		        currentAccountId: 'getAccountId',
 		        dictionaries: 'getDictionaries',
 		        activeModules: 'getActiveModules',
 	        }),
-	        ...mapState('service', [
-	        	'loading'
-            ]),
+	        ...mapState('service', [ 'loading' ]),
 	        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
+
 	        showHeaders () {
 		        return this.headers.filter((header) => this.selectedHeaders.includes(header))
 	        }
@@ -312,6 +314,7 @@
 				'fetchAssignments',
 				'acceptAssignment',
 				'saveAssignmentContacts',
+				'fetchAssignmentsLogs',
             ]),
 	        ...mapActions('registration', [
 		        'fetchTypes',
@@ -320,6 +323,15 @@
 	        changeColumnsVisibility(columns) {
 		        this.selectedHeaders = this.headers.filter(({ index }) => columns.includes(index))
 	        },
+
+	        getAssignmentEventTypeColor(status) {
+	        	switch (status) {
+	        		case 1:
+	        		case 4: return this.colorGrey
+	        		case 2: return this.colorBlue
+	        		case 3: return this.colorGreen
+                }
+            },
 
 	        async assignmentAccept({ id }) {
                 try {
@@ -341,6 +353,11 @@
 
             openEventList() {
 	            this.$refs.eventList.open(this.currentItem, this.currentAccountId)
+            },
+
+            async openAssignmentsLogsDialog() {
+                const { ServiceUpdateLogsDialog } = this.$refs
+                ServiceUpdateLogsDialog.dialogOpen()
             },
 
 	        refreshAssignments() {

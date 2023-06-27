@@ -181,7 +181,7 @@
       </template>
       <template v-slot:item.in_pyramid="{ item }">
         <v-chip v-if="item.in_pyramid === 0" :color="colorGrey">Не загружен</v-chip>
-        <v-chip v-else :color="colorGreen">Загружен</v-chip>
+        <v-chip v-else :color="colorGreen">Загружен {{ item.loaded ? formatDate(item.loaded) : '' }}</v-chip>
       </template>
       <template v-slot:item.prog_value="{ item }">
         <v-tooltip bottom v-if="item.prog_value === 1">
@@ -276,7 +276,7 @@ export default {
       { text: 'Тип', value: 'type', sortable: false, align: 'center', cellClass: 'table-small-cell', width: '150px' },
       { text: 'Серийный номер', value: 'serial_number', sortable: false, align: 'center', cellClass: 'table-small-cell' },
       { text: 'Фазность', value: 'phase', sortable: false, align: 'center', cellClass: 'table-small-cell' },
-      { text: 'Номер телефона(счетчик)', value: 'phone', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Сим карта', value: 'phone', sortable: false, align: 'center', cellClass: 'table-small-cell' },
       { text: 'IP адрес', value: 'ip_address', sortable: true, align: 'center', cellClass: 'table-small-cell' },
       { text: 'Порт', value: 'port', align: 'center', cellClass: 'table-small-cell' },
       { text: 'ICC', value: 'icc', sortable: false, align: 'center', cellClass: 'table-small-cell' },
@@ -289,7 +289,7 @@ export default {
       { text: 'Наименование', value: 'customer', sortable: false, align: 'center', cellClass: 'table-small-cell' },
       { text: 'Тип клиента', value: 'customer_type', sortable: true, align: 'center', cellClass: 'table-small-cell' },
       { text: 'Адрес', value: 'customer_address', sortable: true, align: 'center', cellClass: 'table-small-cell' },
-      { text: 'Номер телефона(клиент)', value: 'customer_phone', sortable: false, align: 'center', cellClass: 'table-small-cell' },
+      { text: 'Номер телефона', value: 'customer_phone', sortable: false, align: 'center', cellClass: 'table-small-cell' },
       { text: 'Почта', value: 'customer_email', sortable: false, align: 'center', cellClass: 'table-small-cell' },
       { text: 'Смс', value: 'sms_status', align: 'center', cellClass: 'table-small-cell' },
       { text: 'Шлюз', value: 'gateway', sortable: false, align: 'center', cellClass: 'table-small-cell' },

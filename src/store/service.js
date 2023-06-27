@@ -4,17 +4,27 @@ export const service = {
 	state: () => ({
 		assignments: [],
 		loading: false,
-		serverModuleName: 'meter-service'
+		serverModuleName: 'meter-service',
+		assignmentsLogs: [],
 	}),
 	getters: {
 		getAssignments(state) {
 			return state.assignments
+		},
+		
+		getAssignmentsLogs(state) {
+			return state.assignmentsLogs
 		},
 	},
 	mutations: {
 		setAssignments(state, assignments) {
 			state.assignments = assignments
 		},
+		
+		setAssignmentsLogs(state, assignmentsLogs) {
+			state.assignmentsLogs = assignmentsLogs
+		},
+		
 		setLoading(state, bool) {
 			state.loading = bool
 		}
@@ -27,11 +37,24 @@ export const service = {
 					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignments`,
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 
-				commit('setAssignments', response.data)
-				return response.data
+				const assignments = response.data
+				commit('setAssignments', assignments)
 			} finally {
 				commit('setLoading', false)
 			}
+		},
+		
+		async fetchAssignmentsLogs({ state, commit }) {
+			const response = await get(
+				this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignments-logs`,
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			const assignmentsLogs = response.data.map((log) => ({
+				...log,
+				data: JSON.parse(log.data)
+			}))
+	
+			commit('setAssignmentsLogs', assignmentsLogs)
 		},
 		
 		async fetchAssignmentEvents({ state, commit }, assignmentId) {

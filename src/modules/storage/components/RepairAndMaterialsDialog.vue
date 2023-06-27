@@ -41,14 +41,15 @@
                                         :resultColor="resultColorMaterials"
                                         @onResetValidation="resetValidation"
                                         @onMeterCountUpdate="meterRepairCountUpdate"
-                                        @metersClear="metersRepairClear"
+                                        @metersClear="repairMeters = []"
+                                        @meterTypeChanged="meterTypeChanged"
                                         is-repair
                                         current-tab="materialInsertTab"
                                     ></add-meter-view>
                                     <add-material-view
                                         :form-submit="formSubmit"
                                         ref="addMaterialTable"
-                                        :storage-materials="repairMaterials"
+                                        :materials="repairMaterials"
                                     >
                                     </add-material-view>
                                 </div>
@@ -58,7 +59,7 @@
                                 class="pl-2 pt-4"
                                 :form-submit="formSubmit"
                                 ref="addMaterialTableStorage"
-                                :storage-materials="storageMaterials"
+                                :materials="storageMaterials"
                             ></add-material-view>
                         </v-tab-item>
                         <v-tab-item value="meterWorkabilityTab">
@@ -71,7 +72,7 @@
                                 :resultColor="resultColorWorkability"
                                 @onResetValidation="resetValidation"
                                 @onMeterCountUpdate="meterWorkCountUpdate"
-                                @metersClear="metersWorkClear"
+                                @metersClear="repairWorkMeters = []"
                                 is-repair
                                 current-tab="meterWorkabilityTab"
                             ></add-meter-view>
@@ -160,17 +161,8 @@
             isWorkable: true,
         }),
 		computed: {
-			...mapState({
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
-			...mapGetters({
-				staffId: 'getStaffId',
-			}),
+			...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange' ]),
+			...mapGetters({ staffId: 'getStaffId', }),
 		},
 		inject: [
 			'showNotification',
@@ -207,13 +199,6 @@
 				this.clear()
 			},
 
-			metersRepairClear() {
-				this.repairMeters = []
-            },
-			metersWorkClear() {
-				this.repairWorkMeters = []
-			},
-
 			clear() {
 				this.repairMeters = []
 				this.storageMaterials = []
@@ -238,7 +223,7 @@
 	            }
 
 	            let updateStr = 'Используемые материалы:;'
-	            this.repairMaterials.forEach(material => {
+	            this.repairMaterials.forEach((material) => {
 		            updateStr += `${ this.getMaterialTypeTitle(material.materialType) } ${ material.count }шт.;`
 	            })
 
@@ -334,6 +319,12 @@
 				}
 			},
 
+            meterTypeChanged(meterType) {
+				if (this.tabModel === 'materialInsertTab') {
+					const { addMaterialTable } = this.$refs
+                    addMaterialTable.changeAvailableMaterials(meterType)
+				}
+            }
 		}
 	}
 </script>

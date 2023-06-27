@@ -10,11 +10,11 @@
 </template>
 <script>
 
-import NavigationBar from "@/components/NavigationBar";
-import NotificationSnackBar from "@/components/utils-components/NotificationSnackBar";
-import SideBar from "@/components/SideBar";
-import MainContent from "@/components/MainContent";
-import {mapActions, mapGetters} from "vuex";
+import NavigationBar from "./components/NavigationBar"
+import NotificationSnackBar from "./components/utils-components/NotificationSnackBar"
+import SideBar from "./components/SideBar"
+import MainContent from "./components/MainContent"
+import { mapActions, mapGetters } from "vuex"
 
 export default {
     name: 'App',
@@ -25,21 +25,16 @@ export default {
         NotificationSnackBar
     },
 	async mounted() {
-        $cookies.get('auth_token')
-            ? this.$store.commit('login', true)
-            : this.$store.commit('login', false)
+        this.$store.commit('login', $cookies.get('auth_token'))
 
         try {
-        	await this.fetchAccounts()
-        	await this.fetchAssignmentEventTypes()
         	await this.fetchDictionaries()
-	        console.log('mounted app')
         } catch (e) {
-            this.showNotificationError(e)
+            this.showNotificationStandardError(e)
         }
     },
     computed: {
-        ...mapGetters(['isLogin', ])
+        ...mapGetters([ 'isLogin' ])
     },
     provide: function () {
         return {
@@ -51,7 +46,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions([ 'logoutUser', 'fetchAccounts', 'fetchAssignmentEventTypes', 'fetchDictionaries' ]),
+        ...mapActions([ 'logoutUser', 'fetchDictionaries' ]),
         showNotification(text, color) {
             this.$refs.notificationManager.showNotification(text, color)
         },

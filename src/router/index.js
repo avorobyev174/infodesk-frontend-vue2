@@ -8,7 +8,6 @@ import Meters from "../modules/Meters"
 import Login from "../modules/Login"
 import PageNotFound from "../modules/PageNotFound"
 import Profile from "../profile/Profile"
-import Alpha from "../modules/alpha/Alpha"
 import TestUtils from "../modules/test-utils/TestUtils"
 import Reports from "../modules/reports/Reports"
 import Welcome from "../modules/Welcome"
@@ -59,11 +58,6 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: Profile
-  },
-  {
-    path: '/alpha',
-    name: 'Alpha',
-    component: Alpha
   },
   {
     path: '/test-utils',

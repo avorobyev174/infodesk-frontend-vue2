@@ -8,7 +8,6 @@ import { registration } from "@/store/registration"
 import { charts } from "@/store/charts"
 import { profile } from "@/store/profile"
 import { utils } from "@/store/utils"
-import { alpha } from "@/store/alpha"
 import { testUtils } from "@/store/test-utils"
 import { reports } from "@/store/reports"
 import { search } from "@/store/search"
@@ -41,109 +40,101 @@ export default new Vuex.Store({
         cookies: [],
         favoriteModuleColor: '',
     },
-    
+
     getters: {
         getSideBarState(state) {
             return state.sideBarState
         },
-        
+
         getActiveModules(state) {
             return state.activeModules
         },
-        
+
         isLogin(state) {
             return state.isUserLogin
         },
-        
+
         getCookies(state) {
             return state.cookies
         },
-        
+
         getFavoriteModuleColor(state) {
             return state.favoriteModuleColor
         },
-        
+
         getStaffId(state) {
             return state.staffId
         },
-        
+
         getRoles(state) {
             return state.roles
         },
-        
+
         getAccounts(state) {
             return state.accounts
         },
-        
+
         getAccountId(state) {
             return state.accountId
         },
-        
-        getAssignmentEventTypes(state) {
-            return state.assignmentEventTypes
-        },
-    
+
         getDictionaries(state) {
             return state.dictionaries
         },
     },
-    
+
     mutations: {
         setSideBarState(state, sideBarState) {
             state.sideBarState = sideBarState
         },
-        
+
         setActiveModules(state, activeModules) {
             state.activeModules = activeModules
         },
-        
+
         login(state, isUserLogin) {
             state.isUserLogin = isUserLogin
         },
-        
+
         setCookies(state, cookies) {
             state.cookies = cookies
         },
-        
+
         setFavoriteModuleColor(state, color) {
             state.favoriteModuleColor = color
         },
-        
+
         setStaffId(state, staffId) {
             state.staffId = staffId
         },
-        
+
         setAccountId(state, accountId) {
             state.accountId = accountId
         },
-        
+
         setRoles(state, roles) {
             state.roles = roles
         },
-        
+
         setAccounts(state, accounts) {
             state.accounts = accounts
         },
-        
-        setAssignmentEventTypes(state, assignmentEventTypes) {
-            state.assignmentEventTypes = assignmentEventTypes
-        },
-    
+
         setDictionaries(state, dictionaries) {
             state.dictionaries = dictionaries
         },
     },
 
     actions: {
-        async loginUser({state, commit}, { authToken, roleToken, cookies }) {
+        async loginUser({ state, commit }, { authToken, roleToken, cookies }) {
             $cookies.set('auth_token', authToken, '4h')
             $cookies.set('role_token', roleToken, '4h')
-            
+
             commit('login', true)
             commit('setCookies', cookies)
-            
+
             let redirect = '/'
-            
+
             if (cookies && cookies.common && cookies.common.length) {
                 cookies.common.forEach((cookie) => {
                     if (cookie.settings === 'favorite_module') {
@@ -152,39 +143,23 @@ export default new Vuex.Store({
                     }
                 })
             }
-            
+
             await router.push(redirect)
         },
-        
+
         async logoutUser({ state, commit }) {
             $cookies.remove('auth_token')
             $cookies.remove('role_token')
             commit('login', false)
             await router.push('/login')
         },
-        
-        async fetchAccounts({ state, commit }) {
-            const response = await get(
-                this.state.serverUrl + `/api/common/accounts`,
-                    { headers: { 'authorization': $cookies.get('auth_token') } })
-            const { data } = response
-            commit('setAccounts', data)
-        },
-        
-        async fetchAssignmentEventTypes({ state, commit }) {
-            const response = await get(
-                this.state.serverUrl + `/api/common/assignment-event-types`,
-                    { headers: { 'authorization': $cookies.get('auth_token') } })
-            const { data } = response
-            commit('setAssignmentEventTypes', data)
-        },
-    
+
         async fetchDictionaries({ state, commit }) {
             const response = await get(
                 this.state.serverUrl + `/api/common/dictionaries`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
-    
-            
+
+
             const { data } = response
             const dictionaries = {}
             for (const { title, value } of data) {
@@ -199,7 +174,6 @@ export default new Vuex.Store({
         charts,
         profile,
         utils,
-        alpha,
         testUtils,
         search,
         reports,

@@ -66,44 +66,28 @@
             class='google-map'
             :options="mapOptions"
         >
-<!--            <gmap-cluster-->
-<!--                :gridSize="30"-->
-<!--                :zoomOnClick="true"-->
-<!--                :minimumClusterSize="5"-->
-<!--            >-->
-<!--            <gmap-marker-->
-<!--                :key="index"-->
-<!--                v-for="(m, index) in markers"-->
-<!--                :position="m"-->
-<!--                @click="center=m"-->
-<!--                :clickable="true"-->
-<!--                :icon="markerOptions"-->
-<!--                :title="m.title"-->
-<!--            >-->
-<!--            </gmap-marker>-->
-                <gmap-custom-marker
-                    v-for="({ color, position, address, volume }, index) in markers"
-                    :key="index"
-                    :marker="position"
-                    ref="marker"
-                >
-                    <v-tooltip top :color="colorGrey">
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-icon
-                                v-bind="attrs"
-                                v-on="on"
-                                :color="color"
-                            >
-                                mdi-home-circle
-                            </v-icon>
-                        </template>
-                        <div style="text-align: center">
-                            <span style="display: block">{{ address }}</span>
-                            <span style="display: block">{{ `Объем: ${ volume } кВТ*ч` }}</span>
-                        </div>
-                    </v-tooltip>
-                </gmap-custom-marker>
-<!--            </gmap-cluster>-->
+            <gmap-custom-marker
+                v-for="({ color, position, address, volume }, index) in markers"
+                :key="index"
+                :marker="position"
+                ref="marker"
+            >
+                <v-tooltip top :color="colorGrey">
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-icon
+                            v-bind="attrs"
+                            v-on="on"
+                            :color="color"
+                        >
+                            mdi-home-circle
+                        </v-icon>
+                    </template>
+                    <div style="text-align: center">
+                        <span style="display: block">{{ address }}</span>
+                        <span style="display: block">{{ `Объем: ${ volume } кВТ*ч` }}</span>
+                    </div>
+                </v-tooltip>
+            </gmap-custom-marker>
         </gmap-map>
     </div>
 </template>
@@ -125,10 +109,6 @@ export default {
 	    center: { lat: 53.41295, lng: 58.99823 },
         markers: [],
         filteredMarkers: [],
-	    markerOptions: {
-		    url: require(''),
-		    scaledSize: { width: 20, height: 20, f: 'px', b: 'px' },
-	    },
         mapOptions: {
             disableDefaultUi: true,
             scaleControl: true,
@@ -140,7 +120,7 @@ export default {
         },
         currentMapItem: null,
         mapItems: [
-            { title: 'МКД План обследования по нормативу', value: 1 },
+            { title: 'МКД план обследования по нормативу', value: 1 },
         ],
 	    currentMkdProgrammTypes: [],
         mkdProgrammTypes: [
@@ -178,14 +158,6 @@ export default {
 		    'fetchAddresses',
 	    ]),
 
-	    initializeMap() {
-		    //console.log(this.$refs.googleMap)
-		    // this.$refs.googleMap.$mapPromise.then((map) => {
-			//     map.controls[ this.google.maps.ControlPosition.TOP_CENTER  ].push(this.createColorLegendDiv())
-		    // })
-		    //this.$refs.googleMap.$mapObject.controls[ this.google.maps.ControlPosition.TOP_CENTER  ].push(this.createColorLegendDiv())
-	    },
-
 	    mapItemChanged() {
             switch (this.currentMapItem) {
 	            case 1: this.initMkdProgramm(); break
@@ -218,7 +190,6 @@ export default {
                 volume: parseInt(volume),
 			    position: { lat, lng }
 		    }))
-		    console.log(this.mkdProgrammMarkers)
         },
 
         show() {
@@ -250,13 +221,5 @@ export default {
         z-index: 1;
         display: flex;
         gap: 5px;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    .active {
-        display: block;
     }
 </style>

@@ -1,9 +1,5 @@
-<template>
-    
-</template>
-
 <script>
-	import { mapGetters, mapState } from "vuex";
+	import { mapGetters } from "vuex";
 	import StorageMixin from "./StorageMixin"
 
 	export default {
@@ -126,7 +122,3 @@
         }
 	}
 </script>
-
-<style scoped>
-
-</style>

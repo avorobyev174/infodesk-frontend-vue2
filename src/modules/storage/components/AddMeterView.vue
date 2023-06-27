@@ -462,6 +462,7 @@
                     this.availableByTypeSerials = this.availableByTypeMeters
                         .filter((availableMeter) => this.checkIfUpdateFieldIsValid(availableMeter))
                         .map((availableMeter) => availableMeter.serial_number)
+                    this.$emit('meterTypeChanged', this.type.index)
                 }
             },
 

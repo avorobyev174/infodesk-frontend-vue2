@@ -9,7 +9,7 @@
     >
         <v-list-item class="pt-3">
             <v-list-item-avatar>
-                <v-img :src="photoUrl"></v-img>
+                <v-img :src="photoUrl" lazy-src="@/assets/no-user-image.png"></v-img>
             </v-list-item-avatar>
 
             <v-list-item-content>
@@ -269,8 +269,13 @@
 					this.events = await this.fetchAssignmentEvents(item.id)
                     this.lastEvent = this.events.at(0)
 					const { photo_url_sm } = await this.getProfileData()
-					this.photoUrl = this.$store.state.serverUrl + `/images/${ photo_url_sm }`
                     this.owner = this.getAccountFullName(item.owner_id)
+                    if (this.owner) {
+	                    this.photoUrl = this.$store.state.serverUrl + `/images/${ photo_url_sm }`
+                    } else {
+	                    this.owner = 'отсутствует'
+	                    this.photoUrl = ''
+                    }
 					this.eventListModel = true
 				} catch (e) {
 					this.showNotificationStandardError(e)

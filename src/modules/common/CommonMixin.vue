@@ -11,6 +11,7 @@
 	        assignmentEventTypes: [],
 	        assignmentCloseReasonTypes: [],
 	        accounts: [],
+	        types: [],
         }),
 		computed: {
 			...mapGetters({	dictionaries: 'getDictionaries' })
@@ -19,12 +20,14 @@
 			const {
 				assignmentEventTypes,
                 assignmentCloseReasonTypes,
-                accounts
+                accounts,
+				types,
 			} = this.dictionaries
 
             this.assignmentEventTypes = assignmentEventTypes
             this.assignmentCloseReasonTypes = assignmentCloseReasonTypes
             this.accounts = accounts
+            this.types = types
         },
 		methods: {
 			formatDate(dateToFormat, withTime) {
@@ -100,7 +103,12 @@
 			getAssignmentCloseEventTypeTitle(value) {
 				const assignmentCloseEventType = this.assignmentCloseReasonTypes.find((closeEventType) => closeEventType.id === value)
 				return assignmentCloseEventType ? assignmentCloseEventType.title : value
-			}
+			},
+
+			getMeterTypeTitle(meterType) {
+				const mType = this.types.find((type) => meterType === type.id)
+				return mType ? mType.type_name : meterType
+			},
 		}
 	}
 </script>

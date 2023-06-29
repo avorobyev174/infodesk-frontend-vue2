@@ -23,11 +23,9 @@
             <template v-slot:no-results>
                 <span>Идет загрузка счетчиков...</span>
             </template>
-
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
             </template>
-
             <template v-slot:header.serial_number="{ header }">
                 {{ header.text }}
                 <v-menu
@@ -62,7 +60,6 @@
                     </div>
                 </v-menu>
             </template>
-
             <template v-slot:header.meter_type="{ header }">
                 {{ header.text }}
                 <v-menu
@@ -97,7 +94,6 @@
                     </div>
                 </v-menu>
             </template>
-
             <template v-slot:header.meter_location="{ header }">
                 {{ header.text }}
                 <v-menu
@@ -131,17 +127,16 @@
                     </div>
                 </v-menu>
             </template>
-
             <template v-slot:header.current_owner="{ header }">
                 {{ header.text }}
                 <v-menu
-                        nudge-bottom="10px"
-                        nudge-left="180px"
-                        offset-y
-                        :close-on-content-click="false"
-                        origin="center center"
-                        transition="scale-transition"
-                        ref="filterByOwnerMenu"
+                    nudge-bottom="10px"
+                    nudge-left="180px"
+                    offset-y
+                    :close-on-content-click="false"
+                    origin="center center"
+                    transition="scale-transition"
+                    ref="filterByOwnerMenu"
                 >
                     <template v-slot:activator="{ on, attrs }">
                         <v-btn v-bind="attrs" v-on="on" icon>
@@ -166,7 +161,6 @@
                     </div>
                 </v-menu>
             </template>
-
             <template v-slot:top>
                 <v-toolbar
                     flat
@@ -186,8 +180,6 @@
                     ></main-menu>
                 </v-toolbar>
             </template>
-
-            <!-- Подмена значений таблицы на лэйблы -->
             <template v-slot:item.meter_type="{ item }">
                 {{ getMeterTypeTitle(item.meter_type) }}
             </template>

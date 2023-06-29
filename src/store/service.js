@@ -6,6 +6,8 @@ export const service = {
 		loading: false,
 		serverModuleName: 'meter-service',
 		assignmentsLogs: [],
+		assignmentCloseReasonTypes: [],
+		assignmentEventTypes: [],
 	}),
 	getters: {
 		getAssignments(state) {
@@ -39,6 +41,7 @@ export const service = {
 
 				const assignments = response.data
 				commit('setAssignments', assignments)
+				return assignments
 			} finally {
 				commit('setLoading', false)
 			}
@@ -85,11 +88,26 @@ export const service = {
 			}
 		},
 		
+		async addAssignment({ state, commit }, { type, serialNumber }) {
+			try {
+				commit('setLoading', true)
+				const response = await post(
+					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/add-assignment`,
+					{ type, serialNumber },
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
+				
+				const [ assignment ] = response.data
+				return assignment
+			} finally {
+				commit('setLoading', false)
+			}
+		},
+		
 		async addAssignmentActionEvent({ state, commit }, { assignmentId, description }) {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/add-action-assignment/${ assignmentId }`,
+					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/add-action-assignment-event/${ assignmentId }`,
 					{ description },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 
@@ -119,7 +137,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/delete-action-assignment/${ eventId }`,
+					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/delete-action-assignment-event/${ eventId }`,
 					{},
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				

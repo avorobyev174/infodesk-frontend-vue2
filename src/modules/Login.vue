@@ -19,8 +19,10 @@
                     required
                     class="mt-4"
                     placeholder="Имя"
+                    autocomplete
                 ></v-text-field>
                 <v-text-field
+                    autocomplete
                     v-model="password"
                     type="password"
                     hide-spin-buttons

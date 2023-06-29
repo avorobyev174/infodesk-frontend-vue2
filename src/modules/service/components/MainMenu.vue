@@ -42,9 +42,30 @@
         name: "MainMenu",
         data: () => ({
             actions: [
-                { id: 1, title: 'Обновить', onClick: 'refreshAssignments', icon: 'mdi-refresh', color: 'primary', disabled: false },
-                { id: 2, title: 'Журнал обновления системы', onClick: 'openAssignmentsLogsDialog', icon: 'mdi-clipboard-text-search-outline', color: 'primary', disabled: false },
-                { id: 3, title: 'Видимость колонок', onClick: 'showHideColumns', icon: 'mdi-eye', color: 'primary', disabled: false },
+                {
+                	title: 'Обновить',
+                    onClick: 'refreshAssignments',
+                    icon: 'mdi-refresh',
+                    color: 'primary'
+                },
+                {
+                	title: 'Добавить',
+                    onClick: 'opendAssignmentAddDialog',
+                    icon: 'mdi-plus-box-outline',
+                    color: 'primary'
+                },
+                {
+                	title: 'Журнал обновления системы',
+                    onClick: 'openAssignmentsLogsDialog',
+                    icon: 'mdi-clipboard-text-search-outline',
+                    color: 'primary'
+                },
+                {
+                	title: 'Видимость колонок',
+                    onClick: 'showHideColumns',
+                    icon: 'mdi-eye',
+                    color: 'primary'
+                },
             ],
         }),
         methods: {

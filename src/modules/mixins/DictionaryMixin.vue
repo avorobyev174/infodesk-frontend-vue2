@@ -1,33 +1,46 @@
-<template>
-    
-</template>
-
 <script>
 	import { mapGetters } from "vuex"
 
 	export default {
-		name: "CommonMixin",
+		name: "DictionaryMixin",
         data: () => ({
 	        assignmentEventTypes: [],
 	        assignmentCloseReasonTypes: [],
+	        assignmentStatuses: [],
 	        accounts: [],
-	        types: [],
+	        meterTypes: [],
+	        ipAddresses: [],
+	        simStatuses: [],
         }),
 		computed: {
-			...mapGetters({	dictionaries: 'getDictionaries' })
+			...mapGetters({
+                dictionaries: 'getDictionaries',
+            })
 		},
-        mounted() {
+        provide: function() {
+	        return {
+		        getMeterTypes: this.getMeterTypes,
+		        getAccounts: this.getAccounts,
+	        }
+        },
+        created() {
 			const {
 				assignmentEventTypes,
                 assignmentCloseReasonTypes,
                 accounts,
-				types,
+				meterTypes,
+				ipAddresses,
+				simStatuses,
+				assignmentStatuses
 			} = this.dictionaries
 
             this.assignmentEventTypes = assignmentEventTypes
             this.assignmentCloseReasonTypes = assignmentCloseReasonTypes
             this.accounts = accounts
-            this.types = types
+            this.meterTypes = meterTypes
+            this.ipAddresses = ipAddresses
+            this.simStatuses = simStatuses
+            this.assignmentStatuses = assignmentStatuses
         },
 		methods: {
 			formatDate(dateToFormat, withTime) {
@@ -89,7 +102,7 @@
 			getAccountFullName(accountId) {
 				const account = this.accounts.find((account) => account.id === accountId)
                 if (account) {
-                	const [ secondName, firstName, middleName ] = account.full_name.split(' ')
+                	const [ secondName, firstName, middleName ] = account.name.split(' ')
                     return `${ secondName } ${ firstName[0] }. ${ middleName[0] }.`
                 }
                 return accountId
@@ -100,19 +113,38 @@
                 return assignmentEventType ? assignmentEventType.title : value
 			},
 
+			getAssignmentStatusTitle(value) {
+				const assignmentStatus = this.assignmentStatuses.find((status) => status.value === value)
+				return assignmentStatus ? assignmentStatus.title : value
+			},
+
 			getAssignmentCloseEventTypeTitle(value) {
 				const assignmentCloseEventType = this.assignmentCloseReasonTypes.find((closeEventType) => closeEventType.id === value)
 				return assignmentCloseEventType ? assignmentCloseEventType.title : value
 			},
 
 			getMeterTypeTitle(meterType) {
-				const mType = this.types.find((type) => meterType === type.id)
-				return mType ? mType.type_name : meterType
+				const mType = this.meterTypes.find((type) => meterType === type.value)
+				return mType ? mType.title : meterType
 			},
+
+			getIpAddressTitle(ipAddress) {
+				const addr = this.ipAddresses.find((address) => ipAddress === address.value)
+				return addr ? addr.title : ipAddress
+			},
+
+			getSimStatusTitle(meterSimStatus) {
+				const status = this.simStatuses.find((status) => meterSimStatus === status.value)
+				return status ? status.title : meterSimStatus
+			},
+
+            getMeterTypes() {
+				return this.meterTypes
+            },
+
+			getAccounts() {
+				return this.accounts
+			}
 		}
 	}
 </script>
-
-<style scoped>
-
-</style>

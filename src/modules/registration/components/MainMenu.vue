@@ -44,7 +44,7 @@
         data: () => ({
             actions: [
                 {id: 1, title: 'Обновить', onClick: 'update', icon: 'mdi-refresh', color: 'primary', disabled: false},
-                {id: 2, title: 'Добавить', onClick: 'addOrEdit', icon: 'mdi-plus-box', color: 'primary', disabled: false},
+                {id: 2, title: 'Добавить', onClick: 'addOrEdit', icon: 'mdi-plus-box-outline', color: 'primary', disabled: false},
                 {id: 3, title: 'Актуализировать данные из РТК', onClick: 'actualizeFromRTC', icon: 'mdi-database-import', color: 'primary', disabled: false},
                 {id: 4, title: 'Групповая отправка смс', onClick: 'groupSmsSend', icon: 'mdi-email-arrow-right', color: 'primary', disabled: false},
                 {id: 5, title: 'Получить все статусы смс после групповой отправки', onClick: 'groupSmsStatusCheck', icon: 'mdi-email-check', color: 'primary', disabled: false},

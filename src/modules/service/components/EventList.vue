@@ -25,7 +25,7 @@
             <v-timeline-item
                 v-for="(event, i) in events"
                 :key="i"
-                :color="getTimeLineItemColor(event.type)"
+                :color="getAssignmentEventTypeColor(event.type)"
             >
                 <div class="">
                     <span class="mb-1 event-type">
@@ -235,6 +235,8 @@
             'getAssignmentEventTypeTitle',
             'getAccountFullName',
             'getAssignmentCloseEventTypeTitle',
+            'getAccounts',
+            'getAssignmentEventTypeColor',
         ],
         computed: {
 	        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
@@ -262,16 +264,20 @@
 			]),
 			...mapActions('profile', [ 'getProfileData' ]),
 
-			async open(item, currentAccountId) {
+			async open(assingment, currentAccountId) {
+				this.owner = 'отсутствует'
+				this.photoUrl = ''
+				this.currentAssignment = assingment
+				this.currentAccountId = currentAccountId
+				const { id, owner_id } = assingment
+				const account = this.getAccounts().find(({ id }) => owner_id === id)
+				this.owner = this.getAccountFullName(owner_id)
+
 				try {
-					this.currentAssignment = item
-					this.currentAccountId = currentAccountId
-					this.events = await this.fetchAssignmentEvents(item.id)
+					this.events = await this.fetchAssignmentEvents(id)
                     this.lastEvent = this.events.at(0)
-					const { photo_url_sm } = await this.getProfileData()
-                    this.owner = this.getAccountFullName(item.owner_id)
                     if (this.owner) {
-	                    this.photoUrl = this.$store.state.serverUrl + `/images/${ photo_url_sm }`
+	                    this.photoUrl = this.$store.state.serverUrl + `/images/${ account?.photo }`
                     } else {
 	                    this.owner = 'отсутствует'
 	                    this.photoUrl = ''
@@ -359,15 +365,6 @@
 					this.closeDescriptionDialog()
 				}
             },
-
-			getTimeLineItemColor(eventType) {
-				switch (eventType) {
-					case AssignmentEventTypes.REGISTERED: return this.colorGrey
-					case AssignmentEventTypes.IN_WORK: return this.colorBlue
-					case AssignmentEventTypes.CLOSE: return this.colorGreen
-					case AssignmentEventTypes.ACTION: return this.colorGold
-				}
-			},
 		}
 	}
 </script>

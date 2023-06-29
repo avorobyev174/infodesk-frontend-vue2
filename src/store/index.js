@@ -159,7 +159,6 @@ export default new Vuex.Store({
                 this.state.serverUrl + `/api/common/dictionaries`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
-
             const { data } = response
             const dictionaries = {}
             for (const { title, value } of data) {

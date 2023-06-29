@@ -24,16 +24,18 @@ export default {
         MainContent,
         NotificationSnackBar
     },
-	async mounted() {
+	mounted() {
         this.$store.commit('login', $cookies.get('auth_token'))
 
-        try {
-        	await this.fetchDictionaries()
-        } catch (e) {
-            this.showNotificationStandardError(e)
-        }
     },
-    computed: {
+	async updated() {
+	    try {
+		    await this.fetchDictionaries()
+	    } catch (e) {
+		    this.showNotificationStandardError(e)
+	    }
+    },
+	computed: {
         ...mapGetters([ 'isLogin' ])
     },
     provide: function () {

@@ -72,11 +72,16 @@
                     } else if (item.status === 2 &&
                                 item.owner_id &&
                                 [ 3 ].includes(action.id) &&
-                                item.owner_id !== currentAccountId
-                    ) {
+                                item.owner_id !== currentAccountId)	{
 	            		return { ...action, disabled: true }
-                    // закрыто - нельзя редактировать и принять
-                    } else if (item.status === 3 && [ 2, 3 ].includes(action.id)) {
+                    // в работе - нельзя принять, если уже принято тем жеисполнителем
+                    } else if (item.status === 2 &&
+			            item.owner_id &&
+			            [ 2 ].includes(action.id) &&
+			            item.owner_id === currentAccountId)	{
+			            return { ...action, disabled: true }
+			            // закрыто - нельзя редактировать и принять
+		            } else if (item.status === 3 && [ 2, 3 ].includes(action.id)) {
 			            return { ...action, disabled: true }
                     }
 	            	return { ...action }

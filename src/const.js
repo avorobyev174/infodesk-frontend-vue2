@@ -4,6 +4,8 @@ const AssignmentEventTypes = {
 	CLOSE: 3,
 	ACTION: 4,
 	RE_REGISTRED: 5,
+	SYSTEM_ACTION: 5,
+	CLOSE_AUTO: 5,
 }
 
 export {

@@ -18,12 +18,11 @@
             loading-text="Идет загрузка поручений..."
             fixed-header
             :headers="showHeaders"
-            :items="assignments"
+            :items="defaultAssignments"
         >
             <template v-slot:no-results>
                 <span>Идет загрузка поручений...</span>
             </template>
-
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
             </template>
@@ -38,39 +37,122 @@
                         label="Поиск"
                         hide-details
                         clearable
-                        class="searchTextInput"
+                        class="search-input"
                     />
                     <v-spacer/>
                     <main-menu
                         @refreshAssignments="refreshAssignments"
-                        @openAssignmentsLogsDialog="openAssignmentsLogsDialog"
+                        @openAssignmentsLogsDialog="$refs.serviceUpdateLogsDialog.dialogOpen()"
                         @showHideColumns="$refs.showHideColumnsDialog.open()"
-                    />
-                    <action-menu
-                       ref="actionMenu"
-                       @openEventList="openEventList"
-                       @refreshAssignments="refreshAssignments"
-                       @acceptAssignment="assignmentAccept"
-                       @editAssignmentContacts="openEditContactsDialog"
-                    />
-                    <show-hide-columns-dialog
-                        ref="showHideColumnsDialog"
-                        :headers="headers"
-                        :selectedHeaders="selectedHeaders"
-                        @changeColumns="changeColumnsVisibility"
-                        moduleName="service"
+                        @opendAssignmentAddDialog="$refs.addAssignmentDialog.dialogOpen()"
                     />
                 </v-toolbar>
             </template>
+            <template v-slot:header.owner_id="{ header }">
+                {{ header.text }}
+                <v-menu
+                    nudge-bottom="10px"
+                    nudge-left="150px"
+                    offset-y
+                    :close-on-content-click="false"
+                    origin="center center"
+                    transition="scale-transition"
+                    ref="filterByOwnerMenu"
+                >
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn v-bind="attrs" v-on="on" icon>
+                            <v-icon :color="filterByOwnerColor" small>mdi-filter-plus</v-icon>
+                        </v-btn>
+                    </template>
+                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
+                        <v-combobox
+                            :items="serviceEmployees"
+                            item-text="name"
+                            item-value="accId"
+                            label="Сотрудник"
+                            class="p-3 pt-5 pb-0"
+                            v-model="filterByOwner"
+                            clearable
+                            multiple
+                            @change="doFilter"
+                        >
+                        </v-combobox>
+                    </div>
+                </v-menu>
+            </template>
+            <template v-slot:header.status="{ header }">
+                {{ header.text }}
+                <v-menu
+                    nudge-bottom="10px"
+                    nudge-left="150px"
+                    offset-y
+                    :close-on-content-click="false"
+                    origin="center center"
+                    transition="scale-transition"
+                    ref="filterByStatusMenu"
+                >
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn v-bind="attrs" v-on="on" icon>
+                            <v-icon :color="filterByStatusColor" small>mdi-filter-plus</v-icon>
+                        </v-btn>
+                    </template>
+                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
+                        <v-combobox
+                            :items="assignmentStatuses"
+                            item-text="title"
+                            item-value="value"
+                            label="Статус"
+                            class="p-3 pt-5 pb-0"
+                            v-model="filterByStatus"
+                            clearable
+                            multiple
+                            @change="doFilter"
+                        >
+                        </v-combobox>
+                    </div>
+                </v-menu>
+            </template>
+            <template v-slot:header.customer_address="{ header }">
+                {{ header.text }}
+                <v-menu
+                    nudge-bottom="10px"
+                    nudge-left="150px"
+                    offset-y
+                    :close-on-content-click="false"
+                    origin="center center"
+                    transition="scale-transition"
+                    ref="filterByStatusMenu"
+                >
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn v-bind="attrs" v-on="on" icon>
+                            <v-icon :color="filterByBuildingColor" small>mdi-filter-plus</v-icon>
+                        </v-btn>
+                    </template>
+                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
+                        <v-combobox
+                            :items="serviceBuildings"
+                            item-text="title"
+                            item-value="value"
+                            label="Адрес"
+                            class="p-3 pt-5 pb-0"
+                            v-model="filterByBuilding"
+                            clearable
+                            multiple
+                            @change="doFilter"
+                        >
+                        </v-combobox>
+                    </div>
+                </v-menu>
+            </template>
             <template v-slot:item.status="{ item }" >
-                <v-chip :color="getAssignmentEventTypeColor(item.status)">
-                    {{ getAssignmentEventTypeTitle(item.status) }}
-                    <v-icon v-if="item.old_last_data_date">mdi-clipboard-alert-outline</v-icon>
+                <v-chip :color="getAssignmentStatusColor(item.status)">
+                    {{ getAssignmentStatusTitle(item.status) }}
+                    <v-icon v-if="item.old_last_data_date">mdi-clipboard-pulse-outline</v-icon>
                 </v-chip>
             </template>
-<!--            <template v-slot:item.meter_ip_address="{ item }" >-->
-<!--                {{ getIpAddressTitle(item.meter_ip_address) }}-->
-<!--            </template>}-->
+            <template v-slot:item.meter_ip_address="{ item }" >
+                {{ getIpAddressTitle(item.meter_ip_address) }}
+            </template>}
             <template v-slot:item.last_data_date="{ item }" >
                 {{ formatDate(item.last_data_date) }}
             </template>
@@ -80,54 +162,57 @@
             <template v-slot:item.meter_type="{ item }" >
                 {{ getMeterTypeTitle(item.meter_type) }}
             </template>
-<!--            <template v-slot:item.meter_sim_status="{ item }">-->
-<!--                {{ getStatusTitle(item.meter_sim_status) }}-->
-<!--            </template>-->
+            <template v-slot:item.meter_sim_status="{ item }">
+                {{ getSimStatusTitle(item.meter_sim_status) }}
+            </template>
             <template v-slot:item.owner_id="{ item }">
                 {{ item.owner_id ? getAccountFullName(item.owner_id) : 'отсутствует' }}
             </template>
         </v-data-table>
         <event-list
             ref="eventList"
-            :assignments="assignments"
+            :assignments="defaultAssignments"
         />
-        <v-dialog
-            v-model="editContactsDialogModel"
-            max-width="500px"
-        >
-            <v-card>
-                <v-card-title>
-                    <span class="mx-auto text-h5 text-center text-break">Редактирование контактных данных</span>
-                </v-card-title>
-                <v-card-text class="pt-2 pb-1">
-                    <v-text-field v-model="contacts" label="Контактные данные"></v-text-field>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        text
-                        color="primary"
-                        @click="saveContacts"
-                    >
-                        Сохранить
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <edit-contacts-dialog
+            ref="editContactsDialog"
+            :assignment="currentAssignment"
+            @updateAssignment="updateAssignment"
+        />
         <service-update-logs-dialog
-            ref="ServiceUpdateLogsDialog"
+            ref="serviceUpdateLogsDialog"
+        />
+        <add-assignment-dialog
+            ref="addAssignmentDialog"
+            @createAssignment="createAssignment"
+        ></add-assignment-dialog>
+        <show-hide-columns-dialog
+            ref="showHideColumnsDialog"
+            :headers="headers"
+            :selectedHeaders="selectedHeaders"
+            @changeColumns="changeColumnsVisibility"
+            moduleName="service"
+        />
+        <action-menu
+            ref="actionMenu"
+            @openEventList="$refs.eventList.open(currentAssignment, currentAccountId)"
+            @refreshAssignments="refreshAssignments"
+            @acceptAssignment="assignmentAccept"
+            @editAssignmentContacts="$refs.editContactsDialog.dialogOpen()"
         />
     </v-card>
 </template>
 
 <script>
-	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
     import ActionMenu from "./components/ActionMenu"
     import EventList from "./components/EventList"
     import MainMenu from "./components/MainMenu"
     import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
-	import CommonMixin from "../common/CommonMixin"
+	import AuthMixin from "../mixins/AuthMixin"
     import ServiceUpdateLogsDialog from "./components/ServiceUpdateLogsDialog"
+    import AddAssignmentDialog from "./components/AddAssignmentDialog"
+    import ServiceMixin from "@/modules/service/ServiceMixin"
+    import EditContactsDialog from "./components/EditContactsDialog"
+    import DictionaryMixin from "../mixins/DictionaryMixin"
 
 	export default {
 		name: "Service",
@@ -136,264 +221,180 @@
 			ActionMenu,
             MainMenu,
 	        ShowHideColumnsDialog,
-	        ServiceUpdateLogsDialog
+	        ServiceUpdateLogsDialog,
+	        AddAssignmentDialog,
+	        EditContactsDialog
         },
         data: () => ({
 	        search: '',
-	        editContactsDialogModel: false,
-	        logsDialogModel: false,
-            contacts: '',
-	        selectedHeaders: [],
-	        headers: [
-		        {
-			        text: 'ID',
-			        align: 'center',
-			        value: 'id',
-			        sortable: true,
-			        width: '80px',
-		        },
-		        {
-			        text: 'Дата регистрации',
-			        value: 'created',
-			        sortable: true,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-		        },
-		        {
-			        text: 'Статус',
-			        align: 'center',
-			        value: 'status',
-			        sortable: true,
-			        width: '80px',
-		        },
-		        {
-			        text: 'Исполнитель',
-			        value: 'owner_id',
-			        sortable: true,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-		        },
-		        {
-			        text: 'Тип',
-			        value: 'meter_type',
-			        sortable: true,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-			        width: '160px'
-		        },
-		        {
-			        text: 'Серийный номер',
-			        value: 'meter_serial_number',
-			        sortable: false,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-			        width: '160px'
-		        },
-		        {
-			        text: 'Дата последнего опроса',
-			        value: 'last_data_date',
-			        sortable: true,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-		        },
-		        {
-		        	text: 'IP адрес',
-                    value: 'meter_ip_address',
-                    sortable: true,
-                    align: 'center',
-                    cellClass: 'table-small-cell',
-			        width: '160px'
-                },
-		        {
-			        text: 'Связной',
-			        value: 'meter_contact',
-			        sortable: true,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-		        },
-		        {
-			        text: 'Сим карта',
-			        value: 'meter_phone',
-			        sortable: false,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-		        },
-		        {
-		        	text: 'Статус сим карты',
-                    value: 'meter_sim_status',
-                    sortable: true,
-                    align: 'center',
-                    cellClass: 'table-small-cell',
-                },
-		        {
-			        text: 'Номер лицевого',
-			        value: 'customer_personal_account',
-			        sortable: false,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-		        },
-		        {
-			        text: 'Адрес',
-			        value: 'customer_address',
-			        sortable: true,
-			        align: 'center',
-			        cellClass: 'table-small-cell',
-		        },
-		        {
-		        	text: 'Контактные данные',
-                    value: 'customer_contacts',
-                    sortable: false,
-                    align: 'center',
-                    cellClass: 'table-small-cell',
-                },
-	        ],
-            currentItem: null,
+            defaultAssignments: [],
+            currentAssignment: null,
+	        filterByOwnerColor: '',
+	        filterByStatusColor: '',
+	        filterByBuildingColor: '',
+	        filterByOwner: [],
+	        filterByStatus: [],
+	        filterByBuilding: [],
+	        filters: {},
+	        serviceEmployees: [],
+	        serviceStatuses: [],
+	        serviceBuildings: [],
         }),
-		mixins: [ CommonMixin ],
-		inject: [ 'showNotification', 'showNotificationError', 'showNotificationStandardError', 'checkAuth' ],
-        provide: function () {
-	        return {
-		        formatDate: this.formatDate,
-		        getAssignmentEventTypeTitle: this.getAssignmentEventTypeTitle,
-		        getAccountFullName: this.getAccountFullName,
-		        getAssignmentCloseEventTypeTitle: this.getAssignmentCloseEventTypeTitle,
-		        getAssignmentEventTypeColor: this.getAssignmentEventTypeColor,
-		        getMeterTypeTitle: this.getMeterTypeTitle,
-	        }
-        },
-        created() {
-	        this.headers = this.headers.map((header, i) => ({ ... header, index: i }))
-	        $cookies.get('meter_service_columns')
-		        ? this.changeColumnsVisibility($cookies.get('meter_service_columns')
-                    .split(',')
-                    .map((column) => parseInt(column)))
-		        : this.selectedHeaders = this.headers
-
-            this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/service' ? this.colorGold : '')
-        },
-		async mounted() {
-			if (!this.checkAuth()) {
-				return
-			}
-
-			if (!this.activeModules.filter((module) => module.name === this.$route.name.toLowerCase()).length) {
-				this.$router.push('/')
-			}
-
-			try {
-				await this.fetchTypes()
-				await this.fetchAssignments()
-				await this.fetchAssignmentsLogs()
-            } catch (e) {
-			    this.showNotificationStandardError(e)
-			}
-
-			document.onkeydown = (evt) => {
-				if (this.$route.name === 'Service' && evt.key === 'Alt') {
-					this.refreshAssignments()
-				}
-			}
-		},
-        computed: {
-	        ...mapGetters({
-		        assignments: 'service/getAssignments',
-		        currentAccountId: 'getAccountId',
-		        dictionaries: 'getDictionaries',
-		        activeModules: 'getActiveModules',
-	        }),
-	        ...mapState('service', [ 'loading' ]),
-	        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
-
-	        showHeaders () {
-		        return this.headers.filter((header) => this.selectedHeaders.includes(header))
-	        }
-        },
-        methods: {
-	        ...mapMutations([ 'setFavoriteModuleColor' ]),
-			...mapActions('service', [
-				'fetchAssignments',
-				'acceptAssignment',
-				'saveAssignmentContacts',
-				'fetchAssignmentsLogs',
-            ]),
-	        ...mapActions('registration', [
-		        'fetchTypes',
-	        ]),
-
-	        changeColumnsVisibility(columns) {
-		        this.selectedHeaders = this.headers.filter(({ index }) => columns.includes(index))
+		mixins: [ AuthMixin, ServiceMixin, DictionaryMixin ],
+        watch: {
+	        filterByOwner(val) {
+		        this.filterByOwnerColor = !val.length ? this.colorGrey : this.colorBlue
 	        },
-
-	        getAssignmentEventTypeColor(status) {
-	        	switch (status) {
-	        		case 1:
-	        		case 4: return this.colorGrey
-	        		case 2: return this.colorBlue
-	        		case 3: return this.colorGreen
-                }
-            },
+	        filterByStatus(val) {
+		        this.filterByStatusColor = !val.length ? this.colorGrey : this.colorBlue
+	        },
+	        filterByBuilding(val) {
+		        this.filterByBuildingColor = !val.length ? this.colorGrey : this.colorBlue
+	        },
+	        assignments(val) {
+	        	this.defaultAssignments = val
+		        this.doFilter()
+		        this.createFiltersValues()
+            }
+        },
+        mounted() {
+	        this.createFiltersValues()
+            this.filterByStatus = this.assignmentStatuses?.filter((status) => [ 1, 2, 4 ].includes(status.value))
+        },
+		methods: {
+	        openActionMenu(e, { item }) {
+		        e.preventDefault()
+		        this.currentAssignment = item
+		        const { actionMenu } = this.$refs
+		        actionMenu.open(item, this.currentAccountId, e.clientX, e.clientY)
+	        },
 
 	        async assignmentAccept({ id }) {
                 try {
+	                this.resetFilters()
 	                const updatedAssignment = await this.acceptAssignment(id)
-                    const oldAssignment = this.assignments.find((assignment) => assignment.id === updatedAssignment.id)
-                    Object.assign(oldAssignment, updatedAssignment)
+	                this.updateAssignment(updatedAssignment)
 	                this.showNotification(`Поручение успешно принято`, this.colorGreen)
                 } catch (e) {
 	                this.showNotificationStandardError(e)
                 }
             },
 
-            openActionMenu(e, { item }) {
-	            e.preventDefault()
-                this.currentItem = item
-                const { actionMenu } = this.$refs
-	            actionMenu.open(item, this.currentAccountId, e.clientX, e.clientY)
-            },
-
-            openEventList() {
-	            this.$refs.eventList.open(this.currentItem, this.currentAccountId)
-            },
-
-            async openAssignmentsLogsDialog() {
-                const { ServiceUpdateLogsDialog } = this.$refs
-                ServiceUpdateLogsDialog.dialogOpen()
-            },
-
 	        refreshAssignments() {
 		        try {
+			        this.resetFilters()
 			        this.fetchAssignments()
 		        } catch (e) {
 			        this.showNotificationStandardError(e)
 		        }
             },
 
-	        async openEditContactsDialog() {
-		        this.editContactsDialogModel = true
-                const { customer_contacts } = this.currentItem
-		        this.contacts = customer_contacts
+	        updateAssignment(updatedAssignment) {
+		        this.resetFilters()
+                const oldAssignment = this.defaultAssignments.find((assignment) => assignment.id === updatedAssignment.id)
+                Object.assign(oldAssignment, updatedAssignment)
 	        },
 
-	        async saveContacts() {
-		        try {
-			        const assignment = await this.saveAssignmentContacts({
-				        assignmentId: this.currentItem?.id,
-				        contacts: this.contacts
-			        })
-			        const oldAssignment = this.assignments.find((assign) => assign.id === assignment.id)
-			        Object.assign(oldAssignment, assignment)
-		        } catch (e) {
-			        this.showNotificationStandardError(e)
-		        } finally {
-			        this.editContactsDialogModel = false
+	        createAssignment(createdAssignment) {
+	        	this.resetFilters()
+		        this.defaultAssignments.push(createdAssignment)
+            },
+
+	        //Обработка фильтров
+	        async doFilter() {
+		        this.checkAllFilters()
+
+		        if (!Object.keys(this.filters).length) {
+			        this.defaultAssignments = this.assignments
+		        } else {
+                    this.defaultAssignments =
+                        this.assignments
+                            .filter((assignment) => {
+                                if (this.filters.owners) {
+                                    return this.filters.owners.includes(assignment.owner_id)
+                                }
+                                return true
+                            })
+	                        .filter((assignment) => {
+		                        if (this.filters.statuses) {
+			                        return this.filters.statuses.includes(assignment.status)
+		                        }
+		                        return true
+	                        })
+	                        .filter((assignment) => {
+		                        if (this.filters.buildings) {
+		                        	return this.filters.buildings
+                                        .some((building) => assignment.customer_address?.includes(building))
+		                        }
+		                        return true
+	                        })
 		        }
 	        },
+
+	        resetFilters() {
+		        this.filterByOwner = []
+		        this.filterByStatus = []
+                this.filterByBuilding = []
+	        },
+
+	        checkAllFilters() {
+		        this.filterByOwner.length
+			        ? this.filters['owners'] = this.filterByOwner.map(({ accId }) => accId)
+			        : delete this.filters['owners']
+
+		        this.filterByStatus.length
+			        ? this.filters['statuses'] = this.filterByStatus.map((status) => status.value)
+			        : delete this.filters['statuses']
+
+		        this.filterByBuilding.length
+			        ? this.filters['buildings'] = this.filterByBuilding
+			        : delete this.filters['buildings']
+	        },
+
+            createFiltersValues() {
+	        	this.createServiceEmployeeArray()
+	        	this.createBuildingArray()
+            },
+
+            createServiceEmployeeArray() {
+	            const employeesAccIdSet = new Set(
+	            	this.assignments
+                        .filter(({ owner_id }) => owner_id)
+                        .map(({ owner_id }) => owner_id)
+                )
+	            this.serviceEmployees = Array.from(employeesAccIdSet).map((accId) => ({
+		            name: this.getAccountFullName(accId),
+		            accId
+	            }))
+            },
+
+            createBuildingArray() {
+	            const buildingsSet = new Set(
+		            this.assignments
+			            .filter(({ customer_address }) => customer_address)
+			            .map(({ customer_address }) => {
+			            	const addressArray = customer_address.split(',')
+				            const index = addressArray.indexOf(addressArray.find((str) => str.includes('кв')))
+                            if (index !== -1) {
+	                            addressArray.splice(index, 1)
+                            }
+				            return addressArray.join(',')
+			            })
+	            )
+	            this.serviceBuildings = Array.from(buildingsSet)
+            }
         }
 	}
 </script>
 
 <style scoped>
-    .searchTextInput {
+    .search-input {
         max-width: 350px;
+    }
+
+    .header-filter-wrapper {
+        background-color: white;
+        display: flex;
+        align-items: center;
     }
 </style>

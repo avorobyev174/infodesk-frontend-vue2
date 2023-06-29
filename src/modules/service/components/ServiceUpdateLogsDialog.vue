@@ -17,7 +17,6 @@
                     class="elevation-1 meter-table"
                     height="50vh"
                     single-select
-                    item-key="id"
                     :search="search"
                     :items-per-page="50"
                     :footer-props="{
@@ -38,17 +37,7 @@
                         <p class="pt-4">Нет данных...</p>
                     </template>
                     <template v-slot:top>
-                       <div style="display:flex; justify-content: space-between; gap: 10px; padding: 10px">
-                            <v-select
-                                v-model="currentLogsDate"
-                                :items="logsDates"
-                                item-text="text"
-                                item-value="value"
-                                label="Выберите дату"
-                                required
-                                @change="changeLogsByDate"
-                                style="width: 150px"
-                            />
+                       <div class="toolbar">
                             <v-text-field
                                 v-model="search"
                                 append-icon="mdi-magnify"
@@ -56,16 +45,27 @@
                                 hide-details
                                 clearable
                                 class="searchTextInput"
+                                style="width: 250px"
                             />
+                           <v-select
+                               v-model="currentLogsDate"
+                               :items="logsDates"
+                               item-text="text"
+                               item-value="value"
+                               label="Выберите дату"
+                               required
+                               @change="changeLogsByDate"
+                               style="width: 250px"
+                           />
                        </div>
                     </template>
                     <template v-slot:item.created="{ item }">
                         {{ currentLogsDate }}
                     </template>
                     <template v-slot:item.status="{ item }">
-                        <v-chip :color="getAssignmentEventTypeColor(item.status)">
-                            {{ getAssignmentEventTypeTitle(item.status) }}
-                            <v-icon v-if="item.old_last_data_date">mdi-clipboard-alert-outline</v-icon>
+                        <v-chip :color="getAssignmentStatusColor(item.status)">
+                            {{ getAssignmentStatusTitle(item.status) }}
+                            <v-icon v-if="item.old_last_data_date">mdi-clipboard-pulse-outline</v-icon>
                         </v-chip>
                     </template>
                     <template v-slot:item.owner_id="{ item }">
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-	import DialogMixin from "../../../utils-mixins/DialogMixin"
+	import DialogMixin from "../../mixins/DialogMixin"
 	import { mapActions, mapGetters, mapState } from "vuex"
 
 	export default {
@@ -98,17 +98,21 @@
 			'showNotificationError',
 			'showNotificationStandardError',
 			'formatDate',
-			'getAssignmentEventTypeTitle',
+			'getAssignmentStatusTitle',
 			'getAccountFullName',
-			'getAssignmentCloseEventTypeTitle',
             'getMeterTypeTitle',
-            'getAssignmentEventTypeColor'
+            'getAssignmentStatusColor'
 		],
-        mounted() {
-            this.logsDates = this.assignmentLogs.map((log) => this.formatDate(log.created))
-	        console.log()
-            this.currentLogsDate = this.logsDates[0]
+        async mounted() {
+	        try {
+		        await this.fetchAssignmentsLogs()
+	        } catch (e) {
+		        this.showNotificationStandardError(e)
+	        }
 
+            this.logsDates = this.assignmentLogs.map((log) => this.formatDate(log.created))
+            const [ firstDate ] = this.logsDates
+            this.currentLogsDate = firstDate
 	        this.changeLogsByDate()
         },
 		data: () => ({
@@ -131,21 +135,36 @@
 	        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
         },
 		methods: {
+			...mapActions('service', [ 'fetchAssignmentsLogs', ]),
+
             changeLogsByDate() {
-	            const [ logsByDate ] = this.assignmentLogs .filter(({ created }) => this.formatDate(created) === this.currentLogsDate)
-	            if (logsByDate?.data) {
-		            this.currentLogs = logsByDate.data.flat().map(({ assignment, status}) => ({
-			            ...assignment,
-			            action_status: status
-		            }))
-	            }
+	            this.currentLogs = []
+	            const logsByDate = this.assignmentLogs.filter(({ created }) => this.formatDate(created) === this.currentLogsDate)
+	            for (const logByDate of logsByDate) {
+		            if (logByDate?.data && typeof logByDate.data === 'object') {
+			            this.currentLogs = this.currentLogs.concat(logByDate.data.flat().map(({ assignment }) => assignment))
+		            } else {
+			            this.currentLogs = this.currentLogs.concat([ {  meter_serial_number: 'ошибка' } ])
+		            }
+                }
+	            // if (logsByDate?.data && typeof logsByDate.data === 'object') {
+		        //     this.currentLogs = logsByDate.data?.flat().map(({ assignment, status}) => ({
+			    //         ...assignment,
+			    //         action_status: status
+		        //     }))
+	            // } else {
+		        //     this.currentLogs = [ {  meter_serial_number: 'ошибка' } ]
+                // }
             },
         }
 	}
 </script>
 
 <style scoped>
-    .v-toolbar__content {
-        flex-direction: column !important;
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        padding: 10px;
     }
 </style>

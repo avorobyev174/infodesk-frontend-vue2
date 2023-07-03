@@ -94,9 +94,7 @@
 		},
         mixins: [ DialogMixin ],
 		inject: [
-			'showNotification',
-			'showNotificationError',
-			'showNotificationStandardError',
+			'showNotificationRequestError',
 			'formatDate',
 			'getAssignmentStatusTitle',
 			'getAccountFullName',
@@ -104,10 +102,14 @@
             'getAssignmentStatusColor'
 		],
         async mounted() {
+	        if (!this.isLogin) {
+		        return
+	        }
+
 	        try {
 		        await this.fetchAssignmentsLogs()
 	        } catch (e) {
-		        this.showNotificationStandardError(e)
+		        this.showNotificationRequestError(e)
 	        }
 
             this.logsDates = this.assignmentLogs.map((log) => this.formatDate(log.created))
@@ -131,7 +133,10 @@
             logsDates: [],
 		}),
         computed: {
-	        ...mapGetters({ assignmentLogs: 'service/getAssignmentsLogs', }),
+	        ...mapGetters({
+                assignmentLogs: 'service/getAssignmentsLogs',
+                isLogin: 'getIsLogin',
+            }),
 	        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
         },
 		methods: {
@@ -140,6 +145,7 @@
             changeLogsByDate() {
 	            this.currentLogs = []
 	            const logsByDate = this.assignmentLogs.filter(({ created }) => this.formatDate(created) === this.currentLogsDate)
+
 	            for (const logByDate of logsByDate) {
 		            if (logByDate?.data && typeof logByDate.data === 'object') {
 			            this.currentLogs = this.currentLogs.concat(logByDate.data.flat().map(({ assignment }) => assignment))
@@ -147,14 +153,6 @@
 			            this.currentLogs = this.currentLogs.concat([ {  meter_serial_number: 'ошибка' } ])
 		            }
                 }
-	            // if (logsByDate?.data && typeof logsByDate.data === 'object') {
-		        //     this.currentLogs = logsByDate.data?.flat().map(({ assignment, status}) => ({
-			    //         ...assignment,
-			    //         action_status: status
-		        //     }))
-	            // } else {
-		        //     this.currentLogs = [ {  meter_serial_number: 'ошибка' } ]
-                // }
             },
         }
 	}

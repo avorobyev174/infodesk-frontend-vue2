@@ -148,11 +148,17 @@
             reportItems: [],
 		}),
 		mixins: [ ReportItemsMixin, StorageMixin, ReportStorageMixin ],
-		inject: ['showNotification', 'showNotificationError', 'checkAuth', 'setBackgroundImage'],
+		inject: [
+            'showNotificationError',
+            'showNotificationInfo',
+            'showNotificationRequestErrorWithCustomText',
+            'setBackgroundImage'
+        ],
 		computed: {
-			...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold']),
+			...mapState([ 'colorGold' ]),
 			...mapGetters({
 				ipAddresses: 'registration/getIpAddress',
+				isLogin: 'getIsLogin',
 			}),
 		},
         provide: function () {
@@ -164,12 +170,8 @@
 			this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/reports' ? this.colorGold : '')
 		},
 		mounted() {
-			if (!this.checkAuth()) {
+			if (!this.isLogin) {
 				return
-			}
-
-			if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
-				this.$router.push('/')
 			}
 
 			this.setBackgroundImage(true)
@@ -206,7 +208,7 @@
                     saveLastTimeDataToExcelFile(response)
 				} catch (e) {
 					console.log(e)
-					this.showNotification(`Ошибка при выполнении отчета: ${ e.message }`, this.colorRed)
+					this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`)
 				} finally {
 					item.loading = false
 				}
@@ -236,7 +238,7 @@
 
 				} catch (e) {
 					console.log(e)
-					this.showNotification('Ошибка при выполнении отчета', this.colorRed)
+					this.showNotificationError('Ошибка при выполнении отчета')
 				} finally {
 					item.loading = false
 				}
@@ -259,7 +261,7 @@
 					saveFromUitToStorageReportToExcel(editedResponse)
 				} catch (e) {
 					console.log(e)
-					this.showNotification('Ошибка при выполнении отчета', this.colorRed)
+					this.showNotificationError('Ошибка при выполнении отчета')
 				} finally {
 					item.loading = false
 				}
@@ -278,7 +280,7 @@
 					saveNotLoadedInPyramidReportToExcel(editedResponse)
 				} catch (e) {
 					//console.log(e)
-					this.showNotification('Ошибка при выполнении отчета', this.colorRed)
+					this.showNotificationError('Ошибка при выполнении отчета')
 				} finally {
 					item.loading = false
 				}
@@ -312,7 +314,7 @@
                     saveNonActivePyramidMetersToExcelFile(nonActiveMetersArray)
                 } catch (e) {
                     console.log(e)
-                    this.showNotification('Ошибка при выполнении отчета', this.colorRed)
+                    this.showNotificationError('Ошибка при выполнении отчета')
                 } finally {
 					this.selectedItem.loading = false
                 }
@@ -351,7 +353,7 @@
 
 				} catch (e) {
 					console.log(e)
-					this.showNotification('Ошибка при выполнении отчета', this.colorRed)
+					this.showNotificationError('Ошибка при выполнении отчета')
 				} finally {
 					this.selectedItem.loading = false
 				}
@@ -363,7 +365,7 @@
 					const meters =  await this.getRotecMetersInfo()
                     saveRotecDataToExcelFile(meters, this.getIpAddressTitle)
 				} catch ({ message }) {
-					this.showNotification(`Ошибка при выполнении отчета: ${ message }`, this.colorRed)
+					this.showNotificationError(`Ошибка при выполнении отчета: ${ message }`)
 				} finally {
 					item.loading = false
 				}

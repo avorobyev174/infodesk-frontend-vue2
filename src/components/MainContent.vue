@@ -1,28 +1,29 @@
 <template>
-    <v-main :class="setBackground ? 'main-background' : ''">
-          <router-view/>
+    <v-main :class="background">
+        <router-view/>
     </v-main>
 </template>
 <script>
     export default {
         name: "MainContent",
         data: () => ({
-            setBackground: false
+            isSetBackground: false
         }),
-        computed: {},
-        methods: {
-        	setBackgroundImage(val) {
-        		this.setBackground = val
-            }
-        },
+	    computed: {
+		    background() {
+			    return this.isSetBackground ? 'main-background' : ''
+		    }
+	    },
 	    provide: function () {
 		    return {
 			    setBackgroundImage: this.setBackgroundImage
 		    }
 	    },
-        mounted() {
-
-        }
+	    methods: {
+		    setBackgroundImage(isSetBackground) {
+			    this.isSetBackground = isSetBackground
+		    },
+	    },
     }
 </script>
 

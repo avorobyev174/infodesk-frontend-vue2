@@ -161,8 +161,10 @@
             }
         },
 		inject: [
-			'showNotification',
-			'showNotificationStandardError',
+			'showNotificationSuccess',
+			'showNotificationWarning',
+			'showNotificationError',
+			'showNotificationRequestError',
 			'getEmployeeStaffIdByCard',
 			'getEmployeeTitleByCard',
             'initializeMeters',
@@ -223,18 +225,18 @@
 		        }
 
                 if (!this.regMeters.length) {
-                    return this.showNotification(`Для выполнения операции заполните таблицу`, this.colorOrange)
+                    return this.showNotificationWarning(`Для выполнения операции заполните таблицу`)
                 }
 
                 this.issuingPersonStaffId = parseInt(this.getEmployeeStaffIdByCard(this.issuingPerson))
                 this.acceptedPersonStaffId = this.staffId
 
                 if (isNaN(this.acceptedPersonStaffId)) {
-                    return this.showNotification('Операция с неизвестным принимающим сотрудником не возможна', this.colorOrange)
+                    return this.showNotificationWarning('Операция с неизвестным принимающим сотрудником не возможна')
                 }
 
 		        if (this.issuingPerson && isNaN(this.issuingPersonStaffId)) {
-			        return this.showNotification('Операция с неизвестным отдающим сотрудником не возможна', this.colorOrange)
+			        return this.showNotificationWarning('Операция с неизвестным отдающим сотрудником не возможна')
 		        }
 
                 try {
@@ -251,7 +253,7 @@
                     })
 
                     if (!res.length) {
-                        this.showNotificationStandardError('Что то пошло не так при регистрации')
+                        this.showNotificationError('Что то пошло не так при регистрации')
                     } else {
                         let successCount = 0
                         this.regMeters.forEach((regMeter) => {
@@ -265,11 +267,11 @@
                         })
 
                         if (this.regMeters.length === successCount) {
-                            this.showNotification('Операция выполнена успешно', this.colorGreen)
+                            this.showNotificationSuccess('Операция выполнена успешно')
                             this.resultColor = this.colorGreen
                             this.oldLocationColor = this.colorGreen
                         } else {
-                            this.showNotification('Операция выполнена с ошибками', this.colorOrange)
+                            this.showNotificationWarning('Операция выполнена с ошибками')
                             this.resultColor = this.colorOrange
                             this.oldLocationColor = this.colorOrange
                         }
@@ -279,7 +281,7 @@
                         this.initializeMeters()
                     }
                 } catch (e) {
-                    this.showNotificationStandardError(e)
+                    this.showNotificationRequestError(e)
 	                this.formSubmit = false
                 } finally {
                     this.$refs.addMeterTable.setLoading(false)

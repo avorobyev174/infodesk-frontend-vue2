@@ -308,7 +308,12 @@ export default {
       { title: 'Актуализировать данные из СТЕКа', action: 'actualizeDataFromStek', icon: 'mdi-database-import' },
     ]
   }),
-  inject: [ 'showNotification', 'showNotificationStandardError', 'checkAuth' ],
+  inject: [
+    'showNotificationSuccess',
+    'showNotificationError',
+    'showNotificationWarning',
+    'showNotificationRequestError',
+  ],
   provide: function () {
     return {
       formatDate: this.formatDate,
@@ -324,7 +329,8 @@ export default {
     ...mapGetters({
       meters: 'registration/getMeters',
       types: 'registration/getTypes',
-      getCookies: 'getCookies'
+      getCookies: 'getCookies',
+      isLogin: 'getIsLogin',
     }),
     ...mapState({
       loading: state => state.registration.isMetersLoading,
@@ -355,16 +361,13 @@ export default {
   },
   mixins: [ RegistrationMixin ],
   mounted() {
-    if (!this.checkAuth())
+    if (!this.isLogin) {
       return
-
-    if (!this.$store.getters.getActiveModules.filter((module) => module.name === this.$route.name.toLowerCase()).length) {
-      this.$router.push('/')
     }
 
     this.fetchTypes().then(
         result => this.fetchMeters(this.showMetersInPyramid),
-        error => this.showNotificationStandardError(error)
+        error => this.showNotificationRequestError(error)
     )
 
     document.onkeydown = (evt) => {
@@ -422,11 +425,11 @@ export default {
     async initialize() {
       try {
         await this.fetchMeters(this.showMetersInPyramid)
-        this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
+        this.showNotificationSuccess(`Список счетчиков успешно обновлен`)
         this.showPyramidIconColor = this.showMetersInPyramid ? 'primary' : 'grey'
         this.showPyramidToolTipTitle = this.showMetersInPyramid ? 'Скрыть загруженные в пирамиду' : 'Показать загруженные в пирамиду'
       } catch (e) {
-        this.showNotificationStandardError(e)
+        this.showNotificationRequestError(e)
       }
     },
 
@@ -436,7 +439,7 @@ export default {
 
     dialogRemovePyramidLoadValueOpen(item) {
       if (item.in_pyramid === 0)
-        this.showNotification(`Счетчик еще не загружен в пирамиду`, this.colorOrange)
+        this.showNotificationWarning(`Счетчик еще не загружен в пирамиду`)
       else {
         this.removeOrAddInPyramidLoadValueItem = item
         this.removeInPyramidLoadValueDialogDeleteModel = true
@@ -448,13 +451,13 @@ export default {
          this.removeMeterPyramidLoadValue(this.removeOrAddInPyramidLoadValueItem).then(
            result => {
              Object.assign(this.removeOrAddInPyramidLoadValueItem, result)
-             this.showNotification(`Счетчик успешно отредактирован`, this.colorGreen)
+             this.showNotificationSuccess(`Счетчик успешно отредактирован`)
              this.closeDialogRemovePyramidLoadValue()
            },
-           e => this.showNotificationStandardError(e)
+           e => this.showNotificationRequestError(e)
          )
        } else {
-         this.showNotification(`Произошла ошибка при редактировании счетчика`, this.colorRed)
+         this.showNotificationError('Произошла ошибка при редактировании счетчика')
          this.closeDialogRemovePyramidLoadValue()
        }
     },
@@ -466,7 +469,7 @@ export default {
 
     dialogAddPyramidLoadValueOpen(item) {
       if (item.in_pyramid === 1)
-        this.showNotification(`Счетчик уже загружен в пирамиду`, this.colorOrange)
+        this.showNotificationWarning('Счетчик уже загружен в пирамиду')
       else {
         this.removeOrAddInPyramidLoadValueItem = item
         this.addInPyramidLoadValueDialogDeleteModel = true
@@ -483,13 +486,13 @@ export default {
         this.addMeterPyramidLoadValue(this.removeOrAddInPyramidLoadValueItem).then(
           result => {
             Object.assign(this.removeOrAddInPyramidLoadValueItem, result)
-            this.showNotification(`Счетчик успешно отредактирован`, this.colorGreen)
+            this.showNotificationSuccess('Счетчик успешно отредактирован')
             this.closeDialogAddPyramidLoadValue()
           },
-          e => this.showNotificationStandardError(e)
+          e => this.showNotificationRequestError(e)
         )
       } else {
-        this.showNotification(`Произошла ошибка при редактировании счетчика`, this.colorRed)
+        this.showNotificationError('Произошла ошибка при редактировании счетчика')
         this.closeDialogAddPyramidLoadValue()
       }
     },
@@ -510,9 +513,9 @@ export default {
         const updatedMeter = await this.setProgrammingValue({ id: this.currentItem.id, value: 2 })
         const mainUpdatedMeter = this.meters.find(mainMeter => updatedMeter.id === mainMeter.id)
         Object.assign(mainUpdatedMeter, updatedMeter)
-        this.showNotification(`Информаця успешно обновлена`, this.colorGreen)
+        this.showNotificationSuccess('Информаця успешно обновлена')
       } catch (e) {
-        this.showNotificationStandardError(e)
+        this.showNotificationRequestError(e)
       }
     },
 

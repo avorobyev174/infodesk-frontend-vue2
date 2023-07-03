@@ -160,7 +160,7 @@
             item: {},
             dialogModel: false
 		}),
-		inject: ['showNotification', 'showNotificationStandardError'],
+		inject: [ 'showNotificationSuccess', 'showNotificationRequestError' ],
         mixins: [ LogTableMixin ],
 		computed: {
 			...mapState({
@@ -190,10 +190,10 @@
 	        	try {
                     await this.editLogComment({ comment: this.comment, logId: this.item?.id })
 			        this.item.comment_field = this.comment
-			        this.showNotification(`Операция выполнена успешно`, this.colorGreen)
+			        this.showNotificationSuccess(`Операция выполнена успешно`, this.colorGreen)
 	                this.close()
 		        } catch (e) {
-                    this.showNotificationStandardError(e)
+                    this.showNotificationRequestError(e)
 		        }
             },
 

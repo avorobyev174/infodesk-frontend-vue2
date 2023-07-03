@@ -112,8 +112,7 @@
             },
         },
 		inject: [
-			'showNotification',
-			'showNotificationStandardError',
+			'showNotificationInfo',
 			'getMaterialTypeTitle',
 		],
 		computed: {
@@ -141,7 +140,7 @@
 				        ? this.materials.unshift({ materialType: this.materialType.id, count })
 				        : usedMaterial.count += count
 		        } else {
-			        this.showNotification('Операция уже завершена, редактирование списка не доступно', this.colorBlue)
+			        this.showNotificationInfo('Операция уже завершена, редактирование списка не доступно')
 		        }
 	        },
 
@@ -149,7 +148,7 @@
 		        if (!this.formSubmit) {
 			        this.materials.splice(this.selectedMaterialIndex, 1)
 		        } else {
-			        this.showNotification('Операция уже завершена, редактирование списка не доступно', this.colorBlue)
+			        this.showNotificationInfo('Операция уже завершена, редактирование списка не доступно')
 		        }
 	        },
 

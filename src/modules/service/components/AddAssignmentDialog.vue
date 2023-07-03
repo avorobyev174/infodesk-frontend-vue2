@@ -18,7 +18,7 @@
                     </v-card-title>
                     <v-card-text class="m-auto">
                         <v-combobox
-                            :items="types"
+                            :items="meterTypes"
                             item-text="title"
                             item-value="value"
                             label="Тип"
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-    import { mapActions, mapState } from "vuex"
+	import { mapActions, mapGetters, mapState } from "vuex"
     import DialogMixin from "../../mixins/DialogMixin"
 
     export default {
@@ -53,7 +53,6 @@
             formValid: true,
             type: null,
             serialNumber: '',
-            types: [],
             serialNumberRules: [
                 v => !!v || 'Обязательно к заполнению',
                 v => v && String(v).length >= 8 || 'Должно быть не меньше 8 символов',
@@ -62,15 +61,20 @@
 		        v => !!v || 'Обязательно к заполнению',
 	        ],
         }),
-        inject: [ 'showNotification', 'showNotificationError', 'showNotificationStandardError', 'getMeterTypes' ],
+        inject: [
+        	'showNotificationSuccess',
+            'showNotificationRequestErrorWithCustomText'
+        ],
         mixins: [ DialogMixin ],
 	    computed: {
 		    ...mapState([ 'colorGreen' ]),
+		    ...mapGetters({
+			    meterTypes: 'getMeterTypes',
+		    })
 	    },
         updated() {
-	        this.types = this.getMeterTypes()
-            if (this.types.length) {
-	            this.type = this.types[0]
+            if (this.meterTypes.length) {
+	            this.type = this.meterTypes[0]
             }
         },
 	    methods: {
@@ -94,9 +98,9 @@
                         serialNumber: this.serialNumber
 	            	})
 	                this.$emit('createAssignment', createdAssignment)
-                    this.showNotification('Поручение успешно добавлено', this.colorGreen)
+                    this.showNotificationSuccess('Поручение успешно добавлено')
                 } catch (e) {
-                    this.showNotificationError('Ошибка при добавлении поручения', e)
+                    this.showNotificationRequestErrorWithCustomText('Ошибка при добавлении поручения', e)
                 } finally {
 	                this.dialogClear()
                 }

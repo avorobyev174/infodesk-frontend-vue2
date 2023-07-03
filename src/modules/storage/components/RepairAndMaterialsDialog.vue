@@ -165,8 +165,10 @@
 			...mapGetters({ staffId: 'getStaffId', }),
 		},
 		inject: [
-			'showNotification',
-			'showNotificationStandardError',
+			'showNotificationSuccess',
+			'showNotificationWarning',
+			'showNotificationError',
+			'showNotificationRequestError',
             'getMaterialTypeTitle',
 			'formatDate',
 			'initializeMeters',
@@ -216,10 +218,10 @@
 
             async insertMeterMaterials() {
 	            if (!this.repairMeters.length) {
-		            return this.showNotification(`Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
+		            return this.showNotificationWarning('Для выполнения операции заполните таблицу счетчиков')
 	            }
 	            if (!this.repairMaterials.length) {
-		            return this.showNotification(`Для выполнения операции заполните таблицу материалов`, this.colorOrange)
+		            return this.showNotificationWarning('Для выполнения операции заполните таблицу материалов')
 	            }
 
 	            let updateStr = 'Используемые материалы:;'
@@ -237,15 +239,15 @@
                     })
                     console.log(result)
                     if (result?.success) {
-                        this.showNotification(`Операция выполнена успешно`, this.colorGreen)
+                        this.showNotificationSuccess('Операция выполнена успешно')
                         this.resultColorMaterials = this.colorGreen
                     } else {
 	                    this.formSubmit = false
-                        this.showNotification(`Что то пошло не так при внесении материалов`, this.colorRed)
+                        this.showNotificationError('Что то пошло не так при внесении материалов')
                     }
 		            this.initializeMeters()
 	            } catch (e) {
-		            this.showNotificationStandardError(e)
+		            this.showNotificationRequestError(e)
 		            this.formSubmit = false
 	            } finally {
 		            this.$refs.addMeterTable.setLoading(false)
@@ -254,8 +256,7 @@
 
             async insertStorageMaterials() {
 	            if (!this.storageMaterials.length) {
-		            return this.showNotification(
-			            `Для выполнения операции заполните таблицу материалов`, this.colorOrange)
+		            return this.showNotificationWarning('Для выполнения операции заполните таблицу материалов')
 	            }
 	            try {
 		            this.formSubmit = true
@@ -263,13 +264,13 @@
                     const result = await this.insertMaterialToStorage(this.storageMaterials)
                     console.log(result)
                     if (result?.success) {
-                        this.showNotification(`Операция выполнена успешно`, this.colorGreen)
+                        this.showNotificationSuccess('Операция выполнена успешно', this.colorGreen)
                     } else {
                         this.formSubmit = false
-                        this.showNotification(`Что то пошло не так при внесении материалов на склад`, this.colorRed)
+                        this.showNotificationError('Что то пошло не так при внесении материалов на склад')
                     }
 	            } catch (e) {
-		            this.showNotificationStandardError(e)
+		            this.showNotificationRequestError(e)
 		            this.formSubmit = false
 	            } finally {
 		            this.$refs.addMaterialTableStorage.setLoading(false)
@@ -278,7 +279,7 @@
 
             async insertMeterWorkability() {
 	            if (!this.repairWorkMeters.length) {
-		            return this.showNotification(`Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
+		            return this.showNotificationWarning('Для выполнения операции заполните таблицу счетчиков')
 	            }
 	            let updateStr = 'Статус ремонта: '
 	            updateStr += this.isWorkable ? 'работает;' : 'не работает;'
@@ -296,15 +297,15 @@
 		            })
 		            console.log(result)
 		            if (result?.success) {
-			            this.showNotification(`Операция выполнена успешно`, this.colorGreen)
+			            this.showNotificationSuccess(`Операция выполнена успешно`)
 			            this.resultColorWorkability = this.colorGreen
 		            } else {
 			            this.formSubmit = false
-			            this.showNotification(`Что то пошло не так при внесении материалов`, this.colorRed)
+			            this.showNotificationError('Что то пошло не так при внесении материалов')
 		            }
 		            this.initializeMeters()
 	            } catch (e) {
-		            this.showNotificationStandardError(e)
+		            this.showNotificationRequestError(e)
 		            this.formSubmit = false
 	            } finally {
 		            this.$refs.addMeterTableWorkability.setLoading(false)

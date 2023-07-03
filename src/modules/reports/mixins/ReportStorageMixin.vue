@@ -67,7 +67,7 @@
 				        data
 			        })
 		        } catch (e) {
-			        this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			        this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 		        } finally {
 			        item.loading = false
 		        }
@@ -96,7 +96,7 @@
 				        data
 			        })
 		        } catch ({ message }) {
-			        this.showNotificationError(`Ошибка при выполнении отчета: ${ message }`)
+			        this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ message }`)
 		        } finally {
 			        item.loading = false
 		        }
@@ -108,7 +108,7 @@
 				    this.$refs.storageInputReportDialog.close()
 
                     if (!meter.length) {
-	                    return this.showNotification(`Счетчик отсутсвтвует в базе данных`, this.colorBlue)
+	                    return this.showNotificationInfo('Счетчик отсутсвтвует в базе данных')
                     }
 
 				    const response = await this.getMeterReport({ type, serialNumber })
@@ -146,7 +146,7 @@
                         1000
                     )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
             },
 
@@ -156,7 +156,7 @@
 		            this.$refs.storageInputReportDialog.close()
 
 		            if (!response.length) {
-			            return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+			            return this.showNotificationInfo('Информация за этот период отсутствует')
 		            }
 
 		            const data = response.map((row) => {
@@ -180,7 +180,7 @@
 			            1000
 		            )
 	            } catch (e) {
-		            this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+		            this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 	            }
             },
 
@@ -191,7 +191,7 @@
 
 				    const countMap = new Map(Object.entries(response))
 				    if (!countMap.size) {
-					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    let data = []
@@ -217,7 +217,7 @@
 					    1000
 				    )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
             },
 
@@ -228,7 +228,7 @@
 				    const countMap = new Map(Object.entries(response))
 
 				    if (!countMap.size) {
-					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    let data = []
@@ -254,7 +254,7 @@
 					    1000
 				    )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
 		    },
 
@@ -264,7 +264,7 @@
 				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
-					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    const data = response.map((row) => {
@@ -288,7 +288,7 @@
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
 		    },
 
@@ -298,7 +298,7 @@
 				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
-					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    const data = response.map((row) => ({
@@ -320,7 +320,7 @@
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
 		    },
 
@@ -330,7 +330,7 @@
 				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
-					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    const data = response.map((row) => ({
@@ -352,7 +352,7 @@
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
 		    },
 
@@ -362,7 +362,7 @@
 				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
-					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    const data = response.map((row) => ({
@@ -383,7 +383,7 @@
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
             },
 
@@ -393,7 +393,7 @@
 		            const storageResponse = await this.getSpentByYearReport()
 
 		            if (!response.length) {
-			            return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+			            return this.showNotificationInfo('Информация за этот период отсутствует')
 		            }
 
 		            let months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
@@ -464,7 +464,7 @@
 		            this.$refs.resultShowReportDialog.print(repairTableHtml, materialTableHtml, `Отчет по ремонту приборов учета ${ this.formatDate(today) }`)
 
 	            } catch (e) {
-		            this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+		            this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 	            }
             },
 
@@ -474,7 +474,7 @@
 				    this.$refs.storageInputReportDialog.close()
 
 				    if (!response.length) {
-					    return this.showNotification(`Информация за этот период отсутствует`, this.colorBlue)
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    const data = response.map((row) => ({
@@ -493,7 +493,7 @@
 					    800
 				    )
 			    } catch (e) {
-				    this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
 			    }
 		    },
         }

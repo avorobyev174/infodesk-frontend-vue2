@@ -247,7 +247,11 @@
                 required: true
             }
         },
-        inject: ['showNotification', 'showNotificationComponentError', 'showNotificationStandardError'],
+        inject: [
+        	'showNotificationSuccess',
+            'showNotificationError',
+            'showNotificationRequestError'
+        ],
 	    computed: {
             ...mapGetters({
                 phases: 'registration/getPhases',
@@ -464,9 +468,9 @@
                             const meter = result.data
                             const index = result.index
                             Object.assign(this.meters[index], meter)
-                            this.showNotification(`Счетчик ${ meter.serial_number } успешно отредактирован`, 'success')
+                            this.showNotificationSuccess(`Счетчик ${ meter.serial_number } успешно отредактирован`)
                         },
-                        e => this.showNotificationComponentError(this.componentTitle, e)
+                        e => this.showNotificationRequestError(e)
                     )
                 }
                 //Добавление
@@ -475,9 +479,9 @@
                         result => {
                             const [ meter ] = result
                             this.meters.push(meter)
-                            this.showNotification(`Счетчик ${ meter.serial_number } успешно добавлен`, 'success')
+                            this.showNotificationSuccess(`Счетчик ${ meter.serial_number } успешно добавлен`)
                         },
-                        e => this.showNotificationComponentError(this.componentTitle, e)
+                        e => this.showNotificationRequestError(e)
                     )
                 }
                 this.close()
@@ -491,12 +495,12 @@
                         if (deletedMeterId === this.editedItem.id) {
                             this.meters.splice(this.editedIndex, 1)
                             this.closeDialogDeleteConfirm()
-                            this.showNotification(`Счетчик ${ this.editedItem.serial_number } успешно удален`, 'success')
+                            this.showNotificationSuccess(`Счетчик ${ this.editedItem.serial_number } успешно удален`)
                         }
                     },
                     e => {
                         this.closeDialogDeleteConfirm()
-                        this.showNotificationComponentError(this.componentTitle, e)
+                        this.showNotificationRequestError(e)
                     }
                 )
             },

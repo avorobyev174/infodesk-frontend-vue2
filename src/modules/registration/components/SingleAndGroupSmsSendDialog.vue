@@ -78,10 +78,10 @@
             }
         },
         inject: [
-            'showNotification',
-            'showNotificationComponentError',
-            'showNotificationStandardError',
+            'showNotificationSuccess',
             'showNotificationError',
+            'showNotificationWarning',
+            'showNotificationInfo',
             'getPhaseTitle',
             'getStatusTitle',
             'getSmsTitleBySmsStatus',
@@ -109,7 +109,7 @@
 
                 this.groupMetersForRegistration.length
                     ? this.dialogModel = true
-                    : this.showNotification(`Не найдено ни одного счетчика для групповой отправки смс`, this.colorOrange)
+                    : this.showNotificationWarning('Не найдено ни одного счетчика для групповой отправки смс')
             },
 
             //Обработчик события групповой отправки смс
@@ -142,51 +142,49 @@
                 switch (item.sms_status) {
                     case 0:
                        isSend
-                            ? this.showNotification(`Отправка смс для счетчика с серийным номером ${ item.serial_number }
+                            ? this.showNotificationWarning(`Отправка смс для счетчика с серийным номером ${ item.serial_number }
                                                                 пока не доступна, привяжите его к номеру телефона
-                                                                (для этого актуализируйте данные)`, this.colorOrange)
-                            : this.showNotification(`Получение статуса смс для счетчика с серийным номером
+                                                                (для этого актуализируйте данные)`)
+                            : this.showNotificationWarning(`Получение статуса смс для счетчика с серийным номером
                                                     ${ item.serial_number } пока не доступно, привяжите его к номеру
-                                                    телефона (для этого актуализируйте данные)`, this.colorOrange);
+                                                    телефона (для этого актуализируйте данные)`);
                         return false
                     case 1:
                         if (!isSend)
-                            this.showNotification(`Сначало отправьте смс для счетчика
-                                                                            ${ item.serial_number }`, this.colorBlue)
+                            this.showNotificationInfo(`Сначало отправьте смс для счетчика ${ item.serial_number }`)
                         return isSend
                     case 2:
                         if (isSend)
-                            this.showNotification(`Смс для счетчика с серийным номером
+                            this.showNotificationInfo(`Смс для счетчика с серийным номером
                                                             ${item.serial_number} уже отправлена и находится в очереди,
-                                                                        вы можете обновить ее статус`, this.colorBlue);
+                                                                        вы можете обновить ее статус`)
                         return !isSend
                     case 3:
-                        this.showNotification(`Смс для счетчика с серийным номером
-                                                                ${item.serial_number} уже доставлена`, this.colorBlue);
+                        this.showNotificationInfo(`Смс для счетчика с серийным номером
+                                                                ${item.serial_number} уже доставлена`)
                         return false
                     case 4:
 	                case 6:
 		               isSend
-                            ? this.showNotification(`Повторный запрос на отправку смс для счетчика с серийным номером
-                                                                            ${ item.serial_number }`, this.colorGreen)
-                            : this.showNotification(`Отправьте повторно смс для счетчика ${ item.serial_number }`,
-                                                                                                    this.colorGreen);
+                            ? this.showNotificationSuccess(`Повторный запрос на отправку смс для счетчика с серийным номером
+                                                                            ${ item.serial_number }`)
+                            : this.showNotificationSuccess(`Отправьте повторно смс для счетчика ${ item.serial_number }`)
                         return isSend
                     case 5:
                         if (isSend)
-                            this.showNotification(`Смс для счетчика с серийным номером
+                            this.showNotificationInfo(`Смс для счетчика с серийным номером
                                                                     ${item.serial_number} передано оператору,
-                                                                    вы можете обновить ее статус позже`, this.colorBlue);
+                                                                    вы можете обновить ее статус позже`)
                         return !isSend
                     case 7:
-                        this.showNotification(`Отправка смс для счетчика с серийным номером
-                                                                   ${item.serial_number} не требуется`, this.colorBlue);
+                        this.showNotificationInfo(`Отправка смс для счетчика с серийным номером
+                                                                   ${item.serial_number} не требуется`)
                         return false
 	                case 8:
 		                if (isSend)
-			                this.showNotification(`Смс для счетчика с серийным номером
+			                this.showNotificationInfo(`Смс для счетчика с серийным номером
                                                             ${ item.serial_number } уже отправлена и находится в ожидании
-                                                             подтверждения, вы можете обновить ее статус`, this.colorBlue);
+                                                             подтверждения, вы можете обновить ее статус`)
 		                return !isSend
                 }
             },
@@ -211,15 +209,14 @@
             //Обработчик отправки смс для регистрации счетчика
             async sendSmsForRegistration(meter) {
                 try {
-	                this.showNotification(`Запрос на отправку смс для счетчика с серийным номером
-                                                                       ${ meter.serial_number }`, this.colorBlue);
+	                this.showNotificationInfo(`Запрос на отправку смс для счетчика с серийным номером ${ meter.serial_number }`)
                     this.smsConfirmDialogModel = false
                     const updatedMeter = await this.registerMeterBySms(meter)
                     const mainUpdatedMeter = this.meters.find(mainMeter => updatedMeter.id === mainMeter.id)
                     Object.assign(mainUpdatedMeter, updatedMeter)
                     this.meterForSmsRegistration = null
                 } catch (e) {
-                    this.showNotificationError(`Ошибка при отправке смс (id счетчика: ${ meter.id })`, e)
+                    this.showNotificationRequestErrorWithCustomText(`Ошибка при отправке смс (id счетчика: ${ meter.id })`, e)
 	                this.meterForSmsRegistration = null
                 }
             },
@@ -230,7 +227,7 @@
                     try {
                         let updatedMeter = await this.checkMeterSmsStatus(item)
                         if (updatedMeter.message) {
-	                        this.showNotification(`${ updatedMeter.message }`, this.colorBlue)
+	                        this.showNotificationInfo(`${ updatedMeter.message }`)
                             return
                         }
 
@@ -240,11 +237,10 @@
                         }
 
                         if (!isGroup) {
-	                        this.showNotification(`Статус смс счетчика
-                                                            ${ updatedMeter.serial_number } обновлен`, this.colorGreen)
+	                        this.showNotificationSuccess(`Статус смс счетчика ${ updatedMeter.serial_number } обновлен`)
                         }
                     } catch (e) {
-                        this.showNotificationError('Ошибка при получении статуса смс', e)
+                        this.showNotificationRequestErrorWithCustomText('Ошибка при получении статуса смс', e)
                     }
                 }
             },
@@ -264,9 +260,9 @@
                         await this.checkSmsStatus(meter, true)
                         checkSum++
                     }
-                    this.showNotification(`Количество обновленных смс статусов ${ checkSum } шт.`, this.colorBlue)
+                    this.showNotificationInfo(`Количество обновленных смс статусов ${ checkSum } шт.`)
                 } else {
-	                this.showNotification(`Не найдено ни одного счетчика для обновления статуса смс`, this.colorOrange)
+	                this.showNotificationWarning('Не найдено ни одного счетчика для обновления статуса смс')
                 }
             },
         },

@@ -8,6 +8,9 @@ const AssignmentEventTypes = {
 	CLOSE_AUTO: 5,
 }
 
+const NOT_AUTHORIZATED_ERROR = 401
+
 export {
-	AssignmentEventTypes
+	AssignmentEventTypes,
+	NOT_AUTHORIZATED_ERROR
 }

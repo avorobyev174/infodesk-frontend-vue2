@@ -57,7 +57,7 @@
               required: true
           }
         },
-        inject: [ 'showNotification', 'showNotificationError', 'moduleName' ],
+        inject: [ 'showNotificationSuccess', 'showNotificationRequestErrorWithCustomText', 'moduleName' ],
         computed: {
             ...mapState([ 'colorBlue', 'colorGreen' ])
         },
@@ -72,10 +72,10 @@
 
                 this.saveSettings(this.columns).then(
                     response =>  {
-                        this.showNotification(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены', this.colorGreen)
+                        this.showNotificationSuccess(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены', this.colorGreen)
                         this.dialogModel = false
                     },
-                    e => this.showNotificationError('Ошибка при обновлении или создании настроек колонок', e)
+                    e => this.showNotificationRequestErrorWithCustomText('Ошибка при обновлении или создании настроек колонок', e)
                 )
                 this.$emit('changeColumns', this.columns)
             }

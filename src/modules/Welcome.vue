@@ -3,36 +3,40 @@
         class="m-3 px-4 pb-4 welcome-card"
     >
         <v-card-text class="slideRight" style="visibility: hidden;">
-            <p class="text-h6 text-secondary search-card-title " >Добро пожаловать на внутренний сайт МЭК</p>
+            <p class="text-h6 text-secondary search-card-title">Добро пожаловать на внутренний сайт МЭК</p>
             <p class="search-card-info">для продолжения работы перейдите в интересующий вас модуль</p>
-            <img :class="getImageClass"/>
+            <img :class="imgClass"/>
         </v-card-text>
     </v-card>
 </template>
 
 <script>
+	import { mapGetters } from "vuex"
+
 	export default {
 		name: "Welcome",
-		inject: ['checkAuth', 'setBackgroundImage'],
+		inject: [ 'setBackgroundImage' ],
         data: () => ({
-            imgCount: 0
+		    alert: false
         }),
-		mounted() {
-			if (!this.checkAuth())
+		async mounted() {
+			if (!this.isLogin) {
 				return
+			}
 
-			this.imgCount = Math.floor(Math.random() * 3);
 			this.setBackgroundImage(true)
 		},
         computed: {
-			getImageClass() {
-				switch (this.imgCount) {
-					case 0: return 'img-container img1'; break;
-					case 1: return 'img-container img2'; break;
-					case 2: return 'img-container img3';
+	        ...mapGetters({ isLogin: 'getIsLogin' }),
+			imgClass() {
+				const imgNumber = Math.floor(Math.random() * 3);
+				switch (imgNumber) {
+					case 0: return 'img-container img1'
+					case 1: return 'img-container img2'
+					case 2: return 'img-container img3'
                 }
             }
-        }
+        },
 	}
 </script>
 

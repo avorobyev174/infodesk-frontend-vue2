@@ -26,10 +26,8 @@ export default new Vuex.Store({
         accountId: 0,
         roles: null,
         activeModules: [],
-        assignmentEventTypes: [],
         dictionaries: {},
-        accounts: [],
-        isUserLogin: false,
+        isLogin: false,
         colorRed: 'red lighten-1',
         colorBlue: 'blue lighten-1',
         colorGreen: 'green lighten-1',
@@ -39,6 +37,13 @@ export default new Vuex.Store({
         serverUrl: process.env.NODE_ENV === "production" ? production : dev,
         cookies: [],
         favoriteModuleColor: '',
+        assignmentEventTypes: [],
+        assignmentCloseReasonTypes: [],
+        assignmentStatuses: [],
+        accounts: [],
+        meterTypes: [],
+        ipAddresses: [],
+        simStatuses: [],
     },
 
     getters: {
@@ -50,8 +55,8 @@ export default new Vuex.Store({
             return state.activeModules
         },
 
-        isLogin(state) {
-            return state.isUserLogin
+        getIsLogin(state) {
+            return state.isLogin
         },
 
         getCookies(state) {
@@ -70,16 +75,40 @@ export default new Vuex.Store({
             return state.roles
         },
 
-        getAccounts(state) {
-            return state.accounts
-        },
-
         getAccountId(state) {
             return state.accountId
         },
 
         getDictionaries(state) {
             return state.dictionaries
+        },
+    
+        getMeterTypes(state) {
+            return state.meterTypes
+        },
+    
+        getAssignmentEventTypes(state) {
+            return state.assignmentEventTypes
+        },
+    
+        getAssignmentCloseReasonTypes(state) {
+            return state.assignmentCloseReasonTypes
+        },
+    
+        getAccounts(state) {
+            return state.accounts
+        },
+    
+        getAssignmentStatuses(state) {
+            return state.assignmentStatuses
+        },
+    
+        getSimStatuses(state) {
+            return state.simStatuses
+        },
+    
+        getIpAddresses(state) {
+            return state.ipAddresses
         },
     },
 
@@ -92,8 +121,8 @@ export default new Vuex.Store({
             state.activeModules = activeModules
         },
 
-        login(state, isUserLogin) {
-            state.isUserLogin = isUserLogin
+        setLogin(state, isLogin) {
+            state.isLogin = isLogin
         },
 
         setCookies(state, cookies) {
@@ -116,11 +145,24 @@ export default new Vuex.Store({
             state.roles = roles
         },
 
-        setAccounts(state, accounts) {
-            state.accounts = accounts
-        },
-
         setDictionaries(state, dictionaries) {
+            const {
+                assignmentEventTypes,
+                assignmentCloseReasonTypes,
+                accounts,
+                meterTypes,
+                ipAddresses,
+                simStatuses,
+                assignmentStatuses
+            } = dictionaries
+    
+            state.assignmentEventTypes = assignmentEventTypes
+            state.assignmentCloseReasonTypes = assignmentCloseReasonTypes
+            state.accounts = accounts
+            state.meterTypes = meterTypes
+            state.ipAddresses = ipAddresses
+            state.simStatuses = simStatuses
+            state.assignmentStatuses = assignmentStatuses
             state.dictionaries = dictionaries
         },
     },
@@ -130,7 +172,7 @@ export default new Vuex.Store({
             $cookies.set('auth_token', authToken, '4h')
             $cookies.set('role_token', roleToken, '4h')
 
-            commit('login', true)
+            commit('setLogin', true)
             commit('setCookies', cookies)
 
             let redirect = '/'
@@ -143,15 +185,21 @@ export default new Vuex.Store({
                     }
                 })
             }
-
+            
             await router.push(redirect)
         },
 
-        async logoutUser({ state, commit }) {
-            $cookies.remove('auth_token')
-            $cookies.remove('role_token')
-            commit('login', false)
-            await router.push('/login')
+        async logoutUser({ state, commit }, isRedirectToLoginPage) {
+            try {
+                $cookies.remove('auth_token')
+                $cookies.remove('role_token')
+                commit('setLogin', false)
+                if (isRedirectToLoginPage) {
+                    await router.push('/login')
+                }
+            } catch (e) {
+                console.log(e)
+            }
         },
 
         async fetchDictionaries({ state, commit }) {
@@ -164,6 +212,7 @@ export default new Vuex.Store({
             for (const { title, value } of data) {
                 dictionaries[title] = value
             }
+            
             commit('setDictionaries', dictionaries)
         },
     },

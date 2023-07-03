@@ -191,8 +191,10 @@
 		inject: [
 			'getLocationTitle',
 			'getMeterTypeTitle',
-			'showNotification',
-			'showNotificationStandardError',
+			'showNotificationSuccess',
+			'showNotificationInfo',
+			'showNotificationWarning',
+			'showNotificationRequestError',
 		],
         async mounted() {
 	        this.fillTypes()
@@ -303,7 +305,7 @@
 	        meterAddButtonOnClick() {
 		        !this.formSubmit
 			        ? this.checkMeterAndInsert()
-			        : this.showNotification('Операция уже завершена, редактирование списка не доступно', this.colorBlue)
+			        : this.showNotificationInfo('Операция уже завершена, редактирование списка не доступно')
 	        },
 
 	        meterDeleteButtonOnClick() {
@@ -311,7 +313,7 @@
 			        this.meters.splice(this.selectedMeterIndex, 1)
 			        this.$emit('onMeterCountUpdate', this.meters.length)
 		        } else {
-			        this.showNotification( 'Операция уже завершена, редактирование списка не доступно', this.colorBlue)
+			        this.showNotificationInfo( 'Операция уже завершена, редактирование списка не доступно')
 		        }
 	        },
 
@@ -335,12 +337,12 @@
 
 	        async checkMeterAndInsert() {
 		        if (!this.serialNumber) {
-			        this.showNotification(`Серийный номер не должен быть пустым`, this.colorOrange)
+			        this.showNotificationWarning('Серийный номер не должен быть пустым')
 			        return
 		        }
 
 		        if (!this.type) {
-			        this.showNotification(`Тип счетчика не должен быть пустым`, this.colorOrange)
+			        this.showNotificationWarning('Тип счетчика не должен быть пустым')
 			        return
 		        }
 
@@ -359,9 +361,8 @@
 		        if (this.meters.find(meter => meter.serialNumber === this.serialNumber && meter.type === meterType)) {
 			        await wrong.play()
 
-			        return this.showNotification(`Счетчик с типом ${ this.getMeterTypeTitle(meterType) }
-                                                    и серийным номером ${ this.serialNumber } уже добавлен в таблицу`,
-				                                    this.colorOrange)
+			        return this.showNotificationWarning(`Счетчик с типом ${ this.getMeterTypeTitle(meterType) }
+                                                    и серийным номером ${ this.serialNumber } уже добавлен в таблицу`)
 		        }
 
 		        this.loading = true
@@ -375,11 +376,10 @@
 				        if (meterInDb.length) {
 					        await wrong.play()
 
-					        return this.showNotification(
+					        return this.showNotificationInfo(
 						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
 						         ${ this.getMeterTypeTitle(meterType) }
-						         и серийным номером ${ this.serialNumber } уже найден в базе данных`,
-						        this.colorBlue)
+						         и серийным номером ${ this.serialNumber } уже найден в базе данных`)
 				        }
 
 				        await correct.play()
@@ -399,12 +399,11 @@
 				        if (!meterInDb.length) {
 					        await wrong.play()
 
-					        return this.showNotification(
+					        return this.showNotificationWarning(
 						        `${ this.isRouter ? 'Маршрутизатор' : 'Счетчик' } с типом
 						         ${ this.getMeterTypeTitle(meterType) }
 						         и серийным номером ${ this.serialNumber } не найден в базе данных
-						         ${ this.isRepair ? 'или не находится в ремонте' : '' }`,
-						        this.colorOrange)
+						         ${ this.isRepair ? 'или не находится в ремонте' : '' }`)
 				        }
 
 				        const [ dbMeter ] = meterInDb
@@ -428,7 +427,7 @@
                     this.$emit('onResetValidation', true)
 		        } catch (e) {
 			        console.log(e)
-			        this.showNotificationStandardError(e)
+			        this.showNotificationRequestError(e)
 		        } finally {
 			        this.loading = false
 		        }

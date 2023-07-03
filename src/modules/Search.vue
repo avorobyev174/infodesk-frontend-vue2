@@ -98,6 +98,7 @@
 
 <script>
     import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+    import DictionaryMixin from "./mixins/DictionaryMixin"
 
     export default {
         name: 'Search',
@@ -115,23 +116,30 @@
                 v => (v && String(v).length >= 8) || 'Должно быть не меньше 8 символов',
             ],
         }),
-        inject: ['showNotification', 'showNotificationStandardError', 'checkAuth', 'setBackgroundImage'],
+        inject: [
+        	'showNotificationSuccess',
+            'showNotificationInfo',
+            'showNotificationWarning',
+            'setBackgroundImage'
+        ],
+        mixins: [ DictionaryMixin ],
         computed: {
-            ...mapGetters('registration', [ 'getTypes' ]),
-            ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue']),
+            ...mapGetters({
+	            isLogin: 'getIsLogin'
+            }),
 
             lastDateTitle() {
                 return this.meterData.dateTime !== '' ? 'Последние показания' : 'Последние показания отсутствуют'
             }
         },
         mounted() {
-            if (!this.checkAuth()) {
+            if (this.isLogin) {
 	            return
             }
-
-	        if (!this.$store.getters.getActiveModules.filter(({ name }) => name === this.$route.name.toLowerCase()).length) {
-		        this.$router.push('/')
-	        }
+            //
+	        // if (!this.$store.getters.getActiveModules.filter(({ name }) => name === this.$route.name.toLowerCase()).length) {
+		    //     this.$router.push('/')
+	        // }
 
 	        this.setBackgroundImage(true)
         },
@@ -163,20 +171,20 @@
                         this.customer_type = meterInfo[0].customer_type
                     } else {
                         this.customer_type = 'отсутствует'
-                        this.showNotification('Счетчик найден, запрограммирован УИТ, но не загружен в пирамиду (причина - нет данных от СТЭК)', this.colorBlue)
+                        this.showNotificationInfo('Счетчик найден, запрограммирован УИТ, но не загружен в пирамиду (причина - нет данных от СТЭК)')
 
                     }
 
                     this.customer_address = meterInfo[0].customer_address ? meterInfo[0].customer_address : 'отсутствует'
                     this.personal_account = meterInfo[0].personal_account ? meterInfo[0].personal_account : 'отсутствует'
                 } else {
-                    this.showNotification('Счетчик не найден', this.colorOrange)
+                    this.showNotificationWarning('Счетчик не найден')
                     this.show = false
                     return
                 }
 
                 if (meterAsdDataInfo.length) {
-                    this.showNotification('Счетчик найден', this.colorGreen)
+                    this.showNotificationSuccess('Счетчик найден')
                     meterAsdDataInfo = meterAsdDataInfo.flat()
                     //console.log(meterAsdDataInfo)
                     let date = new Date(meterAsdDataInfo[0].date_time)
@@ -184,7 +192,7 @@
                     const month = date.getMonth() + 1
                     const day = date.getDate()
 
-                    this.meterData.dateTime  = `${day}.${month}.${year}`
+                    this.meterData.dateTime  = `${ day }.${ month }.${ year }`
 
                     this.meterData.t1 = parseFloat(
                                 meterAsdDataInfo.filter(arr => arr.channel_type === 1001)[0].value).toFixed(3)
@@ -195,10 +203,6 @@
                 }
 
 
-            },
-
-            getMeterTypeTitle(meterType) {
-                return this.getTypes.find(type => meterType === type.value).text
             },
 
             clear() {

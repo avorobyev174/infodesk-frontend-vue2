@@ -396,6 +396,56 @@
             isObserver: false,
             isRepairShowAllFilter: false
 		}),
+		mixins: [ StorageMixin ],
+		inject: [ 'showNotificationRequestError' ],
+		computed: {
+			...mapState({
+				loading: state => state.storage.meterLoading,
+				colorBlue: state => state.colorBlue,
+				colorRed: state => state.colorRed,
+				colorGreen: state => state.colorGreen,
+				colorOrange: state => state.colorOrange,
+				colorGrey: state => state.colorGrey,
+				colorGold: state => state.colorGold,
+			}),
+			...mapGetters({
+				getCookies: 'getCookies',
+				meters: 'storage/getMeters',
+				searchMetersView: 'storage/getSearchMetersView',
+				activeModules: 'getActiveModules',
+				roles: 'getRoles',
+				staffId: 'getStaffId',
+				isLogin: 'getIsLogin',
+			}),
+			showHeaders() {
+				return this.headers.filter(header => this.selectedHeaders.includes(header))
+			}
+		},
+		watch: {
+			options: {
+				handler () {
+					!Object.keys(this.filters).length ? this.initializeMeters() : this.doFilter()
+				},
+				deep: true,
+			},
+			filterBySerialNumber: function(newVal) {
+				!newVal ? this.filterBySerialNumberColor = 'grey' : this.filterBySerialNumberColor = 'blue'
+			},
+			filterByType: function(newVal) {
+				!newVal.length ? this.filterByTypeColor = 'grey' : this.filterByTypeColor = 'blue'
+			},
+			filterByLocation: function(newVal) {
+				this.filterByLocationColor = !newVal.length ? 'grey' :'blue'
+			},
+			filterByOwner: function(newVal) {
+				this.filterByOwnerColor = !newVal.length ? 'grey' :'blue'
+			},
+			search: function(newVal) {
+				if (!newVal) {
+					this.searchOnClear()
+				}
+			},
+		},
 		created() {
 			this.setCookies()
 
@@ -410,12 +460,8 @@
 				: this.setFavoriteModuleColor('')
 		},
         mounted() {
-	        if (!this.checkAuth()) {
+	        if (!this.isLogin) {
 		        return
-	        }
-
-	        if (!this.activeModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
-		        this.$router.push('/')
 	        }
 
             document.onkeydown = (evt) => {
@@ -436,55 +482,6 @@
 
 	        this.initializeOther()
         },
-		watch: {
-			options: {
-				handler () {
-					!Object.keys(this.filters).length ? this.initializeMeters() : this.doFilter()
-				},
-				deep: true,
-			},
-			filterBySerialNumber: function(newVal) {
-				!newVal ? this.filterBySerialNumberColor = 'grey' : this.filterBySerialNumberColor = 'blue'
-            },
-			filterByType: function(newVal) {
-				!newVal.length ? this.filterByTypeColor = 'grey' : this.filterByTypeColor = 'blue'
-			},
-			filterByLocation: function(newVal) {
-				this.filterByLocationColor = !newVal.length ? 'grey' :'blue'
-			},
-			filterByOwner: function(newVal) {
-				this.filterByOwnerColor = !newVal.length ? 'grey' :'blue'
-			},
-            search: function(newVal) {
-	            if (!newVal) {
-		            this.searchOnClear()
-	            }
-            },
-        },
-        mixins: [ StorageMixin ],
-		computed: {
-			...mapState({
-				loading: state => state.storage.meterLoading,
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
-			...mapGetters({
-				getCookies: 'getCookies',
-				meters: 'storage/getMeters',
-				searchMetersView: 'storage/getSearchMetersView',
-				activeModules: 'getActiveModules',
-				roles: 'getRoles',
-				staffId: 'getStaffId',
-			}),
-			showHeaders() {
-				return this.headers.filter(header => this.selectedHeaders.includes(header))
-			}
-		},
-		inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
         provide: function () {
 	        return {
 		        formatDate: this.formatDate,
@@ -552,7 +549,7 @@
 	                this.totalMeters = await this.fetchMetersPerPage(this.options)
 	                this.getMeterTypesInRepair()
                 } catch (e) {
-	                this.showNotificationStandardError(e)
+	                this.showNotificationRequestError(e)
                 }
             },
 
@@ -561,7 +558,7 @@
 				try {
 					await this.fetchLogs(item.guid)
 				} catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				}
 			},
 
@@ -590,7 +587,7 @@
 
 		                this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
 	                } catch (e) {
-                        this.showNotificationStandardError(e)
+                        this.showNotificationRequestError(e)
 	                }
                 }
 			},

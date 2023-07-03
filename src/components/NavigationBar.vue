@@ -18,7 +18,6 @@
       <v-img
         src="@/assets/logo_navbar_mec.webp"
         max-width="60px"
-        @click="$router.push('/').catch(err => err)"
         class="ml-1 slideRight"
         style="visibility: hidden;"
       />
@@ -46,7 +45,7 @@
               icon
               v-bind="attrs"
               v-on="on"
-              @click="$router.push('/profile').catch(err => err)"
+              @click="$router.push('/profile')"
           >
             <v-icon>mdi-account</v-icon>
           </v-btn>
@@ -60,7 +59,7 @@
             icon
             v-bind="attrs"
             v-on="on"
-            @click="logoutUser()"
+            @click="logoutUser(true)"
           >
             <v-icon>mdi-logout</v-icon>
           </v-btn>
@@ -89,9 +88,9 @@
         return this.$route.name === 'Welcome'
       }
     },
-    inject: ['showNotification', 'showNotificationError'],
+    inject: [ 'showNotificationSuccess', 'showNotificationError' ],
     mounted() {
-      this.$router.name
+
     },
     methods: {
       ...mapMutations(['setSideBarState', 'setFavoriteModuleColor']),
@@ -111,9 +110,9 @@
 
         this.saveSettings({settingsName: 'favorite_module', settingsVal: route}).then(
           response =>  {
-            this.showNotification(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены', this.colorGreen)
+            this.showNotificationSuccess(response.action === 'new' ? 'Настройки созданы' : 'Настройки обновлены')
           },
-          e => this.showNotificationError('Ошибка при обновлении или создании настроек начальной страницы', e)
+          e => this.showNotificationRequestErrorWithCustomText('Ошибка при обновлении или создании настроек начальной страницы', e)
         )
       }
     }

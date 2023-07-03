@@ -136,6 +136,7 @@
 				types: 'registration/getTypes',
 				ipAddresses: 'registration/getIpAddress',
 				activeModules: 'getActiveModules',
+                isLogin: 'getIsLogin',
 			}),
 			...mapState({
 				loading: state => state.repair.isMetersLoading,
@@ -144,14 +145,13 @@
 				colorBlue: state => state.colorBlue,
 			})
         },
-		inject: ['showNotification', 'showNotificationStandardError', 'checkAuth'],
+		inject: [
+			'showNotificationSuccess',
+            'showNotificationRequestError',
+        ],
         mounted() {
-	        if (!this.checkAuth()) {
+	        if (!this.isLogin) {
 		        return
-	        }
-
-	        if (!this.activeModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
-		        this.$router.push('/')
 	        }
 
 	        this.initializeMeters()
@@ -187,9 +187,9 @@
 				try {
 					await this.fetchTypes()
 					await this.fetchMeters()
-					this.showNotification(`Список счетчиков успешно обновлен`, this.colorGreen)
+					this.showNotificationSuccess('Список счетчиков успешно обновлен')
                 } catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				}
 	        },
 
@@ -204,9 +204,9 @@
 	                const updatedMeter = await this.setProgrammingValue({ id: this.currentItem.id, value: 1 })
 	                const mainUpdatedMeter = this.meters.find(mainMeter => updatedMeter.id === mainMeter.id)
 	                Object.assign(mainUpdatedMeter, updatedMeter)
-	                this.showNotification(`ПКЭ успешно обновлен`, this.colorGreen)
+	                this.showNotificationSuccess('ПКЭ успешно обновлен')
                 } catch (e) {
-	                this.showNotificationStandardError(e)
+	                this.showNotificationRequestError(e)
                 }
             },
 

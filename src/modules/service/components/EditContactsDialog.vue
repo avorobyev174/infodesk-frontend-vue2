@@ -34,7 +34,7 @@
         data: () => ({
 	        contacts: ''
         }),
-		inject: [ 'showNotificationStandardError' ],
+		inject: [ 'showNotificationRequestError' ],
         props: {
 	        assignment: Object
         },
@@ -54,7 +54,7 @@
 					})
 					this.$emit('updateAssignment', updatedAssignment)
 				} catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				} finally {
 					this.dialogClose()
 				}

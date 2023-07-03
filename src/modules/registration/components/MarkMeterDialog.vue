@@ -89,7 +89,10 @@
                 required: true
             },
         },
-        inject: [ 'getMeterTypeTitle', 'showNotification', 'showNotificationError' ],
+        inject: [
+        	'getMeterTypeTitle',
+            'showNotificationRequestErrorWithCustomText'
+        ],
         methods: {
             ...mapActions('registration', [ 'markMeter' ]),
             open(item) {
@@ -126,7 +129,7 @@
 		            Object.assign(updatedMainMeter, markedMeter)
 		            this.dialogModel = false
                 } catch (e) {
-		            this.showNotificationError('Произошла ошибка при утилизации счетчка', e)
+		            this.showNotificationRequestErrorWithCustomText('Произошла ошибка при утилизации счетчка', e)
 	            }
             }
         }

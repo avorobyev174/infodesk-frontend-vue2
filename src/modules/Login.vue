@@ -64,23 +64,20 @@
             loginRules: [v => !!v || 'Обязательно к заполнению'],
             showPassword: false,
         }),
-        inject: ['showNotification', 'showNotificationError', 'showNotificationStandardError', 'setBackgroundImage'],
+        inject: [ 'showNotificationSuccess', 'showNotificationRequestError', 'setBackgroundImage'],
         mounted() {
-            if ($cookies.get('auth_token'))
-                this.$router.push({ path: '/' })
+            if ($cookies.get('auth_token')) {
+	            this.$router.push('/')
+            }
 
 	        this.setBackgroundImage(true)
         },
         computed: {
-            ...mapState({
-                colorRed: state => state.colorRed,
-                colorGreen: state => state.colorGreen,
-                colorOrange: state => state.colorOrange,
-                serverUrl: state => state.serverUrl
-            }),
+	        ...mapState([ 'colorGreen', 'serverUrl' ]),
         },
         methods: {
-            ...mapActions(['loginUser']),
+            ...mapActions([ 'loginUser' ]),
+
             async submit() {
                 if (!this.$refs.form.validate()) {
                     return
@@ -91,16 +88,13 @@
                         name: this.name,
                         password: this.password
                     });
-                    //console.log(response)
-                    this.showNotification('Успешный вход', this.colorGreen)
-                    this.loginUser({
-                        authToken: response.data.authToken,
-                        roleToken: response.data.roleToken,
-                        cookies: response.data.cookies
-                    })
+                    const { authToken, roleToken, cookies } = response.data
+                    this.showNotificationSuccess('Успешный вход')
+                    this.loginUser({ authToken, roleToken, cookies })
+
                 } catch (e) {
                     console.log(e)
-                    this.showNotificationStandardError(e)
+                    this.showNotificationRequestError(e)
                 }
             },
         }

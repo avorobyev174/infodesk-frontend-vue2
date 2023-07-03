@@ -134,21 +134,18 @@ export default {
 	created() {
 		this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/map' ? this.colorGold : '')
 	},
-	async mounted() {
-		if (!this.checkAuth()) {
+	mounted() {
+		if (this.getIsLogin) {
 			return
 		}
-
-		if (!this.activeModules.filter((module) => module.name === this.$route.name.toLowerCase()).length) {
-			this.$router.push('/')
-		}
 	},
-    inject: [ 'showNotification', 'showNotificationError', 'showNotificationStandardError', 'checkAuth' ],
+    inject: [ 'showNotificationError' ],
     computed: {
 	    ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
 	    ...mapGetters({
 		    addresses: 'map/getAddresses',
 		    activeModules: 'getActiveModules',
+		    isLogin: 'getIsLogin',
 	    }),
 	    google: gmapApi
     },

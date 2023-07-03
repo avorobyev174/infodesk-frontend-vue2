@@ -4,7 +4,7 @@
         timeout="5000"
         right
         :color="color"
-        transition="slide-x-reverse-transition"
+        transition="fab-transition"
     >
         {{ text }}
         <template v-slot:action="{ attrs }">
@@ -20,7 +20,8 @@
 </template>
 
 <script>
-    import { mapActions, mapState } from "vuex";
+    import { mapActions, mapState, mapGetters } from "vuex"
+    import { NOT_AUTHORIZATED_ERROR } from '../../const.js'
 
     export default {
         name: "NotificationSnackBar",
@@ -30,10 +31,13 @@
             color: '',
         }),
         computed: {
-            ...mapState(['colorRed'])
+            ...mapState([ 'colorRed', 'colorGreen', 'colorBlue', 'colorOrange' ]),
+            ...mapGetters({
+	            isLogin: 'getIsLogin',
+            })
         },
         methods: {
-            ...mapActions(['logoutUser']),
+            ...mapActions([ 'logoutUser' ]),
 	        /**
              * Функция показывает произвольное уведомление в правом нижем углу экрана
 	         * @param {string} text текст уведомления
@@ -49,22 +53,54 @@
 	         * @param {string} text текст уведомления
 	         * @param {error} e предаваемая ошибка
 	         */
-            showNotificationError(text, e) {
-                if (text && e) {
-                    if (e.response) {
-                        this.showNotification(`${ text }: ${ e.response.data }`, this.colorRed)
-                        if (e.response.status === 401) {
-                            setTimeout(this.logoutUser, 3500)
-                        }
-                    } else {
-                        this.showNotification(`${ text }: ${ e.message }`, this.colorRed)
-                    }
-                } else if (text) {
-	                this.showNotification(`${ text }`, this.colorRed)
-                } else {
-                    this.showNotification(`Что то пошло не так, возможно не отвечает сервер`, this.colorRed)
-                }
-            }
+
+	        showNotificationSuccess(text) {
+		        this.showNotification(text, this.colorGreen)
+	        },
+
+	        showNotificationInfo(text) {
+		        this.showNotification(text, this.colorBlue)
+	        },
+
+	        showNotificationError(text) {
+		        this.showNotification(text, this.colorRed)
+	        },
+
+	        showNotificationWarning(text) {
+		        this.showNotification(text, this.colorOrange)
+	        },
+
+            showNotificationRequestErrorWithCustomText(text, e) {
+                this.createNotification(text, e)
+            },
+
+	        showNotificationRequestError(e) {
+		        this.createNotification('Произошла ошибка при получении/отправке данных', e)
+	        },
+
+	        createNotification(text, e) {
+		        let notificationText = ''
+		        if (text) {
+			        notificationText = `${ text }: `
+		        }
+		        if (e) {
+			        if (e.response) {
+				        this.showNotificationError(`${ notificationText }${ e.response.data }`)
+				        if (e.response.status === NOT_AUTHORIZATED_ERROR) {
+                            const isRedirectToLoginPage = this.$route.name.toLowerCase() !== 'login'
+                            if (this.isLogin) {
+	                            setTimeout(async () => {
+		                            await this.logoutUser(isRedirectToLoginPage)
+                                }, 1000)
+                            }
+				        }
+			        } else if (e.message) {
+				        this.showNotificationError(`${ notificationText }${ e.message }`,)
+			        }
+		        } else {
+			        this.showNotificationError(notificationText ? notificationText : `Что то пошло не так...`)
+		        }
+	        },
         }
     }
 </script>

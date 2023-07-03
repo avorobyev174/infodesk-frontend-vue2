@@ -195,7 +195,6 @@
         <action-menu
             ref="actionMenu"
             @openEventList="$refs.eventList.open(currentAssignment, currentAccountId)"
-            @refreshAssignments="refreshAssignments"
             @acceptAssignment="assignmentAccept"
             @editAssignmentContacts="$refs.editContactsDialog.dialogOpen()"
         />
@@ -207,7 +206,6 @@
     import EventList from "./components/EventList"
     import MainMenu from "./components/MainMenu"
     import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
-	import AuthMixin from "../mixins/AuthMixin"
     import ServiceUpdateLogsDialog from "./components/ServiceUpdateLogsDialog"
     import AddAssignmentDialog from "./components/AddAssignmentDialog"
     import ServiceMixin from "@/modules/service/ServiceMixin"
@@ -240,16 +238,16 @@
 	        serviceStatuses: [],
 	        serviceBuildings: [],
         }),
-		mixins: [ AuthMixin, ServiceMixin, DictionaryMixin ],
+		mixins: [ DictionaryMixin, ServiceMixin ],
         watch: {
 	        filterByOwner(val) {
-		        this.filterByOwnerColor = !val.length ? this.colorGrey : this.colorBlue
+		        this.filterByOwnerColor = !val?.length ? this.colorGrey : this.colorBlue
 	        },
 	        filterByStatus(val) {
-		        this.filterByStatusColor = !val.length ? this.colorGrey : this.colorBlue
+		        this.filterByStatusColor = !val?.length ? this.colorGrey : this.colorBlue
 	        },
 	        filterByBuilding(val) {
-		        this.filterByBuildingColor = !val.length ? this.colorGrey : this.colorBlue
+		        this.filterByBuildingColor = !val?.length ? this.colorGrey : this.colorBlue
 	        },
 	        assignments(val) {
 	        	this.defaultAssignments = val
@@ -257,9 +255,20 @@
 		        this.createFiltersValues()
             }
         },
-        mounted() {
+		async mounted() {
+	        if (!this.isLogin) {
+		        return
+	        }
+	        await this.refreshAssignments()
+
 	        this.createFiltersValues()
             this.filterByStatus = this.assignmentStatuses?.filter((status) => [ 1, 2, 4 ].includes(status.value))
+
+	        document.onkeydown = (evt) => {
+		        if (this.$route.name === 'Service' && evt.key === 'Alt') {
+			        this.refreshAssignments()
+		        }
+	        }
         },
 		methods: {
 	        openActionMenu(e, { item }) {
@@ -274,18 +283,18 @@
 	                this.resetFilters()
 	                const updatedAssignment = await this.acceptAssignment(id)
 	                this.updateAssignment(updatedAssignment)
-	                this.showNotification(`Поручение успешно принято`, this.colorGreen)
+	                this.showNotificationSuccess('Поручение успешно принято')
                 } catch (e) {
-	                this.showNotificationStandardError(e)
+	                this.showNotificationRequestError(e)
                 }
             },
 
-	        refreshAssignments() {
+	        async refreshAssignments() {
 		        try {
 			        this.resetFilters()
-			        this.fetchAssignments()
+			        await this.fetchAssignments()
 		        } catch (e) {
-			        this.showNotificationStandardError(e)
+			        this.showNotificationRequestError(e)
 		        }
             },
 

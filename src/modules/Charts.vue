@@ -107,7 +107,8 @@
 
 <script>
     import VueApexCharts from 'vue-apexcharts'
-    import {mapActions, mapGetters, mapMutations} from "vuex"
+    import { mapActions, mapGetters, mapMutations } from "vuex"
+    import DictionaryMixin from "./mixins/DictionaryMixin"
 
     export default {
     name: 'General',
@@ -379,18 +380,6 @@
             },
             dataLabels: {
                 enabled: false,
-	            // formatter: function(val, opt) {
-		        //     const goals = opt.w.config.series[opt.seriesIndex].data[opt.dataPointIndex].goals
-		        //     if (goals && goals.length) {
-			    //         return `${val} / ${goals[0].value}`
-		        //     }
-		        //     return val
-	            // },
-	            // style: {
-		        //     fontSize: '6px',
-		        //     fontFamily: 'Arial, sans-serif',
-		        //     fontWeight: 'bold'
-	            // },
             },
             yaxis: {
                 labels: {
@@ -537,20 +526,32 @@
         donutHeight: 350,
         planProgress: ''
     }),
-    inject: ['showNotificationStandardError', 'checkAuth', 'showNotificationComponentError', 'setBackgroundImage'],
+    inject: [
+    	'showNotificationRequestError',
+        'setBackgroundImage'
+    ],
+    mixins: [ DictionaryMixin ],
+    computed: {
+        ...mapGetters({
+	        isLogin: 'getIsLogin',
+        }),
+    },
+    watch: {
+        windowWidth(newVal) {
+            this.registrationCustomerTypesOptions.legend.position = newVal < 1000 ? 'top' : 'left'
+            this.$refs.pieTypesChart.updateOptions(this.registrationTypesOptions)
+            this.$refs.pieCustomerTypesChart.updateOptions(this.registrationCustomerTypesOptions)
+        }
+    },
     created() {
         window.addEventListener("resize", this.resize);
         //const isFavorite = $cookies.get('common_favorite_module')
 	    $cookies.get('common_favorite_module') === '/charts' ? this.setFavoriteModuleColor(this.colorGold) : this.setFavoriteModuleColor('')
     },
     mounted() {
-        if (!this.checkAuth()) {
+        if (!this.isLogin) {
 	        return
         }
-
-	    if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length) {
-		    this.$router.push('/')
-	    }
 
 	    this.setBackgroundImage(false)
 
@@ -568,21 +569,9 @@
 				    this.getMeterRegistrationActiveInPyramidChartSeries()
 			    }, 250)
 		    },
-		    error => this.showNotificationStandardError(error)
+		    error => this.showNotificationRequestError(error)
 	    )
         this.windowWidth = window.innerWidth
-    },
-    watch: {
-        windowWidth(newVal) {
-            this.registrationCustomerTypesOptions.legend.position = newVal < 1000 ? 'top' : 'left'
-            this.$refs.pieTypesChart.updateOptions(this.registrationTypesOptions)
-            this.$refs.pieCustomerTypesChart.updateOptions(this.registrationCustomerTypesOptions)
-        }
-    },
-    computed: {
-	    ...mapGetters({
-		    types: 'registration/getTypes',
-	    }),
     },
     methods: {
         ...mapMutations(['setFavoriteModuleColor']),
@@ -624,7 +613,7 @@
                 ]
                 //this.$apexcharts.exec('registration', 'updateSeries',  series, true)
             } catch (e) {
-                this.showNotificationComponentError(this.componentTitle, e)
+                this.showNotificationRequestError(e)
             }
         },
 
@@ -648,7 +637,7 @@
                 ]
                 //this.$apexcharts.exec('registration', 'updateSeries',  series, true)
             } catch (e) {
-                this.showNotificationComponentError(this.componentTitle, e)
+                this.showNotificationRequestError(e)
             }
         },
 
@@ -667,7 +656,7 @@
                 if (this.$refs && this.$refs.pieTypesChart)
                     this.$refs.pieTypesChart.updateOptions({ labels: labels })
             } catch (e) {
-                this.showNotificationComponentError(this.componentTitle + '(Разделение зарегистрированных счетчиков по типу)', e)
+                this.showNotificationRequestError(e)
             }
         },
 
@@ -688,7 +677,7 @@
                 if (this.$refs && this.$refs.pieCustomerTypesChart)
                     this.$refs.pieCustomerTypesChart.updateOptions({ labels: labels })
             } catch (e) {
-                this.showNotificationComponentError(this.componentTitle, e)
+                this.showNotificationRequestError(e)
             }
         },
 
@@ -802,7 +791,7 @@
                 this.planProgress = `Выполнение плана: ${ totalNow }/${ totalPlan }`
                 this.streetSeries = [{ data: data }]
             } catch (e) {
-                this.showNotificationComponentError(this.componentTitle, e)
+                this.showNotificationRequestError(e)
             }
         },
 
@@ -823,7 +812,7 @@
                 }
             } catch (e) {
 	            console.log(e)
-                this.showNotificationComponentError(this.componentTitle + '(Разделение не загруженных в пирамиду счетчиков по типу)', e)
+                this.showNotificationRequestError(e)
             }
         },
 
@@ -840,28 +829,23 @@
 	                this.$refs.pieInPyramidCountChart.updateOptions({labels})
                 }
             } catch (e) {
-                this.showNotificationComponentError(this.componentTitle, e)
+                this.showNotificationRequestError(e)
             }
         },
 
         async getMeterRegistrationActiveInPyramidChartSeries() {
             try {
                 const response = await this.getMeterRegistrationActiveInPyramidChartData()
-                let labels = ['Есть показания', 'Нет показаний']
+                let labels = [ 'Есть показания', 'Нет показаний' ]
 
                 this.activeInPyramidCountSeries = [ response.withData, response.total - response.withData ]
                 if (this.$refs && this.$refs.pieActiveInPyramidCountChart) {
 	                this.$refs.pieActiveInPyramidCountChart.updateOptions({ labels })
                 }
             } catch (e) {
-                this.showNotificationComponentError(this.componentTitle, e)
+                this.showNotificationRequestError(e)
             }
         },
-
-	    getMeterTypeTitle(meterType) {
-		    const mType = this.types.find((type) => meterType === type.value)
-		    return mType ? mType.text : meterType
-	    },
     }
   }
 </script>

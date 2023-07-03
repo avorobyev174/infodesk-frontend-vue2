@@ -145,7 +145,13 @@
                 required: true
             },
         },
-        inject: ['getMeterTypeTitle', 'showNotification', 'showNotificationError', 'getIpAddressTitle'],
+        inject: [
+        	'getMeterTypeTitle',
+            'showNotificationSuccess',
+            'showNotificationWarning',
+            'showNotificationError',
+            'getIpAddressTitle'
+        ],
         methods: {
             ...mapActions('registration', ['updateMeterAfterLoadInPyramid']),
             open() {
@@ -177,7 +183,7 @@
                     this.defaultMetersArray = this.availableMetersArray
                 }
                 else {
-                    this.showNotification('Не найдено счетчиков для выгрузки в пирамиду', this.colorOrange)
+                    this.showNotificationWarning('Не найдено счетчиков для выгрузки в пирамиду')
                     this.close()
                 }
 
@@ -216,7 +222,7 @@
                 let preUpdateArray = this.availableMetersArray
                         .filter(meter => meter.in_pyramid === 0 && !meter.loaded)
                 if (!preUpdateArray.length) {
-                    this.showNotification('Нет подходящих записей для выгрузки в excel', this.colorOrange)
+                    this.showNotificationWarning('Нет подходящих записей для выгрузки в excel')
                     return
                 }
                 saveExcelFileForPyramid(preUpdateArray, this.getIpAddressTitle)
@@ -235,7 +241,7 @@
                                 .filter(meter => meter.readyToLoad && meter.in_pyramid === 0 && !meter.loaded)
 
                 if (!preUpdateArray.length) {
-                    this.showNotification('Нет подходящих записей для подтверждения загрузки', this.colorOrange)
+                    this.showNotificationWarning('Нет подходящих записей для подтверждения загрузки')
                     return
                 }
 
@@ -254,10 +260,10 @@
                             const updatedDefaultMeter = this.defaultMetersArray.find((meter) => record.id === meter.id)
                             Object.assign(updatedDefaultMeter, record)
                         }
-                        this.showNotification('Подтверждение данных прошло успешно', this.colorGreen)
+                        this.showNotificationSuccess('Подтверждение данных прошло успешно')
                     }
                 ).catch(
-                    e => this.showNotificationError('При подтверждения данных произошла ошибка', e)
+                    e => this.showNotificationRequestErrorWithCustomText('При подтверждения данных произошла ошибка', e)
                 )
             },
         }

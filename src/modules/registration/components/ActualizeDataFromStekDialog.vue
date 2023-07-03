@@ -73,7 +73,13 @@
               required: true
           }
         },
-        inject: ['showNotification', 'showNotificationComponentError', 'getMeterTypeTitle'],
+        inject: [
+        	'showNotificationSuccess',
+            'showNotificationInfo',
+            'showNotificationWarning',
+            'showNotificationRequestError',
+            'getMeterTypeTitle'
+        ],
         computed: {
             ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue'])
         },
@@ -84,7 +90,7 @@
             async open() {
                 try {
 	                this.actualizeMeters.length = 0
-                    this.showNotification('Ожидаем ответа от базы СТЭКа, пожалуйста подождите (ожидаемое время 2-3 мин)', this.colorBlue)
+                    this.showNotificationInfo('Ожидаем ответа от базы СТЭКа, пожалуйста подождите (ожидаемое время 2-3 мин)')
                     this.setLoading(true)
                     this.meters.forEach((meter) => {
                         if (!meter.personal_account) {
@@ -96,7 +102,7 @@
 	                    this.updatedMeters = await this.actualizeMetersDataFromStek()
 
                         if (!this.updatedMeters.length) {
-                            this.showNotification('В базе стэка не найдено подходящих счетчиков для актуализации', this.colorOrange)
+                            this.showNotificationWarning('В базе стэка не найдено подходящих счетчиков для актуализации')
                             this.close()
                         } else {
                             this.actualizeMeters =
@@ -124,18 +130,15 @@
                             if (this.actualizeMeters.length) {
                                 this.dialogModel = true
                             } else  {
-                                this.showNotification(
-                                	`В базе стэка не найдено подходящих счетчиков для актуализации`,
-                                    this.colorOrange
-                                )
+                                this.showNotificationWarning('В базе стэка не найдено подходящих счетчиков для актуализации')
                                 this.close()
                             }
                         }
                     } else {
-                        this.showNotification('В базе не найдено подходящих счетчиков для актуализации из стэка', this.colorOrange)
+                        this.showNotificationWarning('В базе не найдено подходящих счетчиков для актуализации из стэка')
                     }
                 } catch (e) {
-                    this.showNotificationComponentError(this.componentTitle, e)
+                    this.showNotificationRequestError(e)
                 } finally {
                     this.setLoading(false)
                 }
@@ -158,7 +161,7 @@
                                         meter.actualizeStatus = 'да'
                                     },
                                     e => {
-                                        this.showNotificationComponentError(this.componentTitle, e)
+                                        this.showNotificationRequestError(e)
                                         meter.actualizeStatus = 'ошибка'
                                     }
                                 )
@@ -168,15 +171,14 @@
                     } else
                         this.close()
                 } catch (e) {
-                    this.showNotificationComponentError(this.componentTitle, e)
+                    this.showNotificationRequestError(e)
                 }
             },
 
             async actualizeSingleData(item) {
 	            try {
 	            	if (item.personal_account !== null) {
-                        this.showNotification(`Счетчик ${ item.serial_number } уже актуализирован`,
-                                                    this.colorOrange)
+                        this.showNotificationWarning(`Счетчик ${ item.serial_number } уже актуализирован`)
 			            return
                     }
 		            this.setLoading(true)
@@ -188,12 +190,11 @@
 
                     if (mainUpdatedMeter) {
                         Object.assign(mainUpdatedMeter, updatedMeter)
-                        this.showNotification(`Данные счетчика
-                                                    ${ updatedMeter.serial_number } успешно актуализированы`,
-                                                    this.colorGreen)
+                        this.showNotificationSuccess(`Данные счетчика
+                                                    ${ updatedMeter.serial_number } успешно актуализированы`)
                     }
                 } catch (e) {
-                    this.showNotificationComponentError(this.componentTitle, e)
+                    this.showNotificationRequestError(this.componentTitle, e)
                 } finally {
                     this.setLoading(false)
 	            }

@@ -171,7 +171,13 @@
                 required: true
             }
         },
-        inject: [ 'showNotification', 'showNotificationComponentError', 'getMeterTypeTitle', 'getIpAddressTitle' ],
+        inject: [
+        	'showNotificationRequestError',
+            'showNotificationInfo',
+            'showNotificationWarning',
+            'getMeterTypeTitle',
+            'getIpAddressTitle'
+        ],
         computed: {
             ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue' ]),
             okButtonTitle() {
@@ -187,7 +193,7 @@
             //Обработчик открытия диалога актуализации из стэка
             async open() {
                 try {
-                    this.showNotification('Ожидаем ответа от базы СТЭКа, пожалуйста подождите (ожидаемое время 5 мин)', this.colorBlue)
+                    this.showNotificationInfo('Ожидаем ответа от базы СТЭКа, пожалуйста подождите (ожидаемое время 5 мин)')
                     this.setLoading(true)
 
                     const data = await this.refreshMetersDataFromStek()
@@ -234,10 +240,10 @@
                             this.dialogModel = true
                         }
                     } else {
-                        this.showNotification('В базе не найдено подходящих счетчиков для обновления информации из стэка', this.colorOrange)
+                        this.showNotificationWarning('В базе не найдено подходящих счетчиков для обновления информации из стэка')
                     }
                 } catch (e) {
-                    this.showNotificationComponentError(this.componentTitle, e)
+                    this.showNotificationRequestError(e)
                 } finally {
                     this.setLoading(false)
                 }
@@ -290,7 +296,7 @@
                                     meter.actualizeStatus = 'да'
                                 },
                                 e => {
-                                    this.showNotificationComponentError(this.componentTitle, e)
+                                    this.showNotificationRequestError(e)
                                     meter.actualizeStatus = 'ошибка'
                                 }
                             )
@@ -312,7 +318,7 @@
                         this.loading = false
                     }
                 } catch (e) {
-                    this.showNotificationComponentError(this.componentTitle, e)
+                    this.showNotificationRequestError(e)
                 }
             },
 

@@ -1,48 +1,35 @@
 <script>
-	import { mapGetters } from "vuex"
+	import { mapActions, mapGetters } from "vuex"
 
 	export default {
 		name: "DictionaryMixin",
-        data: () => ({
-	        assignmentEventTypes: [],
-	        assignmentCloseReasonTypes: [],
-	        assignmentStatuses: [],
-	        accounts: [],
-	        meterTypes: [],
-	        ipAddresses: [],
-	        simStatuses: [],
-        }),
 		computed: {
 			...mapGetters({
-                dictionaries: 'getDictionaries',
+				assignmentEventTypes: 'getAssignmentEventTypes',
+				assignmentStatuses: 'getAssignmentStatuses',
+				assignmentCloseReasonTypes: 'getAssignmentCloseReasonTypes',
+				meterTypes: 'getMeterTypes',
+				ipAddresses: 'getIpAddresses',
+				simStatuses: 'getSimStatuses',
+				accounts: 'getAccounts',
+                isLogin: 'getIsLogin'
             })
 		},
-        provide: function() {
-	        return {
-		        getMeterTypes: this.getMeterTypes,
-		        getAccounts: this.getAccounts,
+        inject: [ 'showNotificationRequestErrorWithCustomText' ],
+        async mounted() {
+			if (!this.isLogin) {
+				return
+            }
+
+	        try {
+		        await this.fetchDictionaries()
+	        } catch (e) {
+		        this.showNotificationRequestErrorWithCustomText('Произошла ошибка при получении словарей', e)
 	        }
         },
-        created() {
-			const {
-				assignmentEventTypes,
-                assignmentCloseReasonTypes,
-                accounts,
-				meterTypes,
-				ipAddresses,
-				simStatuses,
-				assignmentStatuses
-			} = this.dictionaries
-
-            this.assignmentEventTypes = assignmentEventTypes
-            this.assignmentCloseReasonTypes = assignmentCloseReasonTypes
-            this.accounts = accounts
-            this.meterTypes = meterTypes
-            this.ipAddresses = ipAddresses
-            this.simStatuses = simStatuses
-            this.assignmentStatuses = assignmentStatuses
-        },
 		methods: {
+            ...mapActions([ 'fetchDictionaries' ]),
+
 			formatDate(dateToFormat, withTime) {
 				if (!dateToFormat) {
 					return 'отсутствует'
@@ -137,14 +124,6 @@
 				const status = this.simStatuses.find((status) => meterSimStatus === status.value)
 				return status ? status.title : meterSimStatus
 			},
-
-            getMeterTypes() {
-				return this.meterTypes
-            },
-
-			getAccounts() {
-				return this.accounts
-			}
 		}
 	}
 </script>

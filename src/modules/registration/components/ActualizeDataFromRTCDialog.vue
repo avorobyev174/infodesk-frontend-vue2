@@ -56,7 +56,14 @@
                 required: true
             }
         },
-        inject: ['showNotification', 'showNotificationComponentError', 'showNotificationStandardError', 'getPhaseTitle', 'getStatusTitle', 'getMeterTypeTitle' ],
+        inject: [
+        	'showNotificationWarning',
+            'showNotificationInfo',
+            'showNotificationRequestError',
+            'getPhaseTitle',
+            'getStatusTitle',
+            'getMeterTypeTitle'
+        ],
         computed: {
             ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue'])
         },
@@ -71,15 +78,11 @@
                     })
 
                     if (!this.actualizeMeters.length) {
-                        this.showNotification(
-                        	`Не найдено подходящих счетчиков для актуализации из ростелекома`,
-                            this.colorOrange)
-                        return
+	                    return this.showNotificationWarning('Не найдено подходящих счетчиков для актуализации из ростелекома')
                     } else
-                        this.showNotification(
+                        this.showNotificationInfo(
                         	`Найдено несколько счетчиков (${this.actualizeMeters.length} шт.)
-                                для актуализации в таблице, ожидаем ответа от Ростелекома, пожалуйста подождите`,
-                                this.colorBlue)
+                                для актуализации в таблице, ожидаем ответа от Ростелекома, пожалуйста подождите`)
 
                     //получаем список сим карт с данных от ростелекома и обновляем данные в диалоге
                     let rtcSimCardList = await this.actualizeMeterDataFromRTC()
@@ -101,10 +104,10 @@
                     if (this.actualizeMeters.length)
                         this.dialogModel = true
                     else {
-	                    this.showNotification('В базе ростелекома не найдено подходящих счетчиков для актуализации', this.colorOrange)
+	                    this.showNotificationWarning('В базе ростелекома не найдено подходящих счетчиков для актуализации')
                     }
                 } catch (e) {
-                    this.showNotificationComponentError(this.componentTitle, e)
+                    this.showNotificationRequestError(e)
                 }
             },
 
@@ -126,7 +129,7 @@
                                 //console.log(meter)
                             },
                             e => {
-                                this.showNotificationStandardError(e)
+                                this.showNotificationRequestError(e)
                                 meter.actualizeStatus = 'ошибка'
                             }
                         )

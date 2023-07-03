@@ -91,22 +91,15 @@
             }
         },
 		computed: {
-			...mapState({
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
 			...mapGetters({
 				staffId: 'getStaffId',
 			}),
 		},
 		inject: [
-			'showNotification',
-			'showNotificationComponentError',
-			'showNotificationStandardError',
+			'showNotificationSuccess',
+			'showNotificationWarning',
+			'showNotificationInfo',
+			'showNotificationRequestError',
 			'showNotificationError',
 			'getEmployeeStaffIdByCard',
 			'getEmployeeTitleByCard',
@@ -148,8 +141,7 @@
 
 			async deleteConfirm() {
 				if (!this.staffId) {
-					return this.showNotification(
-						'Операция невозможна, ваш номер сотрудника не определен', this.colorOrange)
+					return this.showNotificationWarning('Операция невозможна, ваш номер сотрудника не определен')
                 }
 				try {
 					const meterSerialNumber = this.editedItem.serial_number
@@ -160,16 +152,15 @@
 					})
 
 					if (!res) {
-						this.showNotificationStandardError(
-							`Что то пошло не так при удалении счетчика ${ meterSerialNumber }`, this.colorRed)
+						this.showNotificationError(`Что то пошло не так при удалении счетчика ${ meterSerialNumber }`)
 					} else {
 						this.meters.splice(this.editedIndex, 1)
 						this.closeDialogDeleteConfirm()
-						this.showNotification(`Счетчик ${ meterSerialNumber } успешно удален`, this.colorGreen)
+						this.showNotificationSuccess(`Счетчик ${ meterSerialNumber } успешно удален`)
 						this.resetFilters()
 					}
                 } catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				}
 			},
 
@@ -225,12 +216,12 @@
 				const updateField = await this.checkDataAndUpdate(meterData)
 
                 if (!updateField) {
-	                return this.showNotification('Ничего не отредактировано', this.colorBlue)
+	                return this.showNotificationInfo('Ничего не отредактировано')
                 }
 
 				if (!this.staffId) {
-					return this.showNotification(
-						'Операция невозможна, ваш номер сотрудника не определен', this.colorOrange)
+					return this.showNotificationWarning(
+						'Операция невозможна, ваш номер сотрудника не определен')
 				}
 
 				this.saveLoading = true
@@ -247,12 +238,12 @@
 	                } else {
 	                	const editedMeter = this.meters.find((meter) => meter.guid === res.guid)
                         Object.assign(editedMeter, res)
-		                this.showNotification('Редактирование выполнено успешно', this.colorGreen)
+		                this.showNotificationSuccess('Редактирование выполнено успешно')
 		                this.close()
 		                this.resetFilters()
 	                }
                 } catch (e) {
-	                this.showNotificationStandardError(e)
+	                this.showNotificationRequestError(e)
                 } finally {
 	                this.saveLoading = false
                 }

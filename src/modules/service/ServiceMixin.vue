@@ -1,6 +1,6 @@
 <script>
 	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
-
+    import headers from "./headers"
 	export default {
 		name: "ServiceMixin",
 		data: () => ({
@@ -128,6 +128,7 @@
 			...mapGetters({
 				assignments: 'service/getAssignments',
 				currentAccountId: 'getAccountId',
+				isLogin: 'getIsLogin',
 			}),
 			...mapState('service', [ 'loading' ]),
 			...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
@@ -136,7 +137,7 @@
 				return this.headers.filter((header) => this.selectedHeaders.includes(header))
 			}
 		},
-		inject: [ 'showNotification', 'showNotificationStandardError', ],
+		inject: [ 'showNotificationSuccess', 'showNotificationRequestError' ],
 		provide: function () {
 			return {
 				formatDate: this.formatDate,
@@ -159,15 +160,6 @@
 
 			this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/service' ? this.colorGold : '')
 		},
-		async mounted() {
-			this.refreshAssignments()
-
-	        document.onkeydown = (evt) => {
-		        if (this.$route.name === 'Service' && evt.key === 'Alt') {
-			        this.refreshAssignments()
-		        }
-	        }
-        },
 		methods: {
 			...mapMutations(['setFavoriteModuleColor']),
 			...mapActions('service', [

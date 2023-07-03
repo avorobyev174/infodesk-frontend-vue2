@@ -219,7 +219,6 @@
             addOrEditDialogTitle: 'Добавление события',
             addOrEditDialogButtonTitle: 'Добавить',
 			AssignmentEventTypes: {},
-			assignmentCloseReasonTypes: []
 		}),
         props: {
 		    assignments: {
@@ -228,25 +227,24 @@
             }
         },
 		inject: [
-			'showNotification',
+			'showNotificationSuccess',
             'showNotificationError',
-            'showNotificationStandardError',
+            'showNotificationRequestError',
             'formatDate',
             'getAssignmentEventTypeTitle',
             'getAccountFullName',
             'getAssignmentCloseEventTypeTitle',
-            'getAccounts',
             'getAssignmentEventTypeColor',
         ],
         computed: {
 	        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
-            ...mapGetters({
-                dictionaries: 'getDictionaries'
-            })
+	        ...mapGetters({
+		        accounts: 'getAccounts',
+		        assignmentCloseReasonTypes: 'getAssignmentCloseReasonTypes',
+	        })
         },
         mounted() {
 			this.AssignmentEventTypes = AssignmentEventTypes
-			this.assignmentCloseReasonTypes = this.dictionaries.assignmentCloseReasonTypes
         },
 		watch: {
 	        currentActionEvent(newVal) {
@@ -270,7 +268,7 @@
 				this.currentAssignment = assingment
 				this.currentAccountId = currentAccountId
 				const { id, owner_id } = assingment
-				const account = this.getAccounts().find(({ id }) => owner_id === id)
+				const account = this.accounts.find(({ id }) => owner_id === id)
 				this.owner = this.getAccountFullName(owner_id)
 
 				try {
@@ -284,7 +282,7 @@
                     }
 					this.eventListModel = true
 				} catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				}
 			},
 
@@ -318,7 +316,7 @@
 					const event = this.events.find((event) => event.id === deletedActionEvent.id)
 					this.events.splice(this.events.indexOf(event), 1)
 				} catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				} finally {
 					this.closeDescriptionDialog()
 				}
@@ -335,7 +333,7 @@
 					Object.assign(oldAssignment, assignment)
 					this.events.unshift(assignmentEvent)
 				} catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				} finally {
 					this.closeConfirmationDialogModel = false
 					this.description = ''
@@ -360,7 +358,7 @@
                         this.events.unshift(addedActionEvent)
                     }
 				} catch (e) {
-					this.showNotificationStandardError(e)
+					this.showNotificationRequestError(e)
 				} finally {
 					this.closeDescriptionDialog()
 				}

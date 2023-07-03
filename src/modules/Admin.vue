@@ -8,15 +8,23 @@
 </template>
 
 <script>
+	import { mapGetters } from "vuex"
+
 	export default {
 		name: "Admin",
-		inject: ['showNotification', 'showNotificationStandardError', 'checkAuth', 'setBackgroundImage'],
+		inject: [ 'setBackgroundImage'],
+		computed: {
+			...mapGetters({
+				isLogin: 'getIsLogin'
+			}),
+		},
 		mounted() {
-			if (!this.checkAuth())
+			if (!this.isLogin) {
 				return
+			}
 
-			if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
-				this.$router.push('/')
+			// if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
+			// 	this.$router.push('/')
 
 			this.setBackgroundImage(true)
 		},

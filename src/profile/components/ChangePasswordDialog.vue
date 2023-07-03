@@ -72,20 +72,9 @@
 				this.dialogModel = val
 			}
 		},
-		inject: ['showNotification', 'showNotificationStandardError'],
-        computed: {
-	        ...mapState({
-		        loading: state => state.registration.isMetersLoading,
-		        colorBlue: state => state.colorBlue,
-		        colorRed: state => state.colorRed,
-		        colorGreen: state => state.colorGreen,
-		        colorOrange: state => state.colorOrange,
-		        colorGrey: state => state.colorGrey,
-		        colorGold: state => state.colorGold,
-	        }),
-        },
+		inject: [ 'showNotificationSuccess', 'showNotificationRequestError' ],
 		methods: {
-			...mapActions('profile', ['changePassword']),
+			...mapActions('profile', [ 'changePassword' ]),
 			open() {
 				this.dialogModel = true
 			},
@@ -95,12 +84,17 @@
 				this.newPass = ''
 			},
 			async okClick() {
-				if (!this.$refs.form.validate()) return
+				if (!this.$refs.form.validate()) {
+					return
+				}
+
                 try {
 	                let res = await this.changePassword( { oldPassword : this.oldPass, newPassword: this.newPass })
-	                if (res) this.showNotification('Пароль успешно изменен', this.colorGreen)
+	                if (res) {
+		                this.showNotificationSuccess('Пароль успешно изменен')
+	                }
                 } catch (e) {
-	                this.showNotificationStandardError(e)
+	                this.showNotificationRequestError(e)
                 } finally {
 	                this.close()
                 }

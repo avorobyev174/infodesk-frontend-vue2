@@ -24,7 +24,7 @@
 </template>
 
 <script>
-    import { mapActions } from "vuex"
+	import { mapActions, mapGetters } from "vuex"
     import ChangePasswordDialog from "./components/ChangePasswordDialog"
 
     export default {
@@ -32,16 +32,22 @@
         components: {
 	        ChangePasswordDialog
         },
-        inject: [ 'showNotificationError', 'checkAuth' ],
         data: () => ({
             photoUrl: '',
             fullName: 'неизвестно',
             jobTitle: 'неизвестно',
         }),
+	    inject: [ 'showNotificationError' ],
+        computed: {
+	        ...mapGetters({
+		        isLogin: 'getIsLogin'
+	        }),
+        },
         mounted() {
-            if (!this.checkAuth()) {
+            if (!this.isLogin) {
 	            return
             }
+
             this.setProfileData()
         },
         methods: {
@@ -58,7 +64,7 @@
                     this.fullName = full_name
                     this.jobTitle = job_title
 	            } catch (e) {
-                    this.showNotificationError(e)
+                    this.showNotificationRequestErrorWithCustomText(e)
 	            }
             },
 

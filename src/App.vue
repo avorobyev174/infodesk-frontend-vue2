@@ -3,9 +3,7 @@
       <NavigationBar v-if="isLogin"/>
       <SideBar v-if="isLogin"/>
       <MainContent/>
-      <NotificationSnackBar
-          ref="notificationManager"
-      />
+      <NotificationSnackBar ref="notificationManager"/>
   </v-app>
 </template>
 <script>
@@ -24,52 +22,62 @@ export default {
         MainContent,
         NotificationSnackBar
     },
-	mounted() {
-        this.$store.commit('login', $cookies.get('auth_token'))
-
-    },
-	async updated() {
-	    try {
-		    await this.fetchDictionaries()
-	    } catch (e) {
-		    this.showNotificationStandardError(e)
-	    }
+	created() {
+		if (!$cookies.get('auth_token')) {
+			this.$store.commit('setLogin', false)
+			const isRedirectToLoginPage = this.$route.name.toLowerCase() !== 'login'
+			if (isRedirectToLoginPage) {
+				this.$router.push('/login')
+			}
+		} else {
+			this.$store.commit('setLogin', true)
+        }
     },
 	computed: {
-        ...mapGetters([ 'isLogin' ])
+        ...mapGetters({
+            isLogin: 'getIsLogin'
+        }),
     },
     provide: function () {
         return {
             showNotification: this.showNotification,
+	        showNotificationInfo: this.showNotificationInfo,
             showNotificationError: this.showNotificationError,
-            showNotificationStandardError: this.showNotificationStandardError,
-            showNotificationComponentError: this.showNotificationComponentError,
-            checkAuth: this.checkAuth
+	        showNotificationWarning: this.showNotificationWarning,
+	        showNotificationSuccess: this.showNotificationSuccess,
+	        showNotificationRequestError: this.showNotificationRequestError,
+	        showNotificationRequestErrorWithCustomText: this.showNotificationRequestErrorWithCustomText,
         }
     },
     methods: {
-        ...mapActions([ 'logoutUser', 'fetchDictionaries' ]),
+        ...mapActions([ 'logoutUser' ]),
+
         showNotification(text, color) {
             this.$refs.notificationManager.showNotification(text, color)
         },
-        showNotificationError(text, error) {
-            this.$refs.notificationManager.showNotificationError(text, error)
-        },
-        showNotificationStandardError(error) {
-            this.showNotificationError('Произошла ошибка при получении данных', error)
-        },
-        showNotificationComponentError(componentTitle, error) {
-            this.showNotificationError(`Произошла ошибка (${ componentTitle })`, error)
-        },
 
-        checkAuth() {
-            if (!$cookies.get('auth_token')) {
-                this.showNotification('Срок токена авторизации истек, авторизуйтесь заново', this.$store.state.colorRed)
-                this.$store.commit('login', false)
-                this.$router.push('/login')
-                return false
-            }
-            return true
+	    showNotificationInfo(text) {
+		    this.$refs.notificationManager.showNotificationInfo(text)
+	    },
+
+	    showNotificationSuccess(text) {
+		    this.$refs.notificationManager.showNotificationSuccess(text)
+	    },
+
+	    showNotificationWarning(text) {
+		    this.$refs.notificationManager.showNotificationWarning(text)
+	    },
+
+	    showNotificationError(text) {
+		    this.$refs.notificationManager.showNotificationError(text)
+	    },
+
+	    showNotificationRequestError(e) {
+		    this.$refs.notificationManager.showNotificationRequestError(e)
+	    },
+
+	    showNotificationRequestErrorWithCustomText(text, e) {
+            this.$refs.notificationManager.showNotificationRequestErrorWithCustomText(text, e)
         },
     }
 }

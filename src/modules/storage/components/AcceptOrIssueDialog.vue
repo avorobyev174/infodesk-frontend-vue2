@@ -167,9 +167,9 @@
             this.acceptedPersonLabel = this.getEmployeeTitleByCard(this.acceptedPerson)
         },
 	    inject: [
-	    	'showNotification',
-            'showNotificationComponentError',
-            'showNotificationStandardError',
+	    	'showNotificationSuccess',
+            'showNotificationWarning',
+            'showNotificationRequestError',
             'showNotificationError',
             'getEmployeeStaffIdByCard',
             'getEmployeeTitleByCard',
@@ -325,8 +325,7 @@
                 }
 
 		        if (!this.replaceMeters.length) {
-			        return this.showNotification(
-				        `Для выполнения операции заполните таблицу счетчиков`, this.colorOrange)
+			        return this.showNotificationWarning('Для выполнения операции заполните таблицу счетчиков')
 		        }
 
 		        if (!this.isRouter) {
@@ -345,14 +344,11 @@
 		        }
 
 		        if (isNaN(this.issuingPersonStaffId) || isNaN(this.acceptedPersonStaffId)) {
-			        return this.showNotification(
-				        'Операция с неизвестным сотрудником невозможна', this.colorOrange)
+			        return this.showNotificationWarning( 'Операция с неизвестным сотрудником невозможна')
 		        }
 
                 if (!this.replaceMeters.every(meter => this.checkIfMeterLocationValid(meter))) {
-	                return this.showNotification(
-		                'Не возможно произвести операцию, в таблице выбрана запрещенная схема смены местоположения',
-                        this.colorOrange)
+	                return this.showNotificationWarning('Не возможно произвести операцию, в таблице выбрана запрещенная схема смены местоположения')
                 }
 
 	            try {
@@ -369,7 +365,7 @@
 		            })
 
                     if (!res) {
-	                    this.showNotificationStandardError('Что то пошло не так при приеме/выдаче')
+	                    this.showNotificationError('Что то пошло не так при приеме/выдаче')
                     } else {
 	                    let successCount = 0
                     	this.replaceMeters.map((movedMeter) => {
@@ -383,10 +379,10 @@
 	                    })
 
                         if (this.replaceMeters.length === successCount) {
-	                        this.showNotification('Операция выполнена успешно', this.colorGreen)
+	                        this.showNotificationSuccess('Операция выполнена успешно')
                             this.resultColor = this.colorGreen
                         } else {
-	                        this.showNotification('Операция выполнена с ошибками', this.colorOrange)
+	                        this.showNotificationWarning('Операция выполнена с ошибками')
 	                        this.resultColor = this.colorOrange
                         }
 
@@ -396,7 +392,7 @@
 	                    this.meterCount = `${ successCount }/${  this.replaceMeters.length }`
                     }
                 } catch (e) {
-		            this.showNotificationStandardError(e)
+		            this.showNotificationRequestError(e)
 		            this.formSubmit = false
 	            } finally {
 		            this.$refs.addMeterTable.setLoading(false)

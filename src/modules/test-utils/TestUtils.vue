@@ -47,7 +47,7 @@
 </template>
 
 <script>
-    import {mapActions, mapMutations, mapState} from "vuex";
+	import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
     import saveMetersDataBySerialNumberReportToExcelFile from "./js/saveMetersDataBySerialNumberReportToExcel";
     import saveLoadedInPyramidByAddressReportToExcel from "./js/saveLoadedInPyramidByAddressReportToExcel";
     import saveFromUitToStorageReportToExcel from "./js/saveFromUitToStorageReportToExcel";
@@ -66,8 +66,15 @@
                 { text: '172.27.30.11', value: 2 },
             ],
         }),
-        inject: ['showNotification', 'showNotificationError', 'checkAuth', 'setBackgroundImage'],
+        inject: [
+        	'showNotificationSuccess',
+            'showNotificationError',
+            'setBackgroundImage'
+        ],
         computed: {
+	        ...mapGetters({
+		        isLogin: 'getIsLogin'
+	        }),
             ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue']),
         },
         created() {
@@ -78,14 +85,15 @@
                 this.setFavoriteModuleColor('')
             }
 
-	        if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
-		        this.$router.push('/')
+	        // if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
+		    //     this.$router.push('/')
 
 	        this.setBackgroundImage(true)
         },
         mounted() {
-	        if (!this.checkAuth())
+	        if (!this.isLogin) {
 		        return
+	        }
         },
 	    methods: {
             ...mapActions('testUtils', ['getDataBySerialNumber', 'goTest', 'goTest1', 'goTest2']),
@@ -116,7 +124,7 @@
 	                saveMetersDataBySerialNumberReportToExcelFile(editedResponse)
                 } catch (e) {
                     console.log(e)
-                    this.showNotification('Синтаксическая ошибка', this.colorRed)
+                    this.showNotificationError('Синтаксическая ошибка')
                 } finally {
                     this.loadingMeterInfoBySerialNumberReport = false
                 }
@@ -166,7 +174,7 @@
 
 			    } catch (e) {
 				    console.log(e)
-				    this.showNotification('Синтаксическая ошибка', this.colorRed)
+				    this.showNotificationError('Синтаксическая ошибка')
 			    } finally {
 				    this.loadingPyramidLoadedReport = false
 			    }
@@ -188,7 +196,7 @@
 
 			    } catch (e) {
 				    console.log(e)
-				    this.showNotification('Синтаксическая ошибка', this.colorRed)
+				    this.showNotificationError('Синтаксическая ошибка')
 			    } finally {
 				    this.loadingMeterFromRepairToStorageCount = false
 			    }
@@ -208,7 +216,7 @@
 				    saveNotLoadedInPyramidReportToExcel(editedResponse)
 			    } catch (e) {
 				    console.log(e)
-				    this.showNotification('Синтаксическая ошибка', this.colorRed)
+				    this.showNotificationError('Синтаксическая ошибка')
 			    } finally {
 				    this.loadingNotInPyramidReport = false
 			    }

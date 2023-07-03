@@ -82,7 +82,7 @@
 	        height: 500,
             count: '',
         }),
-	    inject: ['showNotification', 'showNotificationError', 'checkAuth', 'setBackgroundImage'],
+	    inject: [ 'showNotificationError' ],
 	    computed: {
 		    ...mapState(['colorGreen', 'colorRed', 'colorGrey']),
 	    },
@@ -147,15 +147,15 @@
 
 	        dataToExcelFile() {
                 if (!this.report && !this.report.titles && !this.report.titles.length) {
-                	return this.showNotification('В отчете отсутсвуют заголовки', this.colorRed)
+                	return this.showNotificationError('В отчете отсутсвуют заголовки', this.colorRed)
                 }
 
 		        if (!this.report.data) {
-			        return this.showNotification('В отчете отсутсвуют данные', this.colorRed)
+			        return this.showNotificationError('В отчете отсутсвуют данные', this.colorRed)
 		        }
 
 		        if (!this.report.dialogTitle) {
-			        return this.showNotification('Отсутсвует название отчета', this.colorRed)
+			        return this.showNotificationError('Отсутсвует название отчета', this.colorRed)
 		        }
 
 		        const workBook = XLSX.utils.book_new()

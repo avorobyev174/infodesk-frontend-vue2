@@ -97,14 +97,14 @@
             accounts: []
         }),
         inject: [
-        	'showNotification',
-            'showNotificationComponentError',
-            'showNotificationStandardError',
+        	'showNotificationSuccess',
+            'showNotificationWarning',
+            'showNotificationRequestError',
             'getMeterTypeTitle',
             'formatDate',
         ],
         computed: {
-            ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue'])
+            ...mapState([ 'colorOrange', 'colorBlue' ])
         },
         methods: {
             ...mapActions('registration', [ 'fetchBrokenMeters' ]),
@@ -118,10 +118,10 @@
                     if (this.meters.length) {
                         this.dialogModel = true
                     } else {
-                        this.showNotification('В базе не найдено списанных счетчиков', this.colorOrange)
+                        this.showNotificationWarning('В базе не найдено списанных счетчиков')
                     }
                 } catch (e) {
-                    this.showNotificationComponentError(this.componentTitle, e)
+                    this.showNotificationRequestError(e)
                 }
             },
 

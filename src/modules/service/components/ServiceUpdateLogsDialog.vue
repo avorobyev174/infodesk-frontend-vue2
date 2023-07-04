@@ -113,8 +113,7 @@
 	        }
 
             this.logsDates = this.assignmentLogs.map((log) => this.formatDate(log.created))
-            const [ firstDate ] = this.logsDates
-            this.currentLogsDate = firstDate
+            this.currentLogsDate = this.logsDates.at(0)
 	        this.changeLogsByDate()
         },
 		data: () => ({

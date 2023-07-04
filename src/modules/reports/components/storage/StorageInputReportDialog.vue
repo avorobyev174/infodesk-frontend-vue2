@@ -1,5 +1,5 @@
 <template>
-    <simple-dialog-with-input-slot
+    <simple-dialog-with-data-slot
             :title="title"
             ref="meterReportDialog"
             @okButtonClickEvent="submit"
@@ -68,17 +68,17 @@
                 >
                 </v-text-field>
             </template>
-    </simple-dialog-with-input-slot>
+    </simple-dialog-with-data-slot>
 </template>
 
 <script>
 	import { mapActions, mapGetters } from 'vuex'
-    import SimpleDialogWithInputSlot from "../../../utils-components/SimpleDialogWithInputSlot"
+    import SimpleDialogWithDataSlot from "../../../utils-components/SimpleDialogWithDataSlot"
 
 	export default {
 		name: "StorageInputReportDialog",
         components: {
-            SimpleDialogWithInputSlot
+            SimpleDialogWithDataSlot
         },
         computed: {
 	        ...mapGetters({

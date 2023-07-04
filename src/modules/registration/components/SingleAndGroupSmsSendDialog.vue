@@ -1,16 +1,16 @@
 <template>
     <div>
         <dialog-with-table-slot
-                :dialog-open="dialogModel"
-                max-width="1200px"
-                title="Групповая отправка смс"
-                :item-titles="titles"
-                :items="groupMetersForRegistration"
-                :success-action-status="successGroupSms"
-                action-button-title="Отправить"
-                :actionButtonLoading="loading"
-                @okButtonClickEvent="sendGroupSmsForRegistration"
-                @cancelButtonClickEvent="close"
+            :dialog-open="dialogModel"
+            max-width="1200px"
+            title="Групповая отправка смс"
+            :item-titles="titles"
+            :items="groupMetersForRegistration"
+            :success-action-status="successGroupSms"
+            action-button-title="Отправить"
+            :actionButtonLoading="loading"
+            @okButtonClickEvent="sendGroupSmsForRegistration"
+            @cancelButtonClickEvent="close"
         >
             <template v-slot:table-row-data>
                 <tr
@@ -50,9 +50,9 @@
 </template>
 
 <script>
-    import {mapActions, mapState} from "vuex";
-    import DialogWithTableSlot from "../../utils-components/DialogWithTableSlot";
-    import SimpleDialog from "../../utils-components/SimpleDialog";
+    import { mapActions, mapState } from "vuex"
+    import DialogWithTableSlot from "../../utils-components/DialogWithTableSlot"
+    import SimpleDialog from "../../utils-components/SimpleDialog"
 
     export default {
         name: "SingleAndGroupSmsSendDialog",
@@ -88,7 +88,7 @@
             'getMeterTypeTitle'
         ],
         computed: {
-            ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue'])
+            ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange' ])
         },
         methods: {
             ...mapActions('registration', [

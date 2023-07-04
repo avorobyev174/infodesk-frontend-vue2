@@ -17,21 +17,21 @@ export default [
 		text: 'Статус',
 		align: 'center',
 		value: 'status',
-		sortable: false,
+		sortable: true,
 		width: '80px',
 	},
 	{
 		text: 'Исполнитель',
 		value: 'owner_id',
-		sortable: false,
+		sortable: true,
 		align: 'center',
 		cellClass: 'table-small-cell',
-		width: '150px'
+		width: '200px'
 	},
 	{
 		text: 'Тип',
 		value: 'meter_type',
-		sortable: false,
+		sortable: true,
 		align: 'center',
 		cellClass: 'table-small-cell',
 		width: '160px'
@@ -57,6 +57,7 @@ export default [
 		sortable: true,
 		align: 'center',
 		cellClass: 'table-small-cell',
+		width: '160px'
 	},
 	{
 		text: 'IP адрес',
@@ -104,7 +105,7 @@ export default [
 	{
 		text: 'Адрес',
 		value: 'customer_address',
-		sortable: false,
+		sortable: true,
 		align: 'center',
 		cellClass: 'table-small-cell',
 	},

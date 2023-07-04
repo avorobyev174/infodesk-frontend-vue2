@@ -1,6 +1,6 @@
 <template>
     <v-navigation-drawer
-        v-model="eventListModel"
+        v-model="eventListDrawerModel"
         absolute
         temporary
         right
@@ -27,159 +27,104 @@
                 :key="i"
                 :color="getAssignmentEventTypeColor(event.type)"
             >
-                <div class="">
-                    <span class="mb-1 event-type">
-                        {{ getAssignmentEventTypeTitle(event.type) }}
-                    </span>
+                <span class="mb-1 event-type">{{ getAssignmentEventTypeTitle(event.type) }}</span>
+                <v-btn
+                    x-small
+                    icon
+                    :color="colorRed"
+                    v-if="event.type === AssignmentEventTypes.ACTION && currentAccountId === event.owner_id"
+                    @click="openConfirmationDeleteEventDialog(event)"
+                    class="transparent"
+                >
+                    <v-icon>mdi-close-box-outline</v-icon>
+                </v-btn>
+                <p class="mb-0 event-close-reason" v-if="event.close_reason">
+                    {{ getAssignmentCloseEventTypeTitle(event.close_reason) }}
+                </p>
+                <p class="mb-0 event-owner" v-if="event.owner_id">
+                    {{ getAccountFullName(event.owner_id) }}
+                </p>
+                <p class="mb-2 event-date">
+                    {{ formatDate(event.created, true) }}
+                </p>
+                <div class="d-flex">
+                    <p class="event-text d-inline-block">
+                        {{ event.description }}
+                    </p>
                     <v-btn
                         x-small
                         icon
-                        :color="colorRed"
+                        :color="colorGrey"
                         v-if="event.type === AssignmentEventTypes.ACTION && currentAccountId === event.owner_id"
-                        @click="openConfirmationDeleteEventDialog(event)"
+                        @click="openEditDescriptionDialog(event)"
                         class="transparent"
                     >
-                        <v-icon>
-                            mdi-close-box-outline
-                        </v-icon>
+                        <v-icon>mdi-pencil-box-outline</v-icon>
                     </v-btn>
-                    <p class="mb-0 event-close-reason" v-if="event.close_reason">
-                        {{ getAssignmentCloseEventTypeTitle(event.close_reason) }}
-                    </p>
-                    <p class="mb-0 event-owner" v-if="event.owner_id">
-                        {{ getAccountFullName(event.owner_id) }}
-                    </p>
-                    <p class="mb-2 event-date">
-                        {{ formatDate(event.created, true) }}
-                    </p>
-                    <div class="d-flex">
-                        <p class="event-text d-inline-block">
-                            {{ event.description }}
-                        </p>
-                        <v-btn
-                            x-small
-                            icon
-                            :color="colorGrey"
-                            v-if="event.type === AssignmentEventTypes.ACTION && currentAccountId === event.owner_id"
-                            @click="openDescriptionDialog(event)"
-                            class="transparent"
-                        >
-                            <v-icon>
-                                mdi-pencil-box-outline
-                            </v-icon>
-                        </v-btn>
-                    </div>
                 </div>
             </v-timeline-item>
         </v-timeline>
-        <v-speed-dial
-            v-model="fab"
-            absolute
-            right
-            direction="top"
-            open-on-hover
-            class="add-event-button"
-            transition="slide-y-reverse-transition"
-            v-show="lastEvent && currentAssignment && lastEvent.type !== AssignmentEventTypes.CLOSE && currentAccountId === currentAssignment.owner_id"
-        >
-            <template v-slot:activator>
+        <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
                 <v-btn
-                    v-model="fab"
-                    color="primary"
-                    dark
+                    class="add-event-button"
                     fab
+                    absolute
+                    @click="$refs.addOrEditAssignmentEventDialog.dialogOpen()"
+                    v-bind="attrs"
+                    v-on="on"
+                    dark
+                    :color="colorGreen"
+
                 >
-                    <v-icon v-if="fab">
-                        mdi-close
-                    </v-icon>
-                    <v-icon v-else>
-                        mdi-clipboard-text-outline
-                    </v-icon>
+                    <v-icon>mdi-plus</v-icon>
                 </v-btn>
             </template>
-            <v-tooltip left>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                        fab
-                        small
-                        @click="openDescriptionDialog()"
-                        v-bind="attrs"
-                        v-on="on"
-                    >
-                        <v-icon color="primary">mdi-plus</v-icon>
-                    </v-btn>
-                </template>
-                <span>Добавление события</span>
-            </v-tooltip>
-            <v-tooltip left>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                        fab
-                        small
-                        @click="openConfirmationCloseAssignmentDialog"
-                        v-bind="attrs"
-                        v-on="on"
-                    >
-                        <v-icon color="primary">mdi-clipboard-check-outline</v-icon>
-                    </v-btn>
-                </template>
-                <span>Закрыть поручение</span>
-            </v-tooltip>
-        </v-speed-dial>
-        <v-dialog
-            v-model="descriptionDialogModel"
-            max-width="500px"
+            <span>Добавить событие</span>
+        </v-tooltip>
+        <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="close-event-button"
+                    fab
+                    absolute
+                    @click="$refs.closeAssignmentDialog.dialogOpen()"
+                    v-bind="attrs"
+                    v-on="on"
+                    dark
+                    :color="colorBlue"
+                >
+                    <v-icon>mdi-clipboard-check-outline</v-icon>
+                </v-btn>
+            </template>
+            <span>Закрыть поручение</span>
+        </v-tooltip>
+        <dialog-with-data-slot-only-close
+            :title="addOrEditDialogTitle"
+            ref="addOrEditAssignmentEventDialog"
+            @close="addOrEditAssignmentEventDialogClick"
+            :close-button-title="addOrEditDialogButtonTitle"
         >
-            <v-card>
-                <v-card-title>
-                    <span class="mx-auto text-h5 text-center text-break">{{ addOrEditDialogTitle }}</span>
-                </v-card-title>
-                <v-card-text class="pt-2 pb-1">
-                    <v-text-field v-model="description" label="Описание"></v-text-field>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        text
-                        color="primary"
-                        @click="addOrEditDialogOnClick"
-                    >
-                        {{ addOrEditDialogButtonTitle }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-        <v-dialog
-            v-model="closeConfirmationDialogModel"
-            max-width="500px"
+            <template v-slot:fields>
+                <v-text-field v-model="description" label="Описание"></v-text-field>
+            </template>
+        </dialog-with-data-slot-only-close>
+        <dialog-with-data-slot-only-close
+            title="Закрыть поручение"
+            ref="closeAssignmentDialog"
+            @close="assignmentClose"
         >
-            <v-card>
-                <v-card-title>
-                    <span class="mx-auto text-h5 text-center text-break">Закрытие поручения</span>
-                </v-card-title>
-                <v-card-text class="pt-2 pb-1">
-                    <v-select
-                        v-model="closeReason"
-                        :items="assignmentCloseReasonTypes"
-                        item-text="title"
-                        item-value="id"
-                        label="Причина закрытия"
-                    >
-                    </v-select>
-                    <v-text-field v-model="description" label="Описание"></v-text-field>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        text
-                        color="primary"
-                        @click="closeCurrentAssignment"
-                    >
-                        Закрыть
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+            <template v-slot:fields>
+                <v-select
+                    v-model="closeReason"
+                    :items="assignmentCloseReasonTypes"
+                    item-text="title"
+                    item-value="id"
+                    label="Причина закрытия"
+                />
+                <v-text-field v-model="description" label="Описание"></v-text-field>
+            </template>
+        </dialog-with-data-slot-only-close>
         <simple-dialog
             :dialog-open="deleteConfirmationDialogModel"
             max-width="700px"
@@ -194,31 +139,29 @@
 	import { mapActions, mapState, mapGetters } from 'vuex'
     import { AssignmentEventTypes } from "../../../const"
     import SimpleDialog from "../../utils-components/SimpleDialog"
+    import DialogWithDataSlotOnlyClose from "../../utils-components/DialogWithDataSlotOnlyClose"
 
 	export default {
 		name: 'EventList',
         components: {
+	        DialogWithDataSlotOnlyClose,
 	        SimpleDialog
         },
 		data: () => ({
-			fab: false,
-			eventListModel: false,
-			descriptionDialogModel: false,
+			eventListDrawerModel: false,
 			description: '',
-            currentAssignment: null,
-            currentActionEvent: null,
+            selectedAssignment: null,
+            selectedActionEvent: null,
 			events: [],
 			lastEvent: null,
             owner: '',
-            ACTION_EVENT_TYPE: 4,
             photoUrl: '',
 			closeReason: 1,
 			currentAccountId: 1,
             deleteConfirmationDialogModel: false,
-            closeConfirmationDialogModel: false,
-            addOrEditDialogTitle: 'Добавление события',
+            addOrEditDialogTitle: 'Добавить событие',
             addOrEditDialogButtonTitle: 'Добавить',
-			AssignmentEventTypes: {},
+			AssignmentEventTypes,
 		}),
         props: {
 		    assignments: {
@@ -237,18 +180,15 @@
             'getAssignmentEventTypeColor',
         ],
         computed: {
-	        ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
+	        ...mapState([ 'colorGrey', 'colorRed', 'colorGreen', 'colorBlue' ]),
 	        ...mapGetters({
 		        accounts: 'getAccounts',
 		        assignmentCloseReasonTypes: 'getAssignmentCloseReasonTypes',
 	        })
         },
-        mounted() {
-			this.AssignmentEventTypes = AssignmentEventTypes
-        },
 		watch: {
-	        currentActionEvent(newVal) {
-		        this.addOrEditDialogTitle = newVal ? 'Редактирование события' : 'Добавление события'
+			selectedActionEvent(newVal) {
+		        this.addOrEditDialogTitle = newVal ? 'Редактирование события' : 'Добавить событие'
 		        this.addOrEditDialogButtonTitle = newVal ? 'Сохранить' : 'Добавить'
 	        }
         },
@@ -260,14 +200,13 @@
 				'removeActionEvent',
 				'closeAssignment',
 			]),
-			...mapActions('profile', [ 'getProfileData' ]),
 
-			async open(assingment, currentAccountId) {
+			async open(assignment, currentAccountId) {
 				this.owner = 'отсутствует'
 				this.photoUrl = ''
-				this.currentAssignment = assingment
+				this.selectedAssignment = assignment
 				this.currentAccountId = currentAccountId
-				const { id, owner_id } = assingment
+				const { id, owner_id } = assignment
 				const account = this.accounts.find(({ id }) => owner_id === id)
 				this.owner = this.getAccountFullName(owner_id)
 
@@ -280,7 +219,7 @@
 	                    this.owner = 'отсутствует'
 	                    this.photoUrl = ''
                     }
-					this.eventListModel = true
+					this.eventListDrawerModel = true
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				}
@@ -288,44 +227,40 @@
 
 			openConfirmationDeleteEventDialog(actionEvent) {
 				this.deleteConfirmationDialogModel = true
-                this.currentActionEvent = actionEvent
+                this.selectedActionEvent = actionEvent
 			},
 
-			openConfirmationCloseAssignmentDialog() {
-				this.closeConfirmationDialogModel = true
-			},
-
-			async openDescriptionDialog(actionEvent) {
-				this.descriptionDialogModel = true
-				this.currentActionEvent = actionEvent
+			async openEditDescriptionDialog(actionEvent) {
+				this.$refs.addOrEditAssignmentEventDialog.dialogOpen()
+				this.selectedActionEvent = actionEvent
 				if (actionEvent) {
 					this.description = actionEvent.description
 				}
 			},
 
-			closeDescriptionDialog() {
-				this.descriptionDialogModel = false
+			closeEditDescriptionDialog() {
+				this.$refs.addOrEditAssignmentEventDialog.dialogClose()
 				this.deleteConfirmationDialogModel = false
-				this.currentActionEvent = null
+				this.selectedActionEvent = null
 				this.description = ''
 			},
 
 			async deleteActionEvent() {
 				try {
-				    const deletedActionEvent = await this.removeActionEvent(this.currentActionEvent?.id)
+				    const deletedActionEvent = await this.removeActionEvent(this.selectedActionEvent?.id)
 					const event = this.events.find((event) => event.id === deletedActionEvent.id)
 					this.events.splice(this.events.indexOf(event), 1)
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				} finally {
-					this.closeDescriptionDialog()
+					this.closeEditDescriptionDialog()
 				}
             },
 
-			async closeCurrentAssignment() {
+			async assignmentClose() {
 				try {
 					const { assignment, assignmentEvent } = await this.closeAssignment({
-						assignmentId: this.currentAssignment?.id,
+						assignmentId: this.selectedAssignment?.id,
 						closeReason: this.closeReason,
 						description: this.description
 					})
@@ -335,24 +270,24 @@
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				} finally {
-					this.closeConfirmationDialogModel = false
 					this.description = ''
 					this.closeReason = 1
+                    this.eventListDrawerModel = false
 				}
 			},
 
-			async addOrEditDialogOnClick() {
+			async addOrEditAssignmentEventDialogClick() {
 				try {
-                    if (this.currentActionEvent) {
+                    if (this.selectedActionEvent) {
                         const changedActionEvent = await this.changeAssignmentActionEvent({
-                            actionEventId: this.currentActionEvent.id,
+                            actionEventId: this.selectedActionEvent.id,
                             description: this.description
                         })
                         const oldAssignmentEvent = this.events.find((event) => event.id === changedActionEvent.id)
                         Object.assign(oldAssignmentEvent, changedActionEvent)
                     } else {
                         const addedActionEvent = await this.addAssignmentActionEvent({
-                            assignmentId: this.currentAssignment.id,
+                            assignmentId: this.selectedAssignment.id,
                             description: this.description
                         })
                         this.events.unshift(addedActionEvent)
@@ -360,7 +295,7 @@
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				} finally {
-					this.closeDescriptionDialog()
+					this.closeEditDescriptionDialog()
 				}
             },
 		}
@@ -368,18 +303,15 @@
 </script>
 
 <style scoped>
-    .v-speed-dial {
-        position: absolute;
-    }
-
-    .v-btn--floating {
-        position: relative;
-    }
-
-
     .add-event-button {
+        position: absolute !important;
         bottom: 20px !important;
-        right: 40px !important;
+        right: 90px !important;
+    }
+
+    .close-event-button {
+        bottom: 20px !important;
+        right: 20px !important;
     }
 
     .event-date, .event-owner, .event-close-reason {

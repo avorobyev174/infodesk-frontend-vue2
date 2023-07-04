@@ -1,7 +1,5 @@
 <template>
-    <v-card
-        tile
-    >
+    <v-card tile>
         <v-navigation-drawer
             v-model="drawer"
             :mini-variant="getSideBarState"

@@ -67,14 +67,13 @@
         ],
         mixins: [ DialogMixin ],
 	    computed: {
-		    ...mapState([ 'colorGreen' ]),
 		    ...mapGetters({
 			    meterTypes: 'getMeterTypes',
 		    })
 	    },
-        updated() {
+        mounted() {
             if (this.meterTypes.length) {
-	            this.type = this.meterTypes[0]
+	            this.type = this.meterTypes.at(0)
             }
         },
 	    methods: {

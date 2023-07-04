@@ -167,7 +167,7 @@ export default new Vuex.Store({
         },
     },
 
-    actions: {
+   actions: {
         async loginUser({ state, commit }, { authToken, roleToken, cookies }) {
             $cookies.set('auth_token', authToken, '4h')
             $cookies.set('role_token', roleToken, '4h')

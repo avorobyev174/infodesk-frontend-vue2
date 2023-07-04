@@ -9,7 +9,7 @@
 <script>
 
 import NavigationBar from "./components/NavigationBar"
-import NotificationSnackBar from "./components/utils-components/NotificationSnackBar"
+import NotificationSnackBar from "./modules/utils-components/NotificationSnackBar"
 import SideBar from "./components/SideBar"
 import MainContent from "./components/MainContent"
 import { mapActions, mapGetters } from "vuex"

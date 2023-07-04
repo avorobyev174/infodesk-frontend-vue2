@@ -13,7 +13,7 @@
                 <v-icon :color="filterSelectColor" small>mdi-filter-plus</v-icon>
             </v-btn>
         </template>
-        <div class="header-filter-wrapper p-1 pr-2">
+        <div class="header-filter-wrapper">
             <slot name="filterItem"></slot>
         </div>
     </v-menu>
@@ -22,15 +22,11 @@
 <script>
 	export default {
 		name: "DataTableHeaderFilter",
-        // data: () => ({
-        //
-	    //     filterSelectColor: ''
-        // }),
         props: {
 	        filterSelectColor: {
 	        	type: String,
                 required: true
-            }
+            },
         }
 	}
 </script>

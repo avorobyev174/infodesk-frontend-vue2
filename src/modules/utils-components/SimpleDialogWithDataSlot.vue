@@ -45,7 +45,7 @@
 
 <script>
 	export default {
-		name: "SimpleDialogWithInputSlot",
+		name: "SimpleDialogWithDataSlot",
 		components: {},
         data: () => ({
 	        formValid: true,

@@ -9,7 +9,7 @@
                 v-on="on"
                 :disabled="disabledBtn"
                 :dark="isDark"
-                height="40px"
+                :height="height"
             >
                 <v-icon size="30px">{{ icon }}</v-icon>
             </v-btn>
@@ -25,6 +25,10 @@
             title: {
                 type: String,
                 required: true
+            },
+            height: {
+            	type: Number,
+                default: 40
             },
             icon: {
                 type: String,

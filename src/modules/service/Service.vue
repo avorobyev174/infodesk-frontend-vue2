@@ -5,7 +5,7 @@
             sort-by="id"
             class="elevation-1 meter-table"
             height="80vh"
-            @contextmenu:row="openActionMenu"
+            @contextmenu:row="actionMenuOpen"
             single-select
             item-key="id"
             :search="search"
@@ -40,8 +40,9 @@
                         class="search-input"
                     />
                     <v-spacer/>
-                    <main-menu
-                        @refreshAssignments="refreshAssignments"
+                    <service-menu
+                        :menuActions="menuActions"
+                        @refreshAssignments="getAssignments"
                         @openAssignmentsLogsDialog="$refs.serviceUpdateLogsDialog.dialogOpen()"
                         @showHideColumns="$refs.showHideColumnsDialog.open()"
                         @opendAssignmentAddDialog="$refs.addAssignmentDialog.dialogOpen()"
@@ -50,21 +51,10 @@
             </template>
             <template v-slot:header.owner_id="{ header }">
                 {{ header.text }}
-                <v-menu
-                    nudge-bottom="10px"
-                    nudge-left="150px"
-                    offset-y
-                    :close-on-content-click="false"
-                    origin="center center"
-                    transition="scale-transition"
-                    ref="filterByOwnerMenu"
+                <header-filter
+                    :filter-select-color="filterByOwnerColor"
                 >
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-btn v-bind="attrs" v-on="on" icon>
-                            <v-icon :color="filterByOwnerColor" small>mdi-filter-plus</v-icon>
-                        </v-btn>
-                    </template>
-                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
+                    <template v-slot:filterItem>
                         <v-combobox
                             :items="serviceEmployees"
                             item-text="name"
@@ -74,61 +64,42 @@
                             v-model="filterByOwner"
                             clearable
                             multiple
-                            @change="doFilter"
+                            @change="acceptFilters"
                         >
                         </v-combobox>
-                    </div>
-                </v-menu>
+                    </template>
+                </header-filter>
             </template>
             <template v-slot:header.status="{ header }">
                 {{ header.text }}
-                <v-menu
-                    nudge-bottom="10px"
-                    nudge-left="150px"
-                    offset-y
-                    :close-on-content-click="false"
-                    origin="center center"
-                    transition="scale-transition"
-                    ref="filterByStatusMenu"
-                >
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-btn v-bind="attrs" v-on="on" icon>
-                            <v-icon :color="filterByStatusColor" small>mdi-filter-plus</v-icon>
-                        </v-btn>
-                    </template>
-                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
-                        <v-combobox
-                            :items="assignmentStatuses"
-                            item-text="title"
-                            item-value="value"
-                            label="Статус"
-                            class="p-3 pt-5 pb-0"
-                            v-model="filterByStatus"
-                            clearable
-                            multiple
-                            @change="doFilter"
-                        >
-                        </v-combobox>
-                    </div>
-                </v-menu>
+                <combobox-filter
+                    :filterSelectColor="filterByStatusColor"
+                    filterLabel="Статус"
+                    v-model="filterByStatus"
+                    :filter-value="filterByStatus"
+                    :filterItems="assignmentStatuses"
+                    :filter-color="filterByStatusColor"
+                    @input="acceptFilters"
+                />
+            </template>
+            <template v-slot:header.meter_address="{ header }">
+                {{ header.text }}
+                <combobox-filter
+                    :filterSelectColor="filterByAddressColor"
+                    filterLabel="Принадлежность"
+                    v-model="filterByAddress"
+                    :filter-value="filterByAddress"
+                    :filterItems="serviceAddresses"
+                    :filter-color="filterByAddressColor"
+                    @input="acceptFilters"
+                />
             </template>
             <template v-slot:header.customer_address="{ header }">
                 {{ header.text }}
-                <v-menu
-                    nudge-bottom="10px"
-                    nudge-left="150px"
-                    offset-y
-                    :close-on-content-click="false"
-                    origin="center center"
-                    transition="scale-transition"
-                    ref="filterByStatusMenu"
+                <header-filter
+                    :filter-select-color="filterByBuildingColor"
                 >
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-btn v-bind="attrs" v-on="on" icon>
-                            <v-icon :color="filterByBuildingColor" small>mdi-filter-plus</v-icon>
-                        </v-btn>
-                    </template>
-                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
+                    <template v-slot:filterItem>
                         <v-combobox
                             :items="serviceBuildings"
                             item-text="title"
@@ -138,11 +109,11 @@
                             v-model="filterByBuilding"
                             clearable
                             multiple
-                            @change="doFilter"
+                            @change="acceptFilters"
                         >
                         </v-combobox>
-                    </div>
-                </v-menu>
+                    </template>
+                </header-filter>
             </template>
             <template v-slot:item.status="{ item }" >
                 <v-chip :color="getAssignmentStatusColor(item.status)">
@@ -175,7 +146,7 @@
         />
         <edit-contacts-dialog
             ref="editContactsDialog"
-            :assignment="currentAssignment"
+            :assignment="selectedAssignment"
             @updateAssignment="updateAssignment"
         />
         <service-update-logs-dialog
@@ -194,89 +165,116 @@
         />
         <action-menu
             ref="actionMenu"
-            @openEventList="$refs.eventList.open(currentAssignment, currentAccountId)"
-            @acceptAssignment="assignmentAccept"
+            :actions="assignmentActions"
+            @openEventList="$refs.eventList.open(selectedAssignment, currentAccountId)"
+            @acceptAssignment="assignmentAccept(selectedAssignment)"
             @editAssignmentContacts="$refs.editContactsDialog.dialogOpen()"
         />
     </v-card>
 </template>
 
 <script>
-    import ActionMenu from "./components/ActionMenu"
+    import ActionMenu from "../utils-components/menu/ActionMenu"
     import EventList from "./components/EventList"
-    import MainMenu from "./components/MainMenu"
+    import Menu from "../utils-components/menu/Menu"
     import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
     import ServiceUpdateLogsDialog from "./components/ServiceUpdateLogsDialog"
     import AddAssignmentDialog from "./components/AddAssignmentDialog"
-    import ServiceMixin from "@/modules/service/ServiceMixin"
+    import ServiceMixin from "./mixins/ServiceMixin"
     import EditContactsDialog from "./components/EditContactsDialog"
     import DictionaryMixin from "../mixins/DictionaryMixin"
+    import ColumnVisibilityMixin from "../mixins/ColumnVisibilityMixin"
+    import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
+    import DataTableHeaderFilter from "../utils-components/filter/DataTableHeaderFilter"
+    import ServiceFilterMixin from "./mixins/ServiceFilterMixin"
+    import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
+    import defaultAssignmentActions from "./js/assignment-actions"
 
 	export default {
 		name: "Service",
         components: {
 	        EventList,
 			ActionMenu,
-            MainMenu,
+	        ServiceMenu: Menu,
 	        ShowHideColumnsDialog,
 	        ServiceUpdateLogsDialog,
 	        AddAssignmentDialog,
-	        EditContactsDialog
+	        EditContactsDialog,
+	        HeaderFilter: DataTableHeaderFilter,
+	        ComboboxFilter: ComboboxDataTableFilter
         },
         data: () => ({
+            moduleName: 'service',
 	        search: '',
-            defaultAssignments: [],
-            currentAssignment: null,
-	        filterByOwnerColor: '',
-	        filterByStatusColor: '',
-	        filterByBuildingColor: '',
-	        filterByOwner: [],
-	        filterByStatus: [],
-	        filterByBuilding: [],
-	        filters: {},
-	        serviceEmployees: [],
-	        serviceStatuses: [],
-	        serviceBuildings: [],
+	        selectedAssignment: null,
+	        assignmentActions: [],
+	        defaultAssignmentActions,
         }),
-		mixins: [ DictionaryMixin, ServiceMixin ],
-        watch: {
-	        filterByOwner(val) {
-		        this.filterByOwnerColor = !val?.length ? this.colorGrey : this.colorBlue
-	        },
-	        filterByStatus(val) {
-		        this.filterByStatusColor = !val?.length ? this.colorGrey : this.colorBlue
-	        },
-	        filterByBuilding(val) {
-		        this.filterByBuildingColor = !val?.length ? this.colorGrey : this.colorBlue
-	        },
-	        assignments(val) {
-	        	this.defaultAssignments = val
-		        this.doFilter()
-		        this.createFiltersValues()
-            }
-        },
+		mixins: [ DictionaryMixin, ColumnVisibilityMixin, FavoriteModuleMixin, ServiceMixin, ServiceFilterMixin ],
 		async mounted() {
 	        if (!this.isLogin) {
 		        return
 	        }
-	        await this.refreshAssignments()
 
-	        this.createFiltersValues()
-            this.filterByStatus = this.assignmentStatuses?.filter((status) => [ 1, 2, 4 ].includes(status.value))
+	        await this.getAssignments()
+			this.filterByStatus = this.assignmentStatuses?.filter((status) => [ 1, 2, 4 ].includes(status.value))
 
 	        document.onkeydown = (evt) => {
 		        if (this.$route.name === 'Service' && evt.key === 'Alt') {
-			        this.refreshAssignments()
+			        this.getAssignments()
 		        }
 	        }
         },
 		methods: {
-	        openActionMenu(e, { item }) {
+	        actionMenuOpen(e, { item }) {
 		        e.preventDefault()
-		        this.currentAssignment = item
+                this.selectedAssignment = item
+		        this.assignmentActions = defaultAssignmentActions.map((action) => {
+			        // зарегистрировано - нельзя просматривать список событий и редактировать
+			        if (item.status === 1 && !item.owner_id && [ 1, 3 ].includes(action.id)) {
+				        return { ...action, disabled: true }
+				        // в работе - нельзя редактировать, если не исполнитель
+			        } else if (item.status === 2 &&
+				        item.owner_id &&
+				        [ 3 ].includes(action.id) &&
+				        item.owner_id !== this.currentAccountId)	{
+				        return { ...action, disabled: true }
+				        // в работе - нельзя принять, если уже принято тем жеисполнителем
+			        } else if (item.status === 2 &&
+				        item.owner_id &&
+				        [ 2 ].includes(action.id) &&
+				        item.owner_id === this.currentAccountId)	{
+				        return { ...action, disabled: true }
+				        // закрыто - нельзя редактировать и принять
+			        } else if (item.status === 3 && [ 2, 3 ].includes(action.id)) {
+				        return { ...action, disabled: true }
+			        }
+			        return { ...action }
+		        })
+
 		        const { actionMenu } = this.$refs
-		        actionMenu.open(item, this.currentAccountId, e.clientX, e.clientY)
+		        actionMenu.open(e.clientX, e.clientY)
 	        },
+
+			async getAssignments() {
+				try {
+					this.resetFilters()
+					await this.fetchAssignments()
+				} catch (e) {
+					this.showNotificationRequestError(e)
+				}
+			},
+
+			updateAssignment(updatedAssignment) {
+				this.resetFilters()
+				const oldAssignment = this.defaultAssignments.find((assignment) => assignment.id === updatedAssignment.id)
+				Object.assign(oldAssignment, updatedAssignment)
+			},
+
+			createAssignment(createdAssignment) {
+				this.resetFilters()
+				this.defaultAssignments.push(createdAssignment)
+			},
 
 	        async assignmentAccept({ id }) {
                 try {
@@ -288,110 +286,6 @@
 	                this.showNotificationRequestError(e)
                 }
             },
-
-	        async refreshAssignments() {
-		        try {
-			        this.resetFilters()
-			        await this.fetchAssignments()
-		        } catch (e) {
-			        this.showNotificationRequestError(e)
-		        }
-            },
-
-	        updateAssignment(updatedAssignment) {
-		        this.resetFilters()
-                const oldAssignment = this.defaultAssignments.find((assignment) => assignment.id === updatedAssignment.id)
-                Object.assign(oldAssignment, updatedAssignment)
-	        },
-
-	        createAssignment(createdAssignment) {
-	        	this.resetFilters()
-		        this.defaultAssignments.push(createdAssignment)
-            },
-
-	        //Обработка фильтров
-	        async doFilter() {
-		        this.checkAllFilters()
-
-		        if (!Object.keys(this.filters).length) {
-			        this.defaultAssignments = this.assignments
-		        } else {
-                    this.defaultAssignments =
-                        this.assignments
-                            .filter((assignment) => {
-                                if (this.filters.owners) {
-                                    return this.filters.owners.includes(assignment.owner_id)
-                                }
-                                return true
-                            })
-	                        .filter((assignment) => {
-		                        if (this.filters.statuses) {
-			                        return this.filters.statuses.includes(assignment.status)
-		                        }
-		                        return true
-	                        })
-	                        .filter((assignment) => {
-		                        if (this.filters.buildings) {
-		                        	return this.filters.buildings
-                                        .some((building) => assignment.customer_address?.includes(building))
-		                        }
-		                        return true
-	                        })
-		        }
-	        },
-
-	        resetFilters() {
-		        this.filterByOwner = []
-		        this.filterByStatus = []
-                this.filterByBuilding = []
-	        },
-
-	        checkAllFilters() {
-		        this.filterByOwner.length
-			        ? this.filters['owners'] = this.filterByOwner.map(({ accId }) => accId)
-			        : delete this.filters['owners']
-
-		        this.filterByStatus.length
-			        ? this.filters['statuses'] = this.filterByStatus.map((status) => status.value)
-			        : delete this.filters['statuses']
-
-		        this.filterByBuilding.length
-			        ? this.filters['buildings'] = this.filterByBuilding
-			        : delete this.filters['buildings']
-	        },
-
-            createFiltersValues() {
-	        	this.createServiceEmployeeArray()
-	        	this.createBuildingArray()
-            },
-
-            createServiceEmployeeArray() {
-	            const employeesAccIdSet = new Set(
-	            	this.assignments
-                        .filter(({ owner_id }) => owner_id)
-                        .map(({ owner_id }) => owner_id)
-                )
-	            this.serviceEmployees = Array.from(employeesAccIdSet).map((accId) => ({
-		            name: this.getAccountFullName(accId),
-		            accId
-	            }))
-            },
-
-            createBuildingArray() {
-	            const buildingsSet = new Set(
-		            this.assignments
-			            .filter(({ customer_address }) => customer_address)
-			            .map(({ customer_address }) => {
-			            	const addressArray = customer_address.split(',')
-				            const index = addressArray.indexOf(addressArray.find((str) => str.includes('кв')))
-                            if (index !== -1) {
-	                            addressArray.splice(index, 1)
-                            }
-				            return addressArray.join(',')
-			            })
-	            )
-	            this.serviceBuildings = Array.from(buildingsSet)
-            }
         }
 	}
 </script>

@@ -8,6 +8,9 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
     let pyramidBusinessArray = []
     let i = 1
     meters.forEach((meter) => {
+        if (meter.serial_number === '44390062') {//Опрашивается в альфа центре
+            return
+        }
         let apartment = ''
         let address = meter.customer_address
         let apartmentIndex = address.indexOf('кв.')

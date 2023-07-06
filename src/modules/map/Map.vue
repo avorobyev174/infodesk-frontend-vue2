@@ -3,35 +3,35 @@
         <v-navigation-drawer
             v-model="mapDrawerModel"
             absolute
-            temporary
+            hide-overlay
             right
-            width="400"
-            class="programm-list"
+            width="350"
+            class="drawer"
+            temporary
         >
             <v-select
-                v-model="currentMapItem"
-                :items="mapItems"
+                v-model="viewType"
+                :items="viewTypes"
                 item-text="title"
                 item-value="value"
-                @change="mapItemChanged"
-                label="Выберите программу отображения"
+                @change="viewTypeChange"
+                label="Тип отображения"
             />
-            <v-combobox
-                :items="mkdProgrammTypes"
-                item-text="title"
-                item-value="value"
-                label="Выберите объем ОДПУ в мес(кВт*ч)"
-                v-model="currentMkdProgrammTypes"
-                clearable
-                multiple
-                @change="mkdProgrammTypeChanged"
-            >
-            </v-combobox>
+            <research-map-filter
+                v-if="viewType === MapViewTypes.RESEARCH"
+                :viewType="viewType"
+                ref="ResearchMapFilter"
+            />
+            <assignment-map-filter
+                v-if="viewType === MapViewTypes.ASSIGNMENT"
+                :viewType="viewType"
+                ref="AssignmentMapFilter"
+            />
             <v-btn
                 color="primary"
                 width="100%"
-                @click="show"
-                :disabled="!currentMapItem"
+                @click="showMarkers"
+                :disabled="!viewType"
             >
                Показать
             </v-btn>
@@ -40,25 +40,18 @@
             <v-btn
                 color="primary"
                 dark
-                absolute
-                right
-                fab
-                class="arrow"
-                icon
+                height="40px"
+                class="menu"
                 @click="mapDrawerModel = !mapDrawerModel"
             >
-                <v-icon x-large>mdi-chevron-left-box</v-icon>
+                <v-icon size="30px">mdi-menu</v-icon>
             </v-btn>
         </v-fab-transition>
-        <div class="legend">
-            <v-chip
-                v-for="({ title, color }, index) in currentMkdProgrammTypes"
-                :key="index"
-                :color="color"
-            >
-                {{ title }}
-            </v-chip>
-        </div>
+        <filter-legend
+            class="filter-legend"
+            :legend="legend"
+            v-if="viewType === MapViewTypes.RESEARCH"
+        />
         <gmap-map
             :center="center"
             :zoom="12"
@@ -67,48 +60,56 @@
             :options="mapOptions"
         >
             <gmap-custom-marker
-                v-for="({ color, position, address, volume }, index) in markers"
+                v-for="(marker, index) in markers"
                 :key="index"
-                :marker="position"
+                :marker="marker.position"
                 ref="marker"
             >
-                <v-tooltip top :color="colorGrey">
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-icon
-                            v-bind="attrs"
-                            v-on="on"
-                            :color="color"
-                        >
-                            mdi-home-circle
-                        </v-icon>
-                    </template>
-                    <div style="text-align: center">
-                        <span style="display: block">{{ address }}</span>
-                        <span style="display: block">{{ `Объем: ${ volume } кВТ*ч` }}</span>
-                    </div>
-                </v-tooltip>
+                <research-marker
+                    v-if="viewType === MapViewTypes.RESEARCH"
+                    :marker="marker"
+                />
+                <assignment-marker
+                    v-if="viewType === MapViewTypes.ASSIGNMENT"
+                    :marker="marker"
+                />
             </gmap-custom-marker>
+
         </gmap-map>
     </div>
 </template>
 
 <script>
-import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+import { mapState } from "vuex"
 import { gmapApi } from 'vue2-google-maps'
 import GmapCluster from 'vue2-google-maps/dist/components/cluster'
 import GmapCustomMarker from 'vue2-gmap-custom-marker'
+import AssignmentMapFilter from "./components/Assignments/AssignmentMapFilter"
+import DictionaryMixin from "../mixins/DictionaryMixin"
+import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
+import ResearchMapFilter from "./components/Research/ResearchMapFilter"
+import FilterLegend from "./components/FilterLegend"
+import ResearchMarker from "./components/Research/ResearchMarker"
+import AssignmentMarker from "./components/Assignments/AssignmentMarker"
+import { MapViewTypes } from "../../const"
 
 export default {
     name: "Map",
     components: {
 	    GmapCluster,
-	    GmapCustomMarker
+	    GmapCustomMarker,
+	    AssignmentMapFilter,
+	    ResearchMapFilter,
+	    FilterLegend,
+	    ResearchMarker,
+	    AssignmentMarker,
     },
     data: () => ({
+	    MapViewTypes,
 	    mapDrawerModel: false,
 	    center: { lat: 53.41295, lng: 58.99823 },
         markers: [],
-        filteredMarkers: [],
+        legend: [],
         mapOptions: {
             disableDefaultUi: true,
             scaleControl: true,
@@ -118,81 +119,54 @@ export default {
             scrollwheel: true,
             clickableIcons: true
         },
-        currentMapItem: null,
-        mapItems: [
-            { title: 'МКД план обследования по нормативу', value: 1 },
+        viewType: MapViewTypes.RESEARCH,
+        viewTypes: [
+            { title: 'Обследования', value: 1 },
+            { title: 'Поручения', value: 2 },
         ],
-	    currentMkdProgrammTypes: [],
-        mkdProgrammTypes: [
-	        { title: '0 - 300', value: 1, color: 'green lighten-1' },
-	        { title: '301 - 1000', value: 2, color: '#ecc700' },
-	        { title: '1001 - 5000', value: 3, color: 'orange lighten-1' },
-	        { title: '> 5000', value: 4, color: 'red lighten-1' },
-        ],
-	    mkdProgrammMarkers: []
     }),
-	created() {
-		this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/map' ? this.colorGold : '')
-	},
-	mounted() {
-		if (this.getIsLogin) {
-			return
+	inject: [ 'showNotificationError' ],
+	mixins: [ DictionaryMixin, FavoriteModuleMixin ],
+	provide: function () {
+		return {
+			formatDate: this.formatDate,
+			getAssignmentEventTypeTitle: this.getAssignmentEventTypeTitle,
+			getAccountFullName: this.getAccountFullName,
+			getAssignmentCloseEventTypeTitle: this.getAssignmentCloseEventTypeTitle,
+			getMeterTypeTitle: this.getMeterTypeTitle,
+			getAssignmentStatusTitle: this.getAssignmentStatusTitle,
 		}
 	},
-    inject: [ 'showNotificationError' ],
-    computed: {
-	    ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue', 'colorGold' ]),
-	    ...mapGetters({
-		    addresses: 'map/getAddresses',
-		    activeModules: 'getActiveModules',
-		    isLogin: 'getIsLogin',
-	    }),
-	    google: gmapApi
-    },
+	computed: {
+		...mapState([ 'colorGrey', ]),
+		google: gmapApi
+	},
+	mounted() {
+
+	},
     methods: {
-        ...mapMutations([ 'setFavoriteModuleColor' ]),
-	    ...mapActions('map', [
-		    'fetchAddresses',
-	    ]),
-
-	    mapItemChanged() {
-            switch (this.currentMapItem) {
-	            case 1: this.initMkdProgramm(); break
-            }
+	    viewTypeChange() {
+	    	this.markers = []
         },
 
-	    mkdProgrammTypeChanged() {
-            this.filteredMarkers = this.currentMkdProgrammTypes.map(({ value }) => {
-	            switch (value) {
-		            case 1: return this.mkdProgrammMarkers
-                            .filter(({ volume }) => volume <= 300)
-                            .map((marker) => ({ ...marker, color: this.colorGreen }))
-		            case 2: return this.mkdProgrammMarkers
-                            .filter(({ volume }) => volume > 300 && volume <= 1000)
-	                        .map((marker) => ({ ...marker, color: this.colorGold }))
-		            case 3: return this.mkdProgrammMarkers
-                            .filter(({ volume }) => volume > 1000 && volume <= 5000)
-	                        .map((marker) => ({ ...marker, color: this.colorOrange }))
-		            case 4: return this.mkdProgrammMarkers
-                            .filter(({ volume }) => volume > 5000)
-	                        .map((marker) => ({ ...marker, color: this.colorRed }))
-	            }
-            }).flat()
-	    },
-
-	    async initMkdProgramm() {
-		    await this.fetchAddresses()
-		    this.mkdProgrammMarkers = this.addresses.map(({ lat, lng, address, volume }) => ({
-			    address: address.slice(14),
-                volume: parseInt(volume),
-			    position: { lat, lng }
-		    }))
-        },
-
-        show() {
-        	this.markers = this.filteredMarkers
+        showMarkers() {
+        	switch (this.viewType) {
+		        case 1: this.markers = this.showResearchMarkers(); break
+		        case 2: this.markers = this.showAssignmentsMarkers(); break
+	        }
             this.mapDrawerModel = false
-        }
+        },
+
+        showAssignmentsMarkers() {
+            const { AssignmentMapFilter } = this.$refs
+	        return AssignmentMapFilter.getFilteredMarkers()
+        },
+
+	    showResearchMarkers() {
+		    const { ResearchMapFilter } = this.$refs
+            this.legend = ResearchMapFilter.getLegend()
+		    return ResearchMapFilter.getFilteredMarkers()
+	    },
     },
 }
 </script>
@@ -202,16 +176,18 @@ export default {
         height: calc(100vh - 50px);
     }
 
-    .arrow {
-        top: 40vh;
-        right: 25px;
+    .menu {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        z-index: 1;
     }
 
-    .programm-list {
+    .drawer {
         padding: 20px;
     }
 
-    .legend {
+    .filter-legend {
         position: absolute;
         top: 10px;
         left: 45vw;

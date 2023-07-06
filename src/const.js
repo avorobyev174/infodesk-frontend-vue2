@@ -8,9 +8,15 @@ const AssignmentEventTypes = {
 	CLOSE_AUTO: 5,
 }
 
+const MapViewTypes = {
+	RESEARCH: 1,
+	ASSIGNMENT: 2,
+}
+
 const NOT_AUTHORIZATED_ERROR = 401
 
 export {
 	AssignmentEventTypes,
-	NOT_AUTHORIZATED_ERROR
+	NOT_AUTHORIZATED_ERROR,
+	MapViewTypes
 }

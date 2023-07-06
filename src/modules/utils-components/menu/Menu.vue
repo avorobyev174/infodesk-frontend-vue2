@@ -4,6 +4,7 @@
         bottom
         offset-y
         :nudge-width="250"
+        :nudge-left="250"
     >
         <template v-slot:activator="{ on, attrs }">
             <v-btn
@@ -12,7 +13,6 @@
                 v-bind="attrs"
                 v-on="on"
                 height="40px"
-                class="mr-2"
             >
                 <v-icon size="30px">mdi-menu</v-icon>
             </v-btn>
@@ -44,7 +44,7 @@
         	menuActions: {
         		type: Array,
                 required: true
-            }
+            },
         }
     }
 </script>

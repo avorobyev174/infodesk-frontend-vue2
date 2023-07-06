@@ -18,7 +18,7 @@
             loading-text="Идет загрузка поручений..."
             fixed-header
             :headers="showHeaders"
-            :items="defaultAssignments"
+            :items="filteredAssignments"
         >
             <template v-slot:no-results>
                 <span>Идет загрузка поручений...</span>
@@ -142,7 +142,7 @@
         </v-data-table>
         <event-list
             ref="eventList"
-            :assignments="defaultAssignments"
+            :assignments="filteredAssignments"
         />
         <edit-contacts-dialog
             ref="editContactsDialog"
@@ -218,6 +218,7 @@
 
 	        await this.getAssignments()
 			this.filterByStatus = this.assignmentStatuses?.filter((status) => [ 1, 2, 4 ].includes(status.value))
+            this.acceptFilters()
 
 	        document.onkeydown = (evt) => {
 		        if (this.$route.name === 'Service' && evt.key === 'Alt') {
@@ -267,13 +268,13 @@
 
 			updateAssignment(updatedAssignment) {
 				this.resetFilters()
-				const oldAssignment = this.defaultAssignments.find((assignment) => assignment.id === updatedAssignment.id)
+				const oldAssignment = this.filteredAssignments.find((assignment) => assignment.id === updatedAssignment.id)
 				Object.assign(oldAssignment, updatedAssignment)
 			},
 
 			createAssignment(createdAssignment) {
 				this.resetFilters()
-				this.defaultAssignments.push(createdAssignment)
+				this.filteredAssignments.push(createdAssignment)
 			},
 
 	        async assignmentAccept({ id }) {

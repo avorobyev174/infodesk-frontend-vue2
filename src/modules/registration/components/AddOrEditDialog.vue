@@ -163,7 +163,7 @@
 </template>
 
 <script>
-    import { mapActions, mapGetters, mapState } from "vuex"
+    import { mapActions, mapGetters } from "vuex"
     import SimpleDialog from "../../utils-components/SimpleDialog"
     const DEFAULT_TYPE = 133
     const DEFAULT_SERIAL_NUMBER_LEN = 10

@@ -5,7 +5,8 @@
 		name: "FavoriteModuleMixin",
         created() {
 			if (this.moduleName) {
-				this.setFavoriteModuleColor($cookies.get('common_favorite_module') === this.moduleName ? this.colorGold : '')
+				const color = $cookies.get('common_favorite_module') === `/${ this.moduleName }` ? this.colorGold : ''
+				this.setFavoriteModuleColor(color)
 			}
         },
         computed: {

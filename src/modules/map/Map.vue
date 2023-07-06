@@ -106,6 +106,7 @@ export default {
     },
     data: () => ({
 	    MapViewTypes,
+	    moduleName: 'map',
 	    mapDrawerModel: false,
 	    center: { lat: 53.41295, lng: 58.99823 },
         markers: [],

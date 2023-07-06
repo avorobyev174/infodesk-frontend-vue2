@@ -10,7 +10,7 @@
             :footer-props="{
                 showFirstLastPage: true,
                 'items-per-page-text':'счетчиков на странице',
-                'items-per-page-options': [100, 250, 500, 1000]
+                'items-per-page-options': [ 100, 250, 500, 1000 ]
             }"
             loading-text="Идет загрузка счетчиков..."
             fixed-header
@@ -576,20 +576,18 @@
 				}
 
                 this.checkAllFilters()
-
-                if (!Object.keys(this.filters).length) {
-	                await this.initializeMeters()
-                } else {
-                	try {
-		                if (this.roles?.storage_module === 'repairer') {
-			                this.options.role = this.isRepairShowAllFilter ? 'keeper' : 'repairer'
-		                }
-
-		                this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
-	                } catch (e) {
-                        this.showNotificationRequestError(e)
-	                }
-                }
+				try {
+                    if (!Object.keys(this.filters).length) {
+                        await this.initializeMeters()
+                    } else {
+                        if (this.roles?.storage_module === 'repairer') {
+                            this.options.role = this.isRepairShowAllFilter ? 'keeper' : 'repairer'
+                        }
+                        this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
+                    }
+				} catch (e) {
+					this.showNotificationRequestError(e)
+				}
 			},
 
 			resetFilters() {

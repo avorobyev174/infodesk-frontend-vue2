@@ -13,7 +13,7 @@ import { reports } from "@/store/reports"
 import { search } from "@/store/search"
 import { storage } from "@/store/storage"
 import { repair } from "@/store/repair"
-import { service } from "@/store/service"
+import { service } from "@/modules/service/store/service"
 import { map } from "@/store/map"
 
 import router from '../router/index.js'
@@ -194,6 +194,7 @@ export default new Vuex.Store({
                 $cookies.remove('auth_token')
                 $cookies.remove('role_token')
                 commit('setLogin', false)
+                console.log(isRedirectToLoginPage)
                 if (isRedirectToLoginPage) {
                     await router.push('/login')
                 }

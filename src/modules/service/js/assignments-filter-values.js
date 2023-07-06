@@ -5,8 +5,8 @@ const createServiceEmployeeArray = (assignments, getAccountFullNameFunction) => 
 			.map(({ owner_id }) => owner_id)
 	)
 	return Array.from(employeesAccIdSet).map((accId) => ({
-		name: getAccountFullNameFunction(accId),
-		accId
+		title: getAccountFullNameFunction(accId),
+		value: accId
 	}))
 }
 
@@ -41,6 +41,17 @@ const createServiceAddressesArray = (assignments) => {
 	return Array.from(addressesSet)
 }
 
+const createMeterTypesArray = (assignments, getMeterTypeTitle) => {
+	const meterTypesSet = new Set(
+		assignments
+			.map(({ meter_type }) => meter_type)
+	)
+	return Array.from(meterTypesSet).map((meterType) => ({
+		title: getMeterTypeTitle(meterType),
+		value: meterType
+	}))
+}
+
 const getFilteredAssignments = (assignments, filters) => {
 	return assignments
 		.filter((assignment) => filters.owners.length ? filters.owners.includes(assignment.owner_id) : true)
@@ -54,5 +65,6 @@ export  {
 	createBuildingArray,
 	createServiceAddressesArray,
 	getFilteredAssignments,
-	spliceCustomerAddress
+	spliceCustomerAddress,
+	createMeterTypesArray
 }

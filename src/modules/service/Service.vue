@@ -3,12 +3,11 @@
         <v-data-table
             :loading="loading"
             sort-by="id"
-            class="elevation-1 meter-table"
+            class="elevation-1"
             height="80vh"
             @contextmenu:row="actionMenuOpen"
             single-select
             item-key="id"
-            :search="search"
             :items-per-page="100"
             :footer-props="{
                 showFirstLastPage: true,
@@ -18,7 +17,9 @@
             loading-text="Идет загрузка поручений..."
             fixed-header
             :headers="showHeaders"
-            :items="filteredAssignments"
+            :items="assignments"
+            :options.sync="options"
+            :server-items-length="totalAssignmentsCount"
         >
             <template v-slot:no-results>
                 <span>Идет загрузка поручений...</span>
@@ -31,14 +32,6 @@
                     flat
                     height="70px"
                 >
-                    <v-text-field
-                        v-model="search"
-                        append-icon="mdi-magnify"
-                        label="Поиск"
-                        hide-details
-                        clearable
-                        class="search-input"
-                    />
                     <v-spacer/>
                     <service-menu
                         :menuActions="menuActions"
@@ -51,29 +44,18 @@
             </template>
             <template v-slot:header.owner_id="{ header }">
                 {{ header.text }}
-                <header-filter
-                    :filter-select-color="filterByOwnerColor"
-                >
-                    <template v-slot:filterItem>
-                        <v-combobox
-                            :items="serviceEmployees"
-                            item-text="name"
-                            item-value="accId"
-                            label="Сотрудник"
-                            class="p-3 pt-5 pb-0"
-                            v-model="filterByOwner"
-                            clearable
-                            multiple
-                            @change="acceptFilters"
-                        >
-                        </v-combobox>
-                    </template>
-                </header-filter>
+                <combobox-filter
+                    filterLabel="Сотрудник"
+                    v-model="filterByOwner"
+                    :filter-value="filterByOwner"
+                    :filterItems="serviceEmployees"
+                    :filter-color="filterByOwnerColor"
+                    @input="acceptFilters"
+                />
             </template>
             <template v-slot:header.status="{ header }">
                 {{ header.text }}
                 <combobox-filter
-                    :filterSelectColor="filterByStatusColor"
                     filterLabel="Статус"
                     v-model="filterByStatus"
                     :filter-value="filterByStatus"
@@ -82,10 +64,20 @@
                     @input="acceptFilters"
                 />
             </template>
+            <template v-slot:header.meter_type="{ header }">
+                {{ header.text }}
+                <combobox-filter
+                    filterLabel="Тип счетчика"
+                    v-model="filterByMeterType"
+                    :filter-value="filterByMeterType"
+                    :filterItems="serviceMeterTypes"
+                    :filter-color="filterByMeterTypeColor"
+                    @input="acceptFilters"
+                />
+            </template>
             <template v-slot:header.meter_address="{ header }">
                 {{ header.text }}
                 <combobox-filter
-                    :filterSelectColor="filterByAddressColor"
                     filterLabel="Принадлежность"
                     v-model="filterByAddress"
                     :filter-value="filterByAddress"
@@ -96,24 +88,24 @@
             </template>
             <template v-slot:header.customer_address="{ header }">
                 {{ header.text }}
-                <header-filter
-                    :filter-select-color="filterByBuildingColor"
-                >
-                    <template v-slot:filterItem>
-                        <v-combobox
-                            :items="serviceBuildings"
-                            item-text="title"
-                            item-value="value"
-                            label="Адрес"
-                            class="p-3 pt-5 pb-0"
-                            v-model="filterByBuilding"
-                            clearable
-                            multiple
-                            @change="acceptFilters"
-                        >
-                        </v-combobox>
-                    </template>
-                </header-filter>
+                <combobox-filter
+                    filterLabel="Принадлежность"
+                    v-model="filterByBuilding"
+                    :filter-value="filterByBuilding"
+                    :filterItems="serviceBuildings"
+                    :filter-color="filterByBuildingColor"
+                    @input="acceptFilters"
+                />
+            </template>
+            <template v-slot:header.meter_serial_number="{ header }">
+                {{ header.text }}
+                <input-filter
+                    filterLabel="Серийный номер"
+                    v-model="filterBySerialNumber"
+                    :filter-value="filterBySerialNumber"
+                    :filter-color="filterBySerialNumberColor"
+                    @accept="acceptSerialNumberFilter"
+                />
             </template>
             <template v-slot:item.status="{ item }" >
                 <v-chip :color="getAssignmentStatusColor(item.status)">
@@ -142,7 +134,7 @@
         </v-data-table>
         <event-list
             ref="eventList"
-            :assignments="filteredAssignments"
+            :assignments="assignments"
         />
         <edit-contacts-dialog
             ref="editContactsDialog"
@@ -188,7 +180,9 @@
     import DataTableHeaderFilter from "../utils-components/filter/DataTableHeaderFilter"
     import ServiceFilterMixin from "./mixins/ServiceFilterMixin"
     import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
+    import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
     import defaultAssignmentActions from "./js/assignment-actions"
+    import {mapGetters} from "vuex";
 
 	export default {
 		name: "Service",
@@ -201,31 +195,35 @@
 	        AddAssignmentDialog,
 	        EditContactsDialog,
 	        HeaderFilter: DataTableHeaderFilter,
-	        ComboboxFilter: ComboboxDataTableFilter
+	        ComboboxFilter: ComboboxDataTableFilter,
+	        InputFilter: InputDataTableFilter,
+
         },
         data: () => ({
             moduleName: 'service',
-	        search: '',
 	        selectedAssignment: null,
 	        assignmentActions: [],
+	        totalAssignmentsCount: 0,
 	        defaultAssignmentActions,
+	        options: {},
         }),
 		mixins: [ DictionaryMixin, ColumnVisibilityMixin, FavoriteModuleMixin, ServiceMixin, ServiceFilterMixin ],
-		async mounted() {
-	        if (!this.isLogin) {
-		        return
-	        }
-
-	        await this.getAssignments()
-			this.filterByStatus = this.assignmentStatuses?.filter((status) => [ 1, 2, 4 ].includes(status.value))
-            this.acceptFilters()
-
-	        document.onkeydown = (evt) => {
-		        if (this.$route.name === 'Service' && evt.key === 'Alt') {
-			        this.getAssignments()
-		        }
-	        }
+        computed: {
+	        ...mapGetters({
+		        assignments: 'service/getAssignments',
+	        }),
         },
+        watch: {
+	        options: {
+		        async handler () {
+			        !this.isFilters()
+				        ? await this.getAssignments()
+				        : await this.acceptFilters()
+		        },
+		        deep: true,
+	        },
+        },
+
 		methods: {
 	        actionMenuOpen(e, { item }) {
 		        e.preventDefault()
@@ -260,7 +258,8 @@
 			async getAssignments() {
 				try {
 					this.resetFilters()
-					await this.fetchAssignments()
+					this.totalAssignmentsCount = await this.fetchAssignments(this.options)
+					this.createFiltersValues()
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				}
@@ -268,13 +267,13 @@
 
 			updateAssignment(updatedAssignment) {
 				this.resetFilters()
-				const oldAssignment = this.filteredAssignments.find((assignment) => assignment.id === updatedAssignment.id)
+				const oldAssignment = this.assignments.find((assignment) => assignment.id === updatedAssignment.id)
 				Object.assign(oldAssignment, updatedAssignment)
 			},
 
 			createAssignment(createdAssignment) {
 				this.resetFilters()
-				this.filteredAssignments.push(createdAssignment)
+				this.assignments.push(createdAssignment)
 			},
 
 	        async assignmentAccept({ id }) {
@@ -292,13 +291,5 @@
 </script>
 
 <style scoped>
-    .search-input {
-        max-width: 350px;
-    }
 
-    .header-filter-wrapper {
-        background-color: white;
-        display: flex;
-        align-items: center;
-    }
 </style>

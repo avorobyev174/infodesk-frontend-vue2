@@ -13,6 +13,7 @@ import NotificationSnackBar from "./modules/utils-components/NotificationSnackBa
 import SideBar from "./components/SideBar"
 import MainContent from "./components/MainContent"
 import { mapActions, mapGetters } from "vuex"
+import NotificationMixin from "./modules/mixins/NotificationMixin"
 
 export default {
     name: 'App',
@@ -22,6 +23,7 @@ export default {
         MainContent,
         NotificationSnackBar
     },
+    mixins: [ NotificationMixin ],
 	created() {
 		if (!$cookies.get('auth_token')) {
 			this.$store.commit('setLogin', false)
@@ -51,34 +53,6 @@ export default {
     },
     methods: {
         ...mapActions([ 'logoutUser' ]),
-
-        showNotification(text, color) {
-            this.$refs.notificationManager.showNotification(text, color)
-        },
-
-	    showNotificationInfo(text) {
-		    this.$refs.notificationManager.showNotificationInfo(text)
-	    },
-
-	    showNotificationSuccess(text) {
-		    this.$refs.notificationManager.showNotificationSuccess(text)
-	    },
-
-	    showNotificationWarning(text) {
-		    this.$refs.notificationManager.showNotificationWarning(text)
-	    },
-
-	    showNotificationError(text) {
-		    this.$refs.notificationManager.showNotificationError(text)
-	    },
-
-	    showNotificationRequestError(e) {
-		    this.$refs.notificationManager.showNotificationRequestError(e)
-	    },
-
-	    showNotificationRequestErrorWithCustomText(text, e) {
-            this.$refs.notificationManager.showNotificationRequestErrorWithCustomText(text, e)
-        },
     }
 }
 </script>

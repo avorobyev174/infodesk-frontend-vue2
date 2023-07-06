@@ -29,7 +29,7 @@ export default [
 		width: '200px'
 	},
 	{
-		text: 'Тип',
+		text: 'Тип счетчика',
 		value: 'meter_type',
 		sortable: true,
 		align: 'center',
@@ -39,7 +39,7 @@ export default [
 	{
 		text: 'Серийный номер',
 		value: 'meter_serial_number',
-		sortable: false,
+		sortable: true,
 		align: 'center',
 		cellClass: 'table-small-cell',
 		width: '160px'

@@ -15,6 +15,7 @@
 				assignments: 'service/getAssignments',
 				currentAccountId: 'getAccountId',
 				isLogin: 'getIsLogin',
+				meterTypes: 'getMeterTypes',
 			}),
 			...mapState('service', [ 'loading' ]),
 			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue', 'colorGold' ]),
@@ -33,6 +34,13 @@
 				getAssignmentEventTypeColor: this.getAssignmentEventTypeColor,
 				getMeterTypeTitle: this.getMeterTypeTitle,
 				getAssignmentStatusTitle: this.getAssignmentStatusTitle,
+			}
+		},
+		mounted() {
+			document.onkeydown = (evt) => {
+				if (this.$route.name === 'Service' && evt.key === 'Alt') {
+					this.getAssignments()
+				}
 			}
 		},
 		methods: {

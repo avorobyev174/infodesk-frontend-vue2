@@ -32,16 +32,32 @@ export const service = {
 		}
 	},
 	actions: {
-		async fetchAssignments({ state, commit }) {
+		async fetchAssignments({ state, commit }, options) {
 			try {
 				commit('setLoading', true)
-				const response = await get(
+				const response = await post(
 					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignments`,
+					{ options },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
-
-				const assignments = response.data
+				
+				const { assignments, totalAssignmentsCount } = response.data
 				commit('setAssignments', assignments)
-				return assignments
+				return totalAssignmentsCount
+			} finally {
+				commit('setLoading', false)
+			}
+		},
+		
+		async assignmentsFilter({ state, commit }, { filters, options }) {
+			try {
+				commit('setLoading', true)
+				const response = await post(
+					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/filter`,
+					{ filters, options },
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
+				const { assignments, totalAssignmentsCount } = response.data
+				commit('setAssignments', assignments)
+				return totalAssignmentsCount
 			} finally {
 				commit('setLoading', false)
 			}

@@ -28,10 +28,6 @@
 	        HeaderFilter: DataTableHeaderFilter
         },
 		props: {
-			filterSelectColor: {
-				type: String,
-				required: true
-			},
 			filterLabel: {
 				type: String,
 				required: true

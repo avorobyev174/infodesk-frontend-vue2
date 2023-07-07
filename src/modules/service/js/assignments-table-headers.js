@@ -21,6 +21,13 @@ export default [
 		width: '80px',
 	},
 	{
+		text: 'Последние данные события',
+		align: 'center',
+		value: 'lastEvent',
+		sortable: false,
+		width: '160px',
+	},
+	{
 		text: 'Исполнитель',
 		value: 'owner_id',
 		sortable: true,

@@ -49,7 +49,7 @@
 		getFilteredAssignments,
 		spliceCustomerAddress
 	} from '../../../service/js/assignments-filter-values'
-    import { AssignmentEventTypes } from '../../../../const'
+    import { AssignmentEventType } from '../../../../const'
 
 	export default {
 		name: "AssignmentMapFilter",
@@ -142,11 +142,11 @@
                     }, [])
                     .map((assignment) => {
                     	let color = this.colorGrey
-	                    if (assignment.apartments.some((apartment) => apartment.status === AssignmentEventTypes.IN_WORK)) {
+	                    if (assignment.apartments.some((apartment) => apartment.status === AssignmentEventType.IN_WORK)) {
 	                    	color = this.colorBlue
                         }
-	                    if (assignment.apartments.every((apartment) => apartment.status === AssignmentEventTypes.CLOSE ||
-		                        assignment.apartments.every((apartment) => apartment.status === AssignmentEventTypes.CLOSE_AUTO))) {
+	                    if (assignment.apartments.every((apartment) => apartment.status === AssignmentEventType.CLOSE ||
+		                        assignment.apartments.every((apartment) => apartment.status === AssignmentEventType.CLOSE_AUTO))) {
 		                    color = this.colorGreen
 	                    }
                     	return {

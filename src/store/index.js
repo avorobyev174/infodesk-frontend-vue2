@@ -198,9 +198,7 @@ export default new Vuex.Store({
                 if (isRedirectToLoginPage) {
                     await router.push('/login')
                 }
-            } catch (e) {
-                console.log(e)
-            }
+            } catch (e) {}
         },
 
         async fetchDictionaries({ state, commit }) {

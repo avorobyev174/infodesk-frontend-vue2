@@ -137,7 +137,7 @@
 
 <script>
 	import { mapActions, mapState, mapGetters } from 'vuex'
-    import { AssignmentEventTypes } from "../../../const"
+    import { AssignmentEventType } from "../../../const"
     import SimpleDialog from "../../utils-components/SimpleDialog"
     import DialogWithDataSlotOnlyClose from "../../utils-components/DialogWithDataSlotOnlyClose"
 
@@ -161,7 +161,7 @@
             deleteConfirmationDialogModel: false,
             addOrEditDialogTitle: 'Добавить событие',
             addOrEditDialogButtonTitle: 'Добавить',
-			AssignmentEventTypes,
+			AssignmentEventTypes: AssignmentEventType,
 		}),
         props: {
 		    assignments: {

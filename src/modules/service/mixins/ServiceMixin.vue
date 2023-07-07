@@ -2,6 +2,7 @@
 	import { mapActions, mapGetters, mapState } from "vuex"
     import headers from "../js/assignments-table-headers"
     import menuActions from "../js/assignmets-menu"
+    import { AssignmentEventType, AssignmentStatus } from "../../../const";
 
 	export default {
 		name: "ServiceMixin",
@@ -9,6 +10,7 @@
 			headers,
 			menuActions,
 			selectedHeaders: [],
+			declineDialogModel: false
 		}),
 		computed: {
 			...mapGetters({
@@ -22,7 +24,8 @@
 		},
 		inject: [
 			'showNotificationSuccess',
-            'showNotificationRequestError'
+            'showNotificationRequestError',
+            'showNotificationInfo'
         ],
 		provide: function () {
 			return {
@@ -46,28 +49,30 @@
 		methods: {
 			...mapActions('service', [
 				'fetchAssignments',
-				'acceptAssignment',
+				'acceptOrDeclineAssignment',
+				'declineAssignment',
 			]),
 
 			getAssignmentStatusColor(status) {
 				switch (status) {
-					case 1:
-					case 4: return this.colorGrey
-					case 2: return this.colorBlue
-					case 3:
-					case 5: return this.colorGreen
+					case AssignmentStatus.REGISTERED:
+					case AssignmentStatus.RE_REGISTERED: return this.colorGrey
+					case AssignmentStatus.IN_WORK: return this.colorBlue
+					case AssignmentStatus.CLOSED:
+					case AssignmentStatus.CLOSED_AUTO: return this.colorGreen
 				}
 			},
 
 			getAssignmentEventTypeColor(status) {
 				switch (status) {
-					case 1:
-					case 5: return this.colorGrey
-					case 2: return this.colorBlue
-					case 3:
-					case 7: return this.colorGreen
-					case 4:
-					case 6: return this.colorGold
+					case AssignmentEventType.REGISTERED:
+					case AssignmentEventType.RE_REGISTRED: return this.colorGrey
+					case AssignmentEventType.IN_WORK:
+					case AssignmentEventType.DECLINE: return this.colorBlue
+					case AssignmentEventType.CLOSE:
+					case AssignmentEventType.CLOSE_AUTO: return this.colorGreen
+					case AssignmentEventType.ACTION:
+					case AssignmentEventType.SYSTEM_ACTION: return this.colorGold
 				}
 			},
 		}

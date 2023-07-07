@@ -2,9 +2,9 @@
     <v-dialog
         v-model="dialogModel"
         :max-width="maxWidth"
-        @keydown.enter="$emit('okButtonClickEvent')"
-        @keydown.esc="$emit('cancelButtonClickEvent')"
-        @click.outside="$emit('cancelButtonClickEvent')"
+        @keydown.enter="$emit('submit')"
+        @keydown.esc="dialogClose"
+        @click.outside="dialogClose"
     >
         <v-card>
             <v-card-title>
@@ -12,8 +12,8 @@
             </v-card-title>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="$emit('cancelButtonClickEvent')">Отмена</v-btn>
-                <v-btn color="blue darken-1" text @click="$emit('okButtonClickEvent')">OK</v-btn>
+                <v-btn color="blue darken-1" text @click="dialogClose">Отмена</v-btn>
+                <v-btn color="blue darken-1" text @click="$emit('submit')">OK</v-btn>
                 <v-spacer></v-spacer>
             </v-card-actions>
         </v-card>
@@ -21,16 +21,12 @@
 </template>
 
 <script>
+    import DialogMixin from "../mixins/DialogMixin"
+
     export default {
-        name: "SimpleDialog",
-        data: () => ({
-            dialogModel: false
-        }),
+        name: "CustomDialog",
+        mixins: [ DialogMixin ],
         props: {
-            dialogOpen: {
-                type: Boolean,
-                required: true
-            },
             maxWidth: {
                 type: String,
                 default: '400px'
@@ -40,11 +36,6 @@
                 required: true
             }
         },
-        watch: {
-            dialogOpen(val) {
-                this.dialogModel = val
-            }
-        }
     }
 </script>
 

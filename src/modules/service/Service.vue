@@ -131,6 +131,20 @@
             <template v-slot:item.owner_id="{ item }">
                 {{ item.owner_id ? getAccountFullName(item.owner_id) : 'отсутствует' }}
             </template>
+            <template v-slot:item.lastEvent="{ item }">
+                <div class="last-event">
+                    <span
+                        class="last-event-close-reason"
+                        v-if="item.lastEvent && item.lastEvent.close_reason"
+                        >
+                        {{ `${ getAssignmentCloseEventTypeTitle(item.lastEvent.close_reason) }` }}
+                    </span>
+                    <span
+                        v-if="item.lastEvent &&
+                            ![ AssignmentStatus.REGISTERED, AssignmentStatus.RE_REGISTERED ].includes(item.status)"
+                    >{{ item.lastEvent.description}}</span>
+                </div>
+            </template>
         </v-data-table>
         <event-list
             ref="eventList"
@@ -161,7 +175,14 @@
             @openEventList="$refs.eventList.open(selectedAssignment, currentAccountId)"
             @acceptAssignment="assignmentAccept(selectedAssignment)"
             @editAssignmentContacts="$refs.editContactsDialog.dialogOpen()"
+            @declineAssignment="$refs.assignmentDeclineDialog.dialogOpen()"
         />
+        <custom-dialog
+            ref="assignmentDeclineDialog"
+            max-width="700px"
+            title="Вы уверены что хотите отклонить поручение?"
+            @submit="assignmentDecline(selectedAssignment)"
+        ></custom-dialog>
     </v-card>
 </template>
 
@@ -181,8 +202,9 @@
     import ServiceFilterMixin from "./mixins/ServiceFilterMixin"
     import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
     import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
-    import defaultAssignmentActions from "./js/assignment-actions"
-    import {mapGetters} from "vuex";
+    import { defaultAssignmentActions, filterAssignmentActions }from "./js/assignment-actions"
+    import CustomDialog from "../utils-components/CustomDialog"
+    import { AssignmentStatus } from "../../const"
 
 	export default {
 		name: "Service",
@@ -197,7 +219,7 @@
 	        HeaderFilter: DataTableHeaderFilter,
 	        ComboboxFilter: ComboboxDataTableFilter,
 	        InputFilter: InputDataTableFilter,
-
+	        CustomDialog
         },
         data: () => ({
             moduleName: 'service',
@@ -206,13 +228,9 @@
 	        totalAssignmentsCount: 0,
 	        defaultAssignmentActions,
 	        options: {},
+	        AssignmentStatus,
         }),
 		mixins: [ DictionaryMixin, ColumnVisibilityMixin, FavoriteModuleMixin, ServiceMixin, ServiceFilterMixin ],
-        computed: {
-	        ...mapGetters({
-		        assignments: 'service/getAssignments',
-	        }),
-        },
         watch: {
 	        options: {
 		        async handler () {
@@ -223,34 +241,13 @@
 		        deep: true,
 	        },
         },
-
 		methods: {
+			filterAssignmentActions,
+
 	        actionMenuOpen(e, { item }) {
 		        e.preventDefault()
                 this.selectedAssignment = item
-		        this.assignmentActions = defaultAssignmentActions.map((action) => {
-			        // зарегистрировано - нельзя просматривать список событий и редактировать
-			        if (item.status === 1 && !item.owner_id && [ 1, 3 ].includes(action.id)) {
-				        return { ...action, disabled: true }
-				        // в работе - нельзя редактировать, если не исполнитель
-			        } else if (item.status === 2 &&
-				        item.owner_id &&
-				        [ 3 ].includes(action.id) &&
-				        item.owner_id !== this.currentAccountId)	{
-				        return { ...action, disabled: true }
-				        // в работе - нельзя принять, если уже принято тем жеисполнителем
-			        } else if (item.status === 2 &&
-				        item.owner_id &&
-				        [ 2 ].includes(action.id) &&
-				        item.owner_id === this.currentAccountId)	{
-				        return { ...action, disabled: true }
-				        // закрыто - нельзя редактировать и принять
-			        } else if (item.status === 3 && [ 2, 3 ].includes(action.id)) {
-				        return { ...action, disabled: true }
-			        }
-			        return { ...action }
-		        })
-
+		        this.assignmentActions = this.filterAssignmentActions(item, this.currentAccountId)
 		        const { actionMenu } = this.$refs
 		        actionMenu.open(e.clientX, e.clientY)
 	        },
@@ -279,17 +276,38 @@
 	        async assignmentAccept({ id }) {
                 try {
 	                this.resetFilters()
-	                const updatedAssignment = await this.acceptAssignment(id)
+	                const updatedAssignment = await this.acceptOrDeclineAssignment({ id })
 	                this.updateAssignment(updatedAssignment)
 	                this.showNotificationSuccess('Поручение успешно принято')
                 } catch (e) {
 	                this.showNotificationRequestError(e)
                 }
             },
+
+            async assignmentDecline({ id }) {
+	            const { assignmentDeclineDialog } = this.$refs
+	            assignmentDeclineDialog.dialogClose()
+	            try {
+		            const updatedAssignment = await this.acceptOrDeclineAssignment({ id, isDecline: true })
+		            this.updateAssignment(updatedAssignment)
+		            this.showNotificationInfo('Поручение успешно отклонено')
+	            } catch (e) {
+		            this.showNotificationRequestError(e)
+	            }
+            }
         }
 	}
 </script>
 
-<style scoped>
+<style>
+    .last-event {
+        font-size: 10px !important;
+        display: flex;
+        flex-direction: column !important;
+    }
 
+    .last-event-close-reason {
+        text-decoration: underline;
+        font-style: italic;
+    }
 </style>

@@ -89,12 +89,12 @@ export const service = {
 			}
 		},
 
-		async acceptAssignment({ state, commit }, assignmentId) {
+		async acceptOrDeclineAssignment({ state, commit }, { id, isDecline }) {
 			try {
 				commit('setLoading', true)
-				const response = await put(
-					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignment-accept/${ assignmentId }`,
-					{},
+				const response = await post(
+					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignment-accept-decline/${ id }`,
+					{ isDecline },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 
 				const [ assignment ] = response.data

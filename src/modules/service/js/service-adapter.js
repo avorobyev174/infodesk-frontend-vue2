@@ -1,5 +1,5 @@
 import { formatDate } from '../../Utils.js'
-import { AssignmentEventTypes } from '../../../const.js'
+import { AssignmentEventType } from '../../../const.js'
 
 const assignmentToState = (
 	{

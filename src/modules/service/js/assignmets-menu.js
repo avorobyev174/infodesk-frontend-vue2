@@ -18,6 +18,12 @@ export default [
 		color: 'primary'
 	},
 	{
+		title: 'Выгрузить активные поручения',
+		onClick: 'saveAssignmentsToExcel',
+		icon: 'mdi-file-upload',
+		color: 'primary'
+	},
+	{
 		title: 'Видимость колонок',
 		onClick: 'showHideColumns',
 		icon: 'mdi-eye',

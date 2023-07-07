@@ -105,7 +105,7 @@
 				return assignmentStatus ? assignmentStatus.title : value
 			},
 
-			getAssignmentCloseEventTypeTitle(value) {
+			getAssignmentEventCloseReasonTitle(value) {
 				const assignmentCloseEventType = this.assignmentCloseReasonTypes.find((closeEventType) => closeEventType.id === value)
 				return assignmentCloseEventType ? assignmentCloseEventType.title : value
 			},

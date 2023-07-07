@@ -214,9 +214,9 @@ export default new Vuex.Store({
             
             commit('setDictionaries', dictionaries)
         },
-    },
-
-    modules: {
+   },
+   
+   modules: {
         registration,
         charts,
         profile,
@@ -228,5 +228,5 @@ export default new Vuex.Store({
         repair,
         service,
         map
-    }
+   }
 })

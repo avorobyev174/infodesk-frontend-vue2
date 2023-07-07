@@ -63,6 +63,20 @@ export const service = {
 			}
 		},
 		
+		async getAssignmentsAndEventsInWorkByUser({ state, commit }) {
+			try {
+				commit('setLoading', true)
+				const response = await get(
+					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignments-and-events-by-user-in-work`,
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
+				
+				const assignments = response.data
+				return assignments
+			} finally {
+				commit('setLoading', false)
+			}
+		},
+		
 		async fetchAssignmentsLogs({ state, commit }) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignments-logs`,

@@ -32,7 +32,7 @@
 				formatDate: this.formatDate,
 				getAssignmentEventTypeTitle: this.getAssignmentEventTypeTitle,
 				getAccountFullName: this.getAccountFullName,
-				getAssignmentCloseEventTypeTitle: this.getAssignmentCloseEventTypeTitle,
+				getAssignmentEventCloseReasonTitle: this.getAssignmentEventCloseReasonTitle,
 				getAssignmentStatusColor: this.getAssignmentStatusColor,
 				getAssignmentEventTypeColor: this.getAssignmentEventTypeColor,
 				getMeterTypeTitle: this.getMeterTypeTitle,
@@ -51,6 +51,7 @@
 				'fetchAssignments',
 				'acceptOrDeclineAssignment',
 				'declineAssignment',
+				'getAssignmentsAndEventsInWorkByUser',
 			]),
 
 			getAssignmentStatusColor(status) {

@@ -11,10 +11,9 @@
             <v-list-item-avatar>
                 <v-img :src="photoUrl" lazy-src="@/assets/no-user-image.png"></v-img>
             </v-list-item-avatar>
-
             <v-list-item-content>
-                <v-list-item-title>{{ owner }}</v-list-item-title>
-                <v-list-item-subtitle>Исполнитель</v-list-item-subtitle>
+                <v-list-item-title>Исполнитель</v-list-item-title>
+                <v-list-item-subtitle>{{ owner }}</v-list-item-subtitle>
             </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
@@ -39,7 +38,7 @@
                     <v-icon>mdi-close-box-outline</v-icon>
                 </v-btn>
                 <p class="mb-0 event-close-reason" v-if="event.close_reason">
-                    {{ getAssignmentCloseEventTypeTitle(event.close_reason) }}
+                    {{ getAssignmentEventCloseReasonTitle(event.close_reason) }}
                 </p>
                 <p class="mb-0 event-owner" v-if="event.owner_id">
                     {{ getAccountFullName(event.owner_id) }}
@@ -176,7 +175,7 @@
             'formatDate',
             'getAssignmentEventTypeTitle',
             'getAccountFullName',
-            'getAssignmentCloseEventTypeTitle',
+            'getAssignmentEventCloseReasonTitle',
             'getAssignmentEventTypeColor',
         ],
         computed: {
@@ -209,7 +208,6 @@
 				const { id, owner_id } = assignment
 				const account = this.accounts.find(({ id }) => owner_id === id)
 				this.owner = this.getAccountFullName(owner_id)
-
 				try {
 					this.events = await this.fetchAssignmentEvents(id)
                     this.lastEvent = this.events.at(0)
@@ -217,7 +215,7 @@
 	                    this.photoUrl = this.$store.state.serverUrl + `/images/${ account?.photo }`
                     } else {
 	                    this.owner = 'отсутствует'
-	                    this.photoUrl = ''
+	                    this.photoUrl = this.$store.state.serverUrl + '/images/no-user-image.png'
                     }
 					this.eventListDrawerModel = true
 				} catch (e) {

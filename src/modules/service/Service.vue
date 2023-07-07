@@ -39,6 +39,7 @@
                         @openAssignmentsLogsDialog="$refs.serviceUpdateLogsDialog.dialogOpen()"
                         @showHideColumns="$refs.showHideColumnsDialog.open()"
                         @opendAssignmentAddDialog="$refs.addAssignmentDialog.dialogOpen()"
+                        @saveAssignmentsToExcel="saveAssignmentsToExcel"
                     />
                 </v-toolbar>
             </template>
@@ -137,7 +138,7 @@
                         class="last-event-close-reason"
                         v-if="item.lastEvent && item.lastEvent.close_reason"
                         >
-                        {{ `${ getAssignmentCloseEventTypeTitle(item.lastEvent.close_reason) }` }}
+                        {{ `${ getAssignmentEventCloseReasonTitle(item.lastEvent.close_reason) }` }}
                     </span>
                     <span
                         v-if="item.lastEvent &&
@@ -205,6 +206,7 @@
     import { defaultAssignmentActions, filterAssignmentActions }from "./js/assignment-actions"
     import CustomDialog from "../utils-components/CustomDialog"
     import { AssignmentStatus } from "../../const"
+    import saveAssignmentsByOwnerToExcelFile from "./excel/saveAssignmentsDataToExcel"
 
 	export default {
 		name: "Service",
@@ -243,6 +245,7 @@
         },
 		methods: {
 			filterAssignmentActions,
+			saveAssignmentsByOwnerToExcelFile,
 
 	        actionMenuOpen(e, { item }) {
 		        e.preventDefault()
@@ -294,6 +297,22 @@
 	            } catch (e) {
 		            this.showNotificationRequestError(e)
 	            }
+            },
+
+            async saveAssignmentsToExcel() {
+				try {
+					const currentUserAssignments = await this.getAssignmentsAndEventsInWorkByUser()
+					this.saveAssignmentsByOwnerToExcelFile(
+						currentUserAssignments,
+						this.currentAccountId,
+						this.getAssignmentStatusTitle,
+						this.getAssignmentEventCloseReasonTitle,
+						this.getAssignmentEventTypeTitle,
+						this.getAccountFullName,
+					)
+                } catch (e) {
+					this.showNotificationRequestError(e)
+				}
             }
         }
 	}

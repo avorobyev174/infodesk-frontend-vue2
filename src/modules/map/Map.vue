@@ -133,7 +133,7 @@ export default {
 			formatDate: this.formatDate,
 			getAssignmentEventTypeTitle: this.getAssignmentEventTypeTitle,
 			getAccountFullName: this.getAccountFullName,
-			getAssignmentCloseEventTypeTitle: this.getAssignmentCloseEventTypeTitle,
+			getAssignmentEventCloseReasonTitle: this.getAssignmentEventCloseReasonTitle,
 			getMeterTypeTitle: this.getMeterTypeTitle,
 			getAssignmentStatusTitle: this.getAssignmentStatusTitle,
 		}

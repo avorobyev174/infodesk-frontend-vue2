@@ -178,12 +178,12 @@
             @editAssignmentContacts="$refs.editContactsDialog.dialogOpen()"
             @declineAssignment="$refs.assignmentDeclineDialog.dialogOpen()"
         />
-        <custom-dialog
+        <dialog-custom
             ref="assignmentDeclineDialog"
-            max-width="700px"
+            :max-width="700"
             title="Вы уверены что хотите отклонить поручение?"
             @submit="assignmentDecline(selectedAssignment)"
-        ></custom-dialog>
+        ></dialog-custom>
     </v-card>
 </template>
 
@@ -204,7 +204,7 @@
     import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
     import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
     import { defaultAssignmentActions, filterAssignmentActions }from "./js/assignment-actions"
-    import CustomDialog from "../utils-components/CustomDialog"
+    import DialogCustom from "../utils-components/dialog/DialogCustom"
     import { AssignmentStatus } from "../../const"
     import saveAssignmentsByOwnerToExcelFile from "./excel/saveAssignmentsDataToExcel"
 
@@ -221,7 +221,7 @@
 	        HeaderFilter: DataTableHeaderFilter,
 	        ComboboxFilter: ComboboxDataTableFilter,
 	        InputFilter: InputDataTableFilter,
-	        CustomDialog
+	        DialogCustom
         },
         data: () => ({
             moduleName: 'service',
@@ -236,7 +236,7 @@
         watch: {
 	        options: {
 		        async handler () {
-			        !this.isFilters()
+			        !this.isActiveFilters()
 				        ? await this.getAssignments()
 				        : await this.acceptFilters()
 		        },

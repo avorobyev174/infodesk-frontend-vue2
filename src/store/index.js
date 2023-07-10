@@ -9,12 +9,14 @@ import { charts } from "@/store/charts"
 import { profile } from "@/store/profile"
 import { utils } from "@/store/utils"
 import { testUtils } from "@/store/test-utils"
-import { reports } from "@/store/reports"
+import { reports } from "@/modules/reports/store/reports"
 import { search } from "@/store/search"
 import { storage } from "@/store/storage"
 import { repair } from "@/store/repair"
 import { service } from "@/modules/service/store/service"
 import { map } from "@/store/map"
+import { serviceReports } from "@/modules/reports/store/service-reports"
+import { storageReports } from "@/modules/reports/store/storage-reports"
 
 import router from '../router/index.js'
 import { get } from "axios"
@@ -224,9 +226,11 @@ export default new Vuex.Store({
         testUtils,
         search,
         reports,
+        serviceReports,
+        storageReports,
         storage,
         repair,
         service,
-        map
+        map,
    }
 })

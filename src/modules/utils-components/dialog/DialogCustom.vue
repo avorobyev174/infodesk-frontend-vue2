@@ -21,15 +21,15 @@
 </template>
 
 <script>
-    import DialogMixin from "../mixins/DialogMixin"
+    import DialogMixin from "../../mixins/DialogMixin"
 
     export default {
-        name: "CustomDialog",
+        name: "DialogCustom",
         mixins: [ DialogMixin ],
         props: {
             maxWidth: {
-                type: String,
-                default: '400px'
+                type: Number,
+                default: 400
             },
             title: {
                 type: String,

@@ -246,13 +246,6 @@
 	        },
 
 	        checkIfMeterLocationValid(meter) {
-		        // if (this.isRouter) {
-			    //     return (meter.oldLocation === 1 && this.newLocation !== 1) ||
-				//         (meter.oldLocation !== 1 && this.newLocation === 1)
-		        // } else {
-			    //     return (meter.oldLocation === 0 && this.newLocation !== 0) ||
-				//         (meter.oldLocation !== 0 && this.newLocation === 0)
-		        // }
 		        const storageLocations = [ this.STORAGE_LOCATION, this.SECOND_STORAGE_LOCATION ]
 		        if (this.isRouter) {
 			        return meter.oldLocation === this.REPAIR_LOCATION
@@ -263,11 +256,9 @@
 				        .map((location) => location.value)
 				        .filter((location) => !storageLocations.includes(location))
 
-			        if (storageLocations.includes(meter.oldLocation)) {
-				        return nonStorageLocations.includes(this.newLocation)
-			        } else {
-				        return storageLocations.includes(this.newLocation)
-			        }
+			        return storageLocations.includes(meter.oldLocation)
+                        ? nonStorageLocations.includes(this.newLocation)
+			            : storageLocations.includes(this.newLocation)
 		        }
 	        },
 
@@ -320,7 +311,7 @@
             },
 
 	        async accept() {
-                if (!this.isRouter && this.$refs.form && !this.$refs.form.validate()) {
+                if (!this.isRouter && !this.$refs.form?.validate()) {
                     return
                 }
 
@@ -347,7 +338,7 @@
 			        return this.showNotificationWarning( 'Операция с неизвестным сотрудником невозможна')
 		        }
 
-                if (!this.replaceMeters.every(meter => this.checkIfMeterLocationValid(meter))) {
+                if (!this.replaceMeters.every((meter) => this.checkIfMeterLocationValid(meter))) {
 	                return this.showNotificationWarning('Не возможно произвести операцию, в таблице выбрана запрещенная схема смены местоположения')
                 }
 

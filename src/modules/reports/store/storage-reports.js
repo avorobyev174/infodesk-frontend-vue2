@@ -1,66 +1,7 @@
-import axios from "axios";
+import axios from "axios"
 
-export const reports = {
-    state: () => ({
-        serverModuleName: 'reports'
-    }),
+export const storageReports = {
     actions: {
-        async getAlphaLastTimeDataReport({state, commit}) {
-            const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/alpha-last-time-data-report`,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-        
-            return response.data
-        },
-        
-        async getLoadedPyramidCountByCustomerAddress({state, commit}, metersArr) {
-            const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-meter-loaded-count-by-customer-address`,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-        
-            return response.data
-        },
-        
-        async getMeterFromRepairToStorageCount({state, commit}, metersArr) {
-            const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-meter-from-repair-to-storage-report`,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-        
-            return response.data
-        },
-        
-        async getDataByNotInPyramid({state, commit}) {
-            const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-meter-not-loaded-in-pyramid`,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-        
-            return response.data
-        },
-    
-        async getNonActiveInPyramid({state, commit}, days) {
-            const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-non-active-meters-from-pyramid/` + days,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-        
-            return response.data
-        },
-    
-        async getCountByAddress({state, commit}, created) {
-            const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-meter-count-by-address/` + created,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-        
-            return response.data
-        },
-    
-        async getRotecMetersInfo({ state, commit }) {
-            const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-rotec-meters-info`,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-            
-            return response.data
-        },
-        
         async getLocationReport({ state, commit }) {
             const response = await axios.get(
                 this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-location-report`,
@@ -85,7 +26,7 @@ export const reports = {
         
             return response.data
         },
-        
+    
         async getStoragePeriodReport({ state, commit }, { startDate, endDate }) {
             const response = await axios.post(
                 this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-storage-logs-by-period-report`,
@@ -94,7 +35,7 @@ export const reports = {
         
             return response.data
         },
-        
+    
         async getInOutByPeriodAndLocationReport({ state, commit }, { startDate, endDate, location }) {
             const response = await axios.post(
                 this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-in-out-by-period-and-location-report`,
@@ -103,7 +44,7 @@ export const reports = {
         
             return response.data
         },
-        
+    
         async getInOutByPeriodAndEmployeeReport({ state, commit }, { startDate, endDate, empStaffId }) {
             const response = await axios.post(
                 this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-in-out-by-period-and-emp-report`,
@@ -148,7 +89,7 @@ export const reports = {
         
             return response.data
         },
-        
+    
         async getRepairCountAndMaterialReport({ state, commit }) {
             const response = await axios.get(
                 this.state.serverUrl + `/api/${ this.state.reports.serverModuleName }/get-repair-count-and-material-report`,
@@ -174,5 +115,5 @@ export const reports = {
             return response.data
         },
     },
-    namespaced: true
+    namespaced: true,
 }

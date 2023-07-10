@@ -157,11 +157,16 @@
 	        },
 
 	        changeAvailableMaterials(meterType) {
-		        this.availableMaterialTypes = this.materialTypes.filter((materialType) => {
-                    const specificMaterials = this.specificMaterials[ meterType ]
-                    return (specificMaterials?.includes(materialType.id)) || this.commonMaterials.includes(materialType.id)
-                })
-                this.materialType = this.availableMaterialTypes[0]
+	        	if (this.specificMaterials[ meterType ]) {
+			        this.availableMaterialTypes = this.materialTypes.filter((materialType) => {
+				        const specificMaterials = this.specificMaterials[ meterType ]
+				        return (specificMaterials?.includes(materialType.id)) || this.commonMaterials.includes(materialType.id)
+			        })
+                } else {
+			        this.availableMaterialTypes = this.materialTypes.slice(0)
+                }
+
+                this.materialType = this.availableMaterialTypes.at(0)
             },
         },
 	}

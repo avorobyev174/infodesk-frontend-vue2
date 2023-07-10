@@ -64,7 +64,7 @@
 	        async acceptFilters() {
 		        this.checkAllFilters()
 		        try {
-                    if (!this.isFilters()) {
+                    if (!this.isActiveFilters()) {
                         await this.getAssignments()
                     } else {
 	                    this.totalAssignmentsCount = await this.assignmentsFilter({
@@ -77,7 +77,7 @@
 		        }
 	        },
 
-            isFilters() {
+            isActiveFilters() {
 				return Object.values(this.filters).reduce((totalFilterCount, filter) => totalFilterCount += filter?.length, 0)
             },
 

@@ -1,0 +1,8 @@
+const Reports = {
+	STORAGE_METER_BY_SERIAL_NUMBER: 3,
+	ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER: 14,
+}
+
+export {
+	Reports
+}

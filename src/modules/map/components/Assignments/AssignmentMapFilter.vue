@@ -12,8 +12,8 @@
         <v-combobox
             v-model="filterByOwner"
             :items="serviceEmployees"
-            item-text="name"
-            item-value="accId"
+            item-text="title"
+            item-value="value"
             label="Фильтр по сотруднику"
             clearable
             multiple
@@ -77,7 +77,7 @@
 				return
 			}
 			try {
-				await this.fetchAssignments()
+				await this.fetchAllAssignments()
 				this.createFiltersValues()
 			} catch (e) {
 				this.showNotificationRequestError(e)
@@ -85,7 +85,7 @@
 		},
         methods: {
 	        ...mapActions('service', [
-		        'fetchAssignments',
+		        'fetchAllAssignments',
 	        ]),
 
 	        createFiltersValues() {
@@ -94,25 +94,15 @@
 		        this.serviceAddresses = createServiceAddressesArray(this.assignments)
 	        },
 
-	        getAssignmentMarkerColor(status) {
-		        switch (status) {
-			        case 1:
-			        case 4: return this.colorGrey
-			        case 2: return this.colorBlue
-			        case 3:
-			        case 5: return this.colorGreen
-		        }
-	        },
-
 	        getFilteredMarkers() {
 	        	const filters = {
-			        statuses: this.filterByStatus.map((status) => status.value),
-			        owners: this.filterByOwner.map(({ accId }) => accId),
+			        statuses: this.filterByStatus.map(({ value }) => value),
+			        owners: this.filterByOwner.map(({ value }) => value),
 			        buildings: this.filterByBuilding,
 			        addresses: this.filterByAddress,
 		        }
 		        const filteredAssignments = getFilteredAssignments(this.assignments, filters)
-		        const filteredAndClusteredAssignments = filteredAssignments
+		        return filteredAssignments
                     .map(({ lat, lng, customer_address, owner_id, status }) => ({
                         addressSpliced: customer_address ? spliceCustomerAddress(customer_address, true, true) : 'неизвестно',
                         address: customer_address ? spliceCustomerAddress(customer_address, true, false) : 'неизвестно',
@@ -145,17 +135,11 @@
 	                    if (assignment.apartments.some((apartment) => apartment.status === AssignmentEventType.IN_WORK)) {
 	                    	color = this.colorBlue
                         }
-	                    if (assignment.apartments.every((apartment) => apartment.status === AssignmentEventType.CLOSE ||
-		                        assignment.apartments.every((apartment) => apartment.status === AssignmentEventType.CLOSE_AUTO))) {
+	                    if (assignment.apartments.every((apartment) => [ AssignmentEventType.CLOSE, AssignmentEventType.CLOSE_AUTO ].includes(apartment.status))) {
 		                    color = this.colorGreen
 	                    }
-                    	return {
-                    		...assignment,
-                            color
-                        }
+                    	return { ...assignment, color }
                     })
-
-                return filteredAndClusteredAssignments
             }
         }
 	}

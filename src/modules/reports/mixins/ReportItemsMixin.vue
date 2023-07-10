@@ -1,7 +1,5 @@
-<template>    
-</template>
 <script>
-	import {mapGetters, mapState} from "vuex";
+	import { mapGetters } from "vuex"
 
 	export default {
         name: 'ReportItemsMixin',
@@ -9,7 +7,7 @@
 			role: ''
 		}),
 	    mounted() {
-		    if (this.roles && this.roles.report_module) {
+		    if (this.roles?.report_module) {
 			    this.role = this.roles.report_module
 		    }
 	    },
@@ -103,7 +101,7 @@
 		        name: 'Движение выбранного прибора учета',
 		        download: false,
 		        description: 'Список всех логов текущего счетчика',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -113,7 +111,7 @@
 		        name: 'Информация за период',
 		        download: false,
 		        description: 'Информация по всему комплексу за выбранный период',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -123,7 +121,7 @@
 		        name: 'Движение приборов учета за период по местонахождению (общее количество)',
 		        download: false,
 		        description: 'Информация по количеству полученных и отданных приборов учета за выбранный период по местонахождению',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -133,7 +131,7 @@
 		        name: 'Движение приборов учета за период по сотруднику (общее количество)',
 		        download: false,
 		        description: 'Информация по количеству полученных и отданных приборов учета за выбранный период по сотруднику',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -143,7 +141,7 @@
 		        name: 'Движение приборов учета за период по местонахождению',
 		        download: false,
 		        description: 'Информация по логам приборов учета за выбранный период по местонахождению',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -153,7 +151,7 @@
 		        name: 'Движение приборов учета за период по сотруднику',
 		        download: false,
 		        description: 'Информация по логам приборов учета за выбранный период по сотруднику',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -163,7 +161,7 @@
 		        name: 'Движение приборов учета за период по сотруднику (сгруппированный)',
 		        download: false,
 		        description: 'Информация по логам приборов учета сгруппированным по типу и дате за выбранный период по сотруднику',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -173,7 +171,7 @@
 		        name: 'Текущее количество приборов учета по местонахождению',
 		        download: false,
 		        description: 'Текущее количество приборов учета находящихся в выбранном месте',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -194,7 +192,7 @@
 		        name: 'Количество использованных материалов за период',
 		        download: false,
 		        description: 'Количество использованных расходников за период',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -204,7 +202,17 @@
 		        name: 'Проверка счетчиков выданных на поверку',
 		        download: false,
 		        description: 'Проверка счетчиков выданных на поверку по серийному номеру',
-		        func: 'getStorageReport',
+		        func: 'dataInputReportDialogOpen',
+		        loading: false,
+		        show: false,
+		        open: true,
+	        },
+	        assignmentEventsReport: {
+		        id: 14,
+		        name: 'События по прибору учета',
+		        download: false,
+		        description: 'Количество событий по серийному номеру прибора учета',
+		        func: 'dataInputReportDialogOpen',
 		        loading: false,
 		        show: false,
 		        open: true,
@@ -214,6 +222,10 @@
             getReportItems() {
             	if (this.role === 'admin') {
             		return [
+			            {
+				            name: 'Поручения',
+				            children: [ this.assignmentEventsReport ],
+			            },
 			            {
 				            name: 'Альфа Центр',
 				            children: [ this.alphaReport ],

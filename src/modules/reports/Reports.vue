@@ -92,7 +92,7 @@
         </template>
         </v-treeview>
         <non-active-in-pyramid-report
-            ref="reportDialogActive"
+            ref="ReportActiveDialog"
             @okButtonClickEvent="getNonActiveInPyramidReport"
             title="Параметры отчета"
         />
@@ -101,20 +101,20 @@
             @okButtonClickEvent="getPyramidLoadedByAddressReport"
             title="Параметры отчета"
         />
-        <storage-result-report-dialog
-            ref="resultShowReportDialog"
+        <data-input-report-dialog
+            @submit="showReportData"
+            ref="DataInputReportDialog"
+        ></data-input-report-dialog>
+        <data-result-report-dialog
+            ref="DataResultReportDialog"
             :report-data="reportData"
             :title="reportTitle"
-        ></storage-result-report-dialog>
-        <storage-input-report-dialog
-            @submitClick="showStorageReport"
-            ref="storageInputReportDialog"
-        ></storage-input-report-dialog>
+        ></data-result-report-dialog>
     </v-card>
 </template>
 
 <script>
-	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+	import { mapActions } from "vuex"
 	import saveCountByAddressReportToExcel from "./js/saveCountByAddressReportToExcel"
 	import saveLoadedInPyramidByCustomerAddressReportToExcel from "./js/saveLoadedInPyramidByCustomerAddressReportToExcel"
 	import saveFromUitToStorageReportToExcel from "../reports/js/saveFromUitToStorageReportToExcel"
@@ -125,55 +125,43 @@
 	import NonActiveInPyramidReport from "./components/NonActiveInPyramidReport"
 	import MeterCountByAddressReport from "./components/MeterCountByAddressReport"
 	import ReportItemsMixin from './mixins/ReportItemsMixin'
-    import StorageResultReportDialog from "./components/storage/StorageResultReportDialog"
+    import DataResultReportDialog from "./components/DataResultReportDialog"
 	import StorageMixin from "../storage/mixins/StorageMixin"
 	import ReportStorageMixin from "./mixins/ReportStorageMixin"
-    import StorageInputReportDialog from "./components/storage/StorageInputReportDialog"
+    import DataInputReportDialog from "./components/DataInputReportDialog"
     import { dateFormat } from "../Utils"
+	import DictionaryMixin from "../mixins/DictionaryMixin"
+	import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
+	import ReportServiceMixin from "./mixins/ReportServiceMixin"
 
 	export default {
 		name: "Reports",
 		components: {
 			NonActiveInPyramidReport,
 			MeterCountByAddressReport,
-			StorageResultReportDialog,
-			StorageInputReportDialog
+			DataResultReportDialog,
+			DataInputReportDialog
         },
 		data: () => ({
+			moduleName: 'reports',
             expand: false,
             selectedItem: null,
-			dialogModel: false,
             reportData: [],
             reportTitle: '',
             reportItems: [],
 		}),
-		mixins: [ ReportItemsMixin, StorageMixin, ReportStorageMixin ],
+		mixins: [ ReportItemsMixin, StorageMixin, ReportStorageMixin, DictionaryMixin, FavoriteModuleMixin, ReportServiceMixin ],
 		inject: [
-            'showNotificationError',
+            'showNotificationRequestError',
             'showNotificationInfo',
-            'showNotificationRequestErrorWithCustomText',
             'setBackgroundImage'
         ],
-		computed: {
-			...mapState([ 'colorGold' ]),
-			...mapGetters({
-				ipAddresses: 'registration/getIpAddress',
-				isLogin: 'getIsLogin',
-			}),
-		},
         provide: function () {
 	        return {
 		        formatDate: this.formatDate,
 	        }
         },
-		created() {
-			this.setFavoriteModuleColor($cookies.get('common_favorite_module') === '/reports' ? this.colorGold : '')
-		},
 		mounted() {
-			if (!this.isLogin) {
-				return
-			}
-
 			this.setBackgroundImage(true)
             this.reportItems = this.getReportItems()
 		},
@@ -187,28 +175,19 @@
 					'getLoadedPyramidCountByCustomerAddress',
 					'getAlphaLastTimeDataReport',
 					'getRotecMetersInfo',
-                    'getLocationReport'
 				]),
-			...mapMutations(['setFavoriteModuleColor']),
 
 			localFuncCall(item) {
 				this[ item.func ](item)
-			},
-
-			getIpAddressTitle(ipAddress) {
-				const ipAddr = this.ipAddresses.find(address => ipAddress === address.value)
-				return ipAddr ? ipAddr.text : ipAddress
 			},
 
 			async getAlphaReport(item) {
 				item.loading = true
 				try {
                     const response = await this.getAlphaLastTimeDataReport()
-                    //console.log(response)
                     saveLastTimeDataToExcelFile(response)
 				} catch (e) {
-					console.log(e)
-					this.showNotificationError(`Ошибка при выполнении отчета: ${ e.message }`)
+					this.showNotificationRequestError(e)
 				} finally {
 					item.loading = false
 				}
@@ -237,8 +216,7 @@
 					saveLoadedInPyramidByCustomerAddressReportToExcel(editedResponse)
 
 				} catch (e) {
-					console.log(e)
-					this.showNotificationError('Ошибка при выполнении отчета')
+					this.showNotificationRequestError(e)
 				} finally {
 					item.loading = false
 				}
@@ -260,8 +238,7 @@
 
 					saveFromUitToStorageReportToExcel(editedResponse)
 				} catch (e) {
-					console.log(e)
-					this.showNotificationError('Ошибка при выполнении отчета')
+					this.showNotificationRequestError(e)
 				} finally {
 					item.loading = false
 				}
@@ -279,8 +256,7 @@
 
 					saveNotLoadedInPyramidReportToExcel(editedResponse)
 				} catch (e) {
-					//console.log(e)
-					this.showNotificationError('Ошибка при выполнении отчета')
+					this.showNotificationRequestError(e)
 				} finally {
 					item.loading = false
 				}
@@ -313,8 +289,7 @@
 
                     saveNonActivePyramidMetersToExcelFile(nonActiveMetersArray)
                 } catch (e) {
-                    console.log(e)
-                    this.showNotificationError('Ошибка при выполнении отчета')
+                    this.showNotificationRequestError(e)
                 } finally {
 					this.selectedItem.loading = false
                 }
@@ -352,8 +327,7 @@
 					saveCountByAddressReportToExcel(editedResponse)
 
 				} catch (e) {
-					console.log(e)
-					this.showNotificationError('Ошибка при выполнении отчета')
+					this.showNotificationRequestError(e)
 				} finally {
 					this.selectedItem.loading = false
 				}
@@ -364,20 +338,56 @@
 				try {
 					const meters =  await this.getRotecMetersInfo()
                     saveRotecDataToExcelFile(meters, this.getIpAddressTitle)
-				} catch ({ message }) {
-					this.showNotificationError(`Ошибка при выполнении отчета: ${ message }`)
+				} catch (e) {
+					this.showNotificationRequestError(e)
 				} finally {
 					item.loading = false
 				}
 			},
 
-			async getStorageReport(item) {
-                this.$refs.storageInputReportDialog.open(item)
+			async activePyramidDialogOpen(item) {
+				this.$refs.ReportActiveDialog.open()
+				this.selectedItem = item
 			},
 
-			async activePyramidDialogOpen(item) {
-				this.$refs.reportDialogActive.open()
-				this.selectedItem = item
+			async dataInputReportDialogOpen(item) {
+                this.$refs.DataInputReportDialog.open(item)
+			},
+
+			async showReportData(reportItem) {
+				switch (reportItem.id) {
+					case 3: return this.showMeterStorageReport(reportItem)
+					case 4: return this.showStoragePeriodReport(reportItem)
+					case 5: return this.showLocationByPeriodStorageReport(reportItem)
+					case 6: return this.showEmployeeByPeriodStorageReport(reportItem)
+					case 7: return this.showLocationLogsByPeriodStorageReport(reportItem)
+					case 8: return this.showEmpLogsByPeriodStorageReport(reportItem)
+					case 9: return this.showEmpGroupLogsByPeriodStorageReport(reportItem)
+					case 10: return this.showCurrentCountByLocationStorageReport(reportItem)
+					case 11: return this.showRepairAndMaterialStorageReport(reportItem)
+					case 12: return this.showSpentMaterialsByMonthStorageReport(reportItem)
+					case 14: return this.showAssignmentEventsBySerialNumberReport(reportItem)
+				}
+			},
+
+			async showDataResultReportDialog(dialogTitle, reportHeaders, getReportDataFunction) {
+				const { DataInputReportDialog, DataResultReportDialog } = this.$refs
+				DataInputReportDialog.setLoading(true)
+				try {
+					const data = await getReportDataFunction()
+					if (!data.length) {
+						return this.showNotificationInfo('Информация отсутствует')
+					}
+					DataResultReportDialog.open({
+						headers: reportHeaders,
+						dialogTitle,
+						data
+					})
+				} catch (e) {
+					this.showNotificationRequestError(e)
+				} finally {
+					DataInputReportDialog.close()
+				}
 			},
 		}
 	}

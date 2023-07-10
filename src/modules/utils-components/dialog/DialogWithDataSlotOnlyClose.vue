@@ -2,9 +2,9 @@
     <v-dialog
         v-model="dialogModel"
         :max-width="width"
-        @keydown.enter="okClick"
-        @keydown.esc="close"
-        @click:outside="close"
+        @keydown.enter="dialogClose"
+        @keydown.esc="dialogClose"
+        @click:outside="dialogClose"
     >
         <v-card>
             <v-card-title>
@@ -15,7 +15,7 @@
                     ref="form"
                     v-model="formValid"
                     lazy-validation
-                    @submit.prevent="okClick"
+                    @submit.prevent="closeDialog"
                     height="500px"
                 >
                     <slot name="fields"/>
@@ -26,17 +26,9 @@
                 <v-btn
                     color="blue darken-1"
                     text
-                    @click="close"
+                    @click="closeDialog"
                 >
-                    Отмена
-                </v-btn>
-                <v-btn
-                    color="blue darken-1"
-                    text
-                    @click="okClick"
-                    :loading="loading"
-                >
-                    ОК
+                    {{ closeButtonTitle ? closeButtonTitle : 'Закрыть' }}
                 </v-btn>
             </v-card-actions>
         </v-card>
@@ -44,14 +36,17 @@
 </template>
 
 <script>
+	import DialogMixin from "../../mixins/DialogMixin"
+
 	export default {
-		name: "SimpleDialogWithDataSlot",
+		name: "DialogWithDataSlotOnlyClose",
 		components: {},
         data: () => ({
 	        formValid: true,
 	        dialogModel: false,
 	        loading: false,
         }),
+        mixins: [ DialogMixin ],
         props: {
             title: {
 		        type: String,
@@ -61,30 +56,14 @@
             	type: Number,
                 default: 500
             },
+            closeButtonTitle: {
+            	type: String
+            }
         },
         methods: {
-			open() {
-				this.dialogModel = true
-            },
-
-	        setLoading(loading) {
-		        this.loading = loading
-	        },
-
-	        close() {
-		        this.dialogModel = false
-                if (this.$refs.form) {
-	                this.$refs.form.resetValidation()
-                }
-		        this.$emit('closeEvent')
-	        },
-
-            okClick() {
-	            if (!this.$refs.form?.validate()) {
-		            return
-	            }
-	            this.$emit('okButtonClickEvent')
-	            this.loading = true
+            closeDialog() {
+	            this.$emit('close')
+                this.dialogClose()
             }
         }
 	}

@@ -2,7 +2,7 @@
     <v-dialog
         v-model="dialogModel"
         :max-width="width"
-        @keydown.enter="dialogClose"
+        @keydown.enter="submit"
         @keydown.esc="dialogClose"
         @click:outside="dialogClose"
     >
@@ -15,35 +15,34 @@
                     ref="form"
                     v-model="formValid"
                     lazy-validation
-                    @submit.prevent="closeDialog"
-                    height="500px"
+                    @submit.prevent="submit"
+                    :height="height"
                 >
                     <slot name="fields"/>
                 </v-form>
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="dialogClose">Отмена</v-btn>
                 <v-btn
                     color="blue darken-1"
                     text
-                    @click="closeDialog"
-                >
-                    {{ closeButtonTitle ? closeButtonTitle : 'Закрыть' }}
-                </v-btn>
+                    @click="submit"
+                    :loading="loading"
+                >ОК</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
 <script>
-	import DialogMixin from "../mixins/DialogMixin"
+	import DialogMixin from "../../mixins/DialogMixin"
 
 	export default {
-		name: "DialogWithDataSlotOnlyClose",
+		name: "DialogWithDataSlot",
 		components: {},
         data: () => ({
 	        formValid: true,
-	        dialogModel: false,
 	        loading: false,
         }),
         mixins: [ DialogMixin ],
@@ -56,14 +55,27 @@
             	type: Number,
                 default: 500
             },
-            closeButtonTitle: {
-            	type: String
-            }
+	        height: {
+		        type: Number,
+		        default: 500
+	        },
         },
         methods: {
-            closeDialog() {
-	            this.$emit('close')
-                this.dialogClose()
+	        setLoading(loading) {
+		        this.loading = loading
+	        },
+
+	        dialogBeforeClose() {
+                this.$refs.form?.resetValidation()
+		        this.$emit('close')
+	        },
+
+            submit() {
+	            if (!this.$refs.form?.validate()) {
+		            return
+	            }
+	            this.$emit('submit')
+	            this.loading = true
             }
         }
 	}

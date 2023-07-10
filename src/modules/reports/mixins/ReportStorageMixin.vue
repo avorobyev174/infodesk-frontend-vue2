@@ -20,7 +20,7 @@
                 'checkMeterInDB',
                 'fetchMaterialsTypes',
 		    ]),
-	        ...mapActions('reports',
+	        ...mapActions('storageReports',
 		        [
 			        'getLocationReport',
 			        'getOwnerReport',
@@ -37,37 +37,22 @@
 			        'getMaterialSpentByMonthReport'
 		        ]),
 
-		    async showStorageReport(report) {
-			    switch (report.id) {
-				    case 3: return this.showMeterStorageReport(report)
-				    case 4: return this.showStoragePeriodReport(report)
-				    case 5: return this.showLocationByPeriodStorageReport(report)
-				    case 6: return this.showEmployeeByPeriodStorageReport(report)
-				    case 7: return this.showLocationLogsByPeriodStorageReport(report)
-				    case 8: return this.showEmpLogsByPeriodStorageReport(report)
-				    case 9: return this.showEmpGroupLogsByPeriodStorageReport(report)
-				    case 10: return this.showCurrentCountByLocationStorageReport(report)
-				    case 11: return this.showRepairAndMaterialStorageReport(report)
-				    case 12: return this.showSpentMaterialsByMonthStorageReport(report)
-			    }
-		    },
-
 	        async showLocationStorageReport(item) {
 		        item.loading = true
 		        try {
 			        const response = await this.getLocationReport()
-			        this.$refs.storageInputReportDialog.close()
+			        this.$refs.DataInputReportDialog.close()
 			        const data = response
 				        .map((row) => ({ ...row, meter_location: this.getLocationTitle(row.meter_location) }))
 				        .sort((a, b) => b.count - a.count)
 
-			        this.$refs.resultShowReportDialog.open({
-				        titles: ['Местонахождение', 'Количество'],
+			        this.$refs.DataResultReportDialog.open({
+				        headers: ['Местонахождение', 'Количество'],
 				        dialogTitle: item.description,
 				        data
 			        })
 		        } catch (e) {
-			        this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+			        this.showNotificationRequestError(e)
 		        } finally {
 			        item.loading = false
 		        }
@@ -85,18 +70,18 @@
 		        item.loading = true
 		        try {
 			        const response = await this.getOwnerReport()
-			        this.$refs.storageInputReportDialog.close()
+			        this.$refs.DataInputReportDialog.close()
 			        const data = response
 				        .map((row) => ({ ...row, current_owner: this.getCurrentOwner(row.current_owner) }))
 				        .sort((a, b) => b.count - a.count)
 
-			        this.$refs.resultShowReportDialog.open({
-				        titles: ['Владелец', 'Количество'],
+			        this.$refs.DataResultReportDialog.open({
+				        headers: ['Владелец', 'Количество'],
 				        dialogTitle: item.description,
 				        data
 			        })
-		        } catch ({ message }) {
-			        this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ message }`)
+		        } catch (e) {
+			        this.showNotificationRequestError(e)
 		        } finally {
 			        item.loading = false
 		        }
@@ -105,7 +90,7 @@
 		    async showMeterStorageReport({ type, serialNumber, title }) {
 			    try {
 				    const meter = await this.checkMeterInDB({ type, serialNumber })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 
                     if (!meter.length) {
 	                    return this.showNotificationInfo('Счетчик отсутсвтвует в базе данных')
@@ -136,9 +121,9 @@
                         }
 				    })
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 				    	{
-                            titles: [ 'Дата', 'Операция', 'Отдающий', 'Принимающий', 'Комментарий', 'Доп. информация' ],
+                            headers: [ 'Дата', 'Операция', 'Отдающий', 'Принимающий', 'Комментарий', 'Доп. информация' ],
                             dialogTitle: title,
                             data
                         },
@@ -146,14 +131,14 @@
                         1000
                     )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
             },
 
             async showStoragePeriodReport({ startDate, endDate, title }) {
 	            try {
 		            const response = await this.getStoragePeriodReport({ startDate, endDate })
-		            this.$refs.storageInputReportDialog.close()
+		            this.$refs.DataInputReportDialog.close()
 
 		            if (!response.length) {
 			            return this.showNotificationInfo('Информация за этот период отсутствует')
@@ -169,25 +154,25 @@
 			            }
 		            })
 
-		            this.$refs.resultShowReportDialog.open(
+		            this.$refs.DataResultReportDialog.open(
 			            {
-				            titles: [ 'Дата', 'Операция', 'Тип', 'Серийный номер', 'Отдающий', 'Принимающий', 'Комментарий' ],
+				            headers: [ 'Дата', 'Операция', 'Тип', 'Серийный номер', 'Отдающий', 'Принимающий', 'Комментарий' ],
 				            dialogTitle: title,
-				            additional: `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+				            additionalTitle: `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 				            data
 			            },
 			            500,
 			            1000
 		            )
 	            } catch (e) {
-		            this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+		            this.showNotificationRequestError(e)
 	            }
             },
 
 		    async showLocationByPeriodStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getInOutByPeriodAndLocationReport({ startDate, endDate, location })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 
 				    const countMap = new Map(Object.entries(response))
 				    if (!countMap.size) {
@@ -206,25 +191,25 @@
 					    data.push(record)
 				    }
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 					    {
-						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
+						    headers: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
 						    dialogTitle: title,
-						    additional:  `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle:  `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    500,
 					    1000
 				    )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
             },
 
 		    async showEmployeeByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
 			    try {
 				    const response = await this.getInOutByPeriodAndEmployeeReport({ startDate, endDate, empStaffId })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 				    const countMap = new Map(Object.entries(response))
 
 				    if (!countMap.size) {
@@ -243,25 +228,25 @@
 					    data.push(record)
 				    }
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 					    {
-						    titles: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
+						    headers: [ 'Тип ПУ', 'Количество на начало периода', 'Получено', 'Отдано', 'Количество на конец периода' ],
 						    dialogTitle: title,
-						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    500,
 					    1000
 				    )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
 		    },
 
 		    async showLocationLogsByPeriodStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getLogsByPeriodAndLocationReport({ startDate, endDate, location })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotificationInfo('Информация за этот период отсутствует')
@@ -277,25 +262,25 @@
 					    }
 				    })
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 					    {
-						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
+						    headers: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional: `${ this.getLocationTitle(location) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle: `${ this.getLocationTitle(location) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
 		    },
 
 		    async showEmpLogsByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
 			    try {
 				    const response = await this.getLogsByPeriodAndEmpReport({ startDate, endDate, empStaffId })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotificationInfo('Информация за этот период отсутствует')
@@ -309,25 +294,25 @@
                             accepted_person: this.getEmployeeTitleByStaffId(row.accepted_person)
 					    }))
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 					    {
-						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
+						    headers: [ 'Тип ПУ', 'Серийный номер', 'Дата', 'Тип операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
 		    },
 
 		    async showEmpGroupLogsByPeriodStorageReport({ startDate, endDate, empStaffId, title }) {
 			    try {
 				    const response = await this.getGroupLogsByPeriodAndEmpReport({ startDate, endDate, empStaffId })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotificationInfo('Информация за этот период отсутствует')
@@ -341,25 +326,25 @@
 					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
 				    }))
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 					    {
-						    titles: [ 'Дата', 'Тип ПУ', 'Количество', 'Тип операции', 'Отдающий', 'Принимающий' ],
+						    headers: [ 'Дата', 'Тип ПУ', 'Количество', 'Тип операции', 'Отдающий', 'Принимающий' ],
 						    dialogTitle: title,
-						    additional:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle:  `${ this.getEmployeeTitleByStaffId(empStaffId) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
 		    },
 
 		    async showCurrentCountByLocationStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getCurrentCountByLocationReport({ startDate, endDate, location })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotificationInfo('Информация за этот период отсутствует')
@@ -372,18 +357,18 @@
 					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
 				    }))
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 					    {
-						    titles: [ 'Тип ПУ', 'Серийный номер', 'Дата прихода', 'Отдающий', 'Принимающий', 'Комментарий' ],
+						    headers: [ 'Тип ПУ', 'Серийный номер', 'Дата прихода', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additional: `${ this.getLocationTitle(location) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle: `${ this.getLocationTitle(location) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    600,
 					    1200
 				    )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
             },
 
@@ -461,17 +446,17 @@
                     }, '')
 		            materialTableHtml += '</tbody>'
 
-		            this.$refs.resultShowReportDialog.print(repairTableHtml, materialTableHtml, `Отчет по ремонту приборов учета ${ this.formatDate(today) }`)
+		            this.$refs.DataResultReportDialog.print(repairTableHtml, materialTableHtml, `Отчет по ремонту приборов учета ${ this.formatDate(today) }`)
 
 	            } catch (e) {
-		            this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+		            this.showNotificationRequestError(e)
 	            }
             },
 
 		    async showSpentMaterialsByMonthStorageReport({ startDate, endDate, title }) {
 			    try {
 				    const response = await this.getMaterialSpentByMonthReport({ startDate, endDate })
-				    this.$refs.storageInputReportDialog.close()
+				    this.$refs.DataInputReportDialog.close()
 
 				    if (!response.length) {
 					    return this.showNotificationInfo('Информация за этот период отсутствует')
@@ -482,18 +467,18 @@
 					    item_id: this.getMaterialTypeTitle(row.item_id),
 				    }))
 
-				    this.$refs.resultShowReportDialog.open(
+				    this.$refs.DataResultReportDialog.open(
 					    {
-						    titles: [ 'Материал', 'Количество' ],
+						    headers: [ 'Материал', 'Количество' ],
 						    dialogTitle: title,
-						    additional: `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle: `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
 						    data
 					    },
 					    500,
 					    800
 				    )
 			    } catch (e) {
-				    this.showNotificationRequestErrorWithCustomText(`Ошибка при выполнении отчета: ${ e.message }`, e)
+				    this.showNotificationRequestError(e)
 			    }
 		    },
         }

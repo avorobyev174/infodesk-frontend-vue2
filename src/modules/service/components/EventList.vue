@@ -138,7 +138,7 @@
 	import { mapActions, mapState, mapGetters } from 'vuex'
     import { AssignmentEventType } from "../../../const"
     import SimpleDialog from "../../utils-components/SimpleDialog"
-    import DialogWithDataSlotOnlyClose from "../../utils-components/DialogWithDataSlotOnlyClose"
+    import DialogWithDataSlotOnlyClose from "../../utils-components/dialog/DialogWithDataSlotOnlyClose"
 
 	export default {
 		name: 'EventList',

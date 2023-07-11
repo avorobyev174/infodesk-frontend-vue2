@@ -3,15 +3,16 @@
         <template v-slot:activator="{ on, attrs }">
             <v-btn
                 :color="color"
-                @click="$emit('buttonClickEvent')"
+                @click="$emit('click')"
                 :class="btnClass"
                 v-bind="attrs"
                 v-on="on"
                 :disabled="disabledBtn"
                 :dark="isDark"
                 :height="height"
+                :icon="isIcon"
             >
-                <v-icon size="30px">{{ icon }}</v-icon>
+                <v-icon :size="iconSize">{{ icon }}</v-icon>
             </v-btn>
         </template>
         <span>{{ title }}</span>
@@ -34,10 +35,7 @@
                 type: String,
                 required: true
             },
-            btnClass: {
-                type: String,
-                required: true
-            },
+            btnClass: String,
             color: {
                 type: String,
                 default: 'primary'
@@ -50,6 +48,14 @@
                 type: Boolean,
                 default: true
             },
+            iconSize: {
+	            type: String,
+	            default: '30px'
+            },
+	        isIcon: {
+		        type: Boolean,
+		        default: false
+	        },
         }
     }
 </script>

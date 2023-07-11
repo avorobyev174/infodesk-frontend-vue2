@@ -1,11 +1,11 @@
 const AssignmentEventType = {
 	REGISTERED: 1,
 	IN_WORK: 2,
-	CLOSE: 3,
+	CLOSED: 3,
 	ACTION: 4,
 	RE_REGISTRED: 5,
 	SYSTEM_ACTION: 6,
-	CLOSE_AUTO: 7,
+	CLOSED_AUTO: 7,
 	DECLINE: 8,
 }
 

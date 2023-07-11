@@ -36,9 +36,9 @@
                     <service-menu
                         :menuActions="menuActions"
                         @refreshAssignments="getAssignments"
-                        @openAssignmentsLogsDialog="$refs.serviceUpdateLogsDialog.dialogOpen()"
-                        @showHideColumns="$refs.showHideColumnsDialog.open()"
-                        @opendAssignmentAddDialog="$refs.addAssignmentDialog.dialogOpen()"
+                        @openAssignmentsLogsDialog="$refs.ServiceUpdateLogsDialog.dialogOpen()"
+                        @showHideColumns="$refs.ShowHideColumnsDialog.open()"
+                        @opendAssignmentAddDialog="$refs.AddAssignmentDialog.dialogOpen()"
                         @saveAssignmentsToExcel="saveAssignmentsToExcel"
                     />
                 </v-toolbar>
@@ -148,23 +148,23 @@
             </template>
         </v-data-table>
         <event-list
-            ref="eventList"
+            ref="EventList"
             :assignments="assignments"
         />
         <edit-contacts-dialog
-            ref="editContactsDialog"
+            ref="EditContactsDialog"
             :assignment="selectedAssignment"
             @updateAssignment="updateAssignment"
         />
         <service-update-logs-dialog
-            ref="serviceUpdateLogsDialog"
+            ref="ServiceUpdateLogsDialog"
         />
         <add-assignment-dialog
-            ref="addAssignmentDialog"
+            ref="AddAssignmentDialog"
             @createAssignment="createAssignment"
         ></add-assignment-dialog>
         <show-hide-columns-dialog
-            ref="showHideColumnsDialog"
+            ref="ShowHideColumnsDialog"
             :headers="headers"
             :selectedHeaders="selectedHeaders"
             @changeColumns="changeColumnsVisibility"
@@ -173,13 +173,13 @@
         <action-menu
             ref="actionMenu"
             :actions="assignmentActions"
-            @openEventList="$refs.eventList.open(selectedAssignment, currentAccountId)"
+            @openEventList="$refs.EventList.open(selectedAssignment, currentAccountId)"
             @acceptAssignment="assignmentAccept(selectedAssignment)"
-            @editAssignmentContacts="$refs.editContactsDialog.dialogOpen()"
-            @declineAssignment="$refs.assignmentDeclineDialog.dialogOpen()"
+            @editAssignmentContacts="$refs.EditContactsDialog.dialogOpen()"
+            @declineAssignment="$refs.AssignmentDeclineDialog.dialogOpen()"
         />
         <dialog-custom
-            ref="assignmentDeclineDialog"
+            ref="AssignmentDeclineDialog"
             :max-width="700"
             title="Вы уверены что хотите отклонить поручение?"
             @submit="assignmentDecline(selectedAssignment)"
@@ -288,8 +288,8 @@
             },
 
             async assignmentDecline({ id }) {
-	            const { assignmentDeclineDialog } = this.$refs
-	            assignmentDeclineDialog.dialogClose()
+	            const { AssignmentDeclineDialog } = this.$refs
+	            AssignmentDeclineDialog.dialogClose()
 	            try {
 		            const updatedAssignment = await this.acceptOrDeclineAssignment({ id, isDecline: true })
 		            this.updateAssignment(updatedAssignment)

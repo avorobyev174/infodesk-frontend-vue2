@@ -53,7 +53,7 @@
             v-if="viewType === MapViewTypes.RESEARCH"
         />
         <gmap-map
-            :center="center"
+            :center="mapCenter"
             :zoom="12"
             ref='googleMap'
             class='google-map'
@@ -74,13 +74,11 @@
                     :marker="marker"
                 />
             </gmap-custom-marker>
-
         </gmap-map>
     </div>
 </template>
 
 <script>
-import { mapState } from "vuex"
 import { gmapApi } from 'vue2-google-maps'
 import GmapCluster from 'vue2-google-maps/dist/components/cluster'
 import GmapCustomMarker from 'vue2-gmap-custom-marker'
@@ -92,6 +90,7 @@ import FilterLegend from "./components/FilterLegend"
 import ResearchMarker from "./components/Research/ResearchMarker"
 import AssignmentMarker from "./components/Assignments/AssignmentMarker"
 import { MapViewTypes } from "../../const"
+import { mapOptions, mapCenter } from "./js/map-options"
 
 export default {
     name: "Map",
@@ -106,27 +105,18 @@ export default {
     },
     data: () => ({
 	    MapViewTypes,
+	    mapOptions,
+	    mapCenter,
 	    moduleName: 'map',
 	    mapDrawerModel: false,
-	    center: { lat: 53.41295, lng: 58.99823 },
         markers: [],
         legend: [],
-        mapOptions: {
-            disableDefaultUi: true,
-            scaleControl: true,
-            streetViewControl: false,
-            rotateControl: false,
-            fullscreenControl: false,
-            scrollwheel: true,
-            clickableIcons: true
-        },
-        viewType: MapViewTypes.RESEARCH,
+        viewType: MapViewTypes.ASSIGNMENT,
         viewTypes: [
             { title: 'Обследования', value: 1 },
             { title: 'Поручения', value: 2 },
         ],
     }),
-	inject: [ 'showNotificationError' ],
 	mixins: [ DictionaryMixin, FavoriteModuleMixin ],
 	provide: function () {
 		return {
@@ -139,11 +129,7 @@ export default {
 		}
 	},
 	computed: {
-		...mapState([ 'colorGrey', ]),
 		google: gmapApi
-	},
-	mounted() {
-
 	},
     methods: {
 	    viewTypeChange() {

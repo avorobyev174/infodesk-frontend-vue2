@@ -1,5 +1,13 @@
 <template>
-    <v-tooltip top :color="colorGrey">
+    <v-menu
+        top
+        transition="slide-y-transition"
+        offset-y
+        :nudge-width="250"
+        :nudge-left="120"
+        content-class="marker-menu"
+        :close-on-content-click="false"
+    >
         <template v-slot:activator="{ on, attrs }">
             <div
                 class="assignment-marker"
@@ -19,26 +27,64 @@
                 >{{ marker.count }}</span>
             </div>
         </template>
-        <div>
+        <div class="marker-container">
             <div
-                v-for="({ address, owner, status }, index) in marker.apartments"
+                v-for="({ address, owner_id, status, id, isShowAcceptButton, isShowDeclineButton }, index) in marker.apartments"
                 :key="index"
                 class="marker"
+                :style="`background-color: ${ getAssignmentStatusColor(status) }`"
             >
-                <span class="tooltip-span">{{ `Адрес: ${ address }` }}</span>
-                <span class="tooltip-span">{{ `Исполнитель: ${ owner }` }}</span>
-                <span class="tooltip-span">{{ `Статус: ${ getAssignmentStatusTitle(status) }` }}</span>
+                <div>
+                    <span class="maker-info">{{ `Адрес: ${ address }` }}</span>
+                    <span class="maker-info">{{ `Исполнитель: ${ getAccountFullName(owner_id) }` }}</span>
+                    <span class="maker-info">{{ `Статус: ${ getAssignmentStatusTitle(status) }` }}</span>
+                </div>
+                <div style="display:flex; gap: 5px">
+                    <button-with-tooltip
+                        v-if="isShowAcceptButton"
+                        color="black"
+                        title="Принять поручение"
+                        icon="mdi-clipboard-account-outline"
+                        :is-icon="true"
+                        icon-size="40px"
+                        @click="assignmentAcceptOrDecline(id, false)"
+                    />
+                    <button-with-tooltip
+                        v-if="isShowDeclineButton"
+                        color="black"
+                        title="Отклонить поручение"
+                        icon="mdi-clipboard-minus-outline"
+                        :is-icon="true"
+                        icon-size="40px"
+                        @click="assignmentAcceptOrDecline(id, true)"
+                    />
+                </div>
             </div>
         </div>
-    </v-tooltip>
+    </v-menu>
 </template>
 
 <script>
-	import { mapState } from "vuex"
+	import {mapActions, mapGetters, mapState} from "vuex"
+	import { AssignmentStatus } from "../../../../const"
+    import ButtonWithTooltip from "../../../utils-components/ButtonWithTooltip"
+    import { getMarkerColor, isShowAccept, isShowDecline } from "./utils"
 
 	export default {
 		name: "AssignmentMarker",
-		inject: [ 'getAssignmentStatusTitle' ],
+        components: {
+	        ButtonWithTooltip
+        },
+        data: () => ({
+	        AssignmentStatus
+        }),
+		inject: [
+			'getAssignmentStatusTitle',
+            'showNotificationSuccess',
+            'showNotificationInfo',
+            'showNotificationRequestError',
+            'getAccountFullName'
+        ],
 		props: {
 			marker: {
 				type: Object,
@@ -46,11 +92,56 @@
 			},
 		},
 		computed: {
-			...mapState([ 'colorGrey' ]),
+			...mapState([ 'colorGrey', 'colorBlue', 'colorGreen', 'colorRed' ]),
+			...mapGetters({
+				currentAccountId: 'getAccountId',
+			}),
             markerCountClass() {
 				return this.marker?.count >= 10 ? 'count-more-10' : 'count-less-10'
-            }
+            },
 		},
+        methods: {
+	        ...mapActions('service', [
+		        'acceptOrDeclineAssignment',
+	        ]),
+
+	        getAssignmentStatusColor(status) {
+		        switch (status) {
+			        case AssignmentStatus.REGISTERED:
+			        case AssignmentStatus.RE_REGISTERED: return 'rgba(189, 189, 189, 0.8)'
+			        case AssignmentStatus.IN_WORK: return 'rgba(66, 165, 245, 0.8)'
+			        case AssignmentStatus.CLOSED:
+			        case AssignmentStatus.CLOSED_AUTO: return 'rgba(102, 187, 106, 0.8)'
+		        }
+	        },
+
+	        async assignmentAcceptOrDecline(id, isDecline) {
+		        try {
+			        const updatedAssignment = isDecline
+				        ? await this.acceptOrDeclineAssignment({ id, isDecline })
+				        : await this.acceptOrDeclineAssignment({ id })
+			        this.updateAssignment(updatedAssignment)
+			        isDecline
+                        ? this.showNotificationInfo('Поручение успешно отклонено')
+                        : this.showNotificationSuccess('Поручение успешно принято')
+		        } catch (e) {
+			        this.showNotificationRequestError(e)
+		        }
+	        },
+
+	        updateAssignment({ id, status, owner_id }) {
+	        	const oldAssignmentApartment = this.marker.apartments.find((apartment) => apartment.id === id)
+		        Object.assign(oldAssignmentApartment, {
+		        	...oldAssignmentApartment,
+                    owner: this.getAccountFullName(owner_id),
+			        owner_id,
+                    status,
+			        isShowAcceptButton: isShowDecline(status, owner_id, this.currentAccountId),
+			        isShowDeclineButton: isShowAccept(status, owner_id, this.currentAccountId)
+                })
+		        this.marker.color = getMarkerColor(this.marker.apartments)
+	        },
+        }
 	}
 </script>
 
@@ -61,6 +152,16 @@
 
     .marker {
         font-size: 12px;
+        background-color: white;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        text-align: left;
+        padding: 5px;
+        margin: 5px;
+        border-radius: 3px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
     }
 
     .count {
@@ -79,17 +180,13 @@
         left: 9px;
     }
 
-    .tooltip-span {
+    .maker-info {
         display: block;
         color: rgba(0, 0, 0, 0.8);
         font-weight: 600;
     }
 
-    .marker {
-        border: 1px solid rgba(0, 0, 0, 0.4);
-        text-align: left;
-        padding: 5px;
-        margin: 5px;
-        border-radius: 3px;
+    .marker-menu {
+        background-color: rgba(255, 255, 255, 0.6);
     }
 </style>

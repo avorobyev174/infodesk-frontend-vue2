@@ -49,11 +49,11 @@
 		getFilteredAssignments,
 		spliceCustomerAddress
 	} from '../../../service/js/assignments-filter-values'
-    import { AssignmentEventType } from '../../../../const'
+    import { groupAssignmentsByBuilding } from "./utils"
 
 	export default {
 		name: "AssignmentMapFilter",
-        data: ()=> ({
+        data: () => ({
 	        filterByOwner: [],
 	        filterByStatus: [],
 	        filterByBuilding: [],
@@ -70,6 +70,7 @@
 				assignments: 'service/getAssignments',
 				assignmentStatuses: 'getAssignmentStatuses',
 				isLogin: 'getIsLogin',
+				currentAccountId: 'getAccountId',
 			}),
 		},
 		async mounted() {
@@ -102,44 +103,7 @@
 			        addresses: this.filterByAddress,
 		        }
 		        const filteredAssignments = getFilteredAssignments(this.assignments, filters)
-		        return filteredAssignments
-                    .map(({ lat, lng, customer_address, owner_id, status }) => ({
-                        addressSpliced: customer_address ? spliceCustomerAddress(customer_address, true, true) : 'неизвестно',
-                        address: customer_address ? spliceCustomerAddress(customer_address, true, false) : 'неизвестно',
-                        position: { lat, lng },
-                        owner: owner_id ? this.getAccountFullName(owner_id) : 'отсутствует',
-	                    status
-                    }))
-                    .reduce((assignments, currentAssignment) => {
-                    	const foundAddress = assignments.find(({ addressSpliced }) => addressSpliced === currentAssignment.addressSpliced)
-                        if (foundAddress) {
-	                        foundAddress.count += 1
-	                        foundAddress.apartments.push({
-		                        address: currentAssignment.address,
-		                        owner: currentAssignment.owner,
-		                        status: currentAssignment.status,
-	                        })
-                        } else {
-                            currentAssignment.count = 1
-                            currentAssignment.apartments = [{
-	                            address: currentAssignment.address,
-                                owner: currentAssignment.owner,
-                                status: currentAssignment.status,
-                            }]
-                            assignments.push(currentAssignment)
-                        }
-                        return assignments
-                    }, [])
-                    .map((assignment) => {
-                    	let color = this.colorGrey
-	                    if (assignment.apartments.some((apartment) => apartment.status === AssignmentEventType.IN_WORK)) {
-	                    	color = this.colorBlue
-                        }
-	                    if (assignment.apartments.every((apartment) => [ AssignmentEventType.CLOSE, AssignmentEventType.CLOSE_AUTO ].includes(apartment.status))) {
-		                    color = this.colorGreen
-	                    }
-                    	return { ...assignment, color }
-                    })
+		        return groupAssignmentsByBuilding(filteredAssignments, this.currentAccountId)
             }
         }
 	}

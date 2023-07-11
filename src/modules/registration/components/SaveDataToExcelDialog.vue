@@ -52,16 +52,16 @@
                         />
                     </template>
                     <template v-slot:footer.prepend>
-                        <buttonWithTooltip
+                        <button-with-tooltip
                             title="Скачать файл excel"
                             icon="mdi-download-box"
-                            @buttonClickEvent="saveDataToExcel"
+                            @click="saveDataToExcel"
                             btnClass="mr-1"
                         />
-                        <buttonWithTooltip
+                        <button-with-tooltip
                             title="Подтвердить загрузку в пирамиду"
                             icon="mdi-database-check"
-                            @buttonClickEvent="approveLoadedExcelData"
+                            @click="approveLoadedExcelData"
                             btnClass=""
                         />
                     </template>
@@ -99,14 +99,14 @@
 </template>
 
 <script>
-    import saveExcelFileForPyramid from "../js/saveLoadDataToPyramidExcel";
-    import { mapActions, mapState } from "vuex";
-    import ButtonWithTooltip from "../../utils-components/ButtonWithTooltip";
+    import saveExcelFileForPyramid from "../js/saveLoadDataToPyramidExcel"
+    import { mapActions, mapState } from "vuex"
+    import ButtonWithTooltip from "../../utils-components/ButtonWithTooltip"
 
     export default {
         name: "SaveDataToExcelDialog",
         components: {
-            buttonWithTooltip: ButtonWithTooltip,
+            ButtonWithTooltip,
         },
         data: () => ({
             loading: false,

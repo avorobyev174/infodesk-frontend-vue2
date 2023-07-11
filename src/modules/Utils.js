@@ -57,13 +57,18 @@ function saveDataArrayToExcelFile(dataArray, sheetName, colsWidthArray, fileName
 	XLSX.writeFile(workBook, `${ fileName }.xlsx`)
 }
 
-function getDate() {
-	return dateFormat(new Date())
+const isJsonValid = (str) => {
+	try {
+		JSON.parse(str)
+	} catch (e) {
+		return false
+	}
+	return true
 }
 
 export {
 	stringToArrayBuffer,
-	getDate,
+	isJsonValid,
 	dateFormat,
 	formatDate,
 	saveDataArrayToExcelFile

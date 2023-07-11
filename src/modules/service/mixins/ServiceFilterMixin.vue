@@ -3,7 +3,6 @@
     	createServiceEmployeeArray,
         createBuildingArray,
         createServiceAddressesArray,
-	    getFilteredAssignments,
 	    createMeterTypesArray,
     } from '../js/assignments-filter-values'
     import { mapActions } from 'vuex'

@@ -70,8 +70,8 @@
 					case AssignmentEventType.RE_REGISTRED: return this.colorGrey
 					case AssignmentEventType.IN_WORK:
 					case AssignmentEventType.DECLINE: return this.colorBlue
-					case AssignmentEventType.CLOSE:
-					case AssignmentEventType.CLOSE_AUTO: return this.colorGreen
+					case AssignmentEventType.CLOSED:
+					case AssignmentEventType.CLOSED_AUTO: return this.colorGreen
 					case AssignmentEventType.ACTION:
 					case AssignmentEventType.SYSTEM_ACTION: return this.colorGold
 				}

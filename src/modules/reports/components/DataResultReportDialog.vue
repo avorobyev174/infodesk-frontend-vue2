@@ -26,7 +26,6 @@
 </template>
 
 <script>
-	import { getDate } from "../../Utils"
     import * as XLSX from 'xlsx/xlsx.mjs'
     import DialogWithTableSlot from "../../utils-components/dialog/DialogWithTableSlot"
 
@@ -123,7 +122,7 @@
 		        const workSheet = XLSX.utils.aoa_to_sheet(data)
 		        workBook.Sheets['Отчет' ] = workSheet
 		        workSheet[ '!cols' ] = this.headers.map((title) => ({ width: 35 }))
-		        XLSX.writeFile(workBook, `${ this.dialogTitle } ${ getDate() }.xlsx`)
+		        XLSX.writeFile(workBook, `${ this.dialogTitle } ${ this.formatDate(new Date()) }.xlsx`)
 	        }
         }
     }

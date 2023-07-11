@@ -202,7 +202,7 @@
 
 			async open(assignment, currentAccountId) {
 				this.owner = 'отсутствует'
-				this.photoUrl = ''
+				this.photoUrl = this.$store.state.serverUrl + '/images/no-user-image.png'
 				this.selectedAssignment = assignment
 				this.currentAccountId = currentAccountId
 				const { id, owner_id } = assignment
@@ -211,7 +211,7 @@
 				try {
 					this.events = await this.fetchAssignmentEvents(id)
                     this.lastEvent = this.events.at(0)
-                    if (this.owner) {
+                    if (this.owner && this.owner !== 'отсутствует') {
 	                    this.photoUrl = this.$store.state.serverUrl + `/images/${ account?.photo }`
                     } else {
 	                    this.owner = 'отсутствует'

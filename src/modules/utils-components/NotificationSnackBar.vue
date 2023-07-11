@@ -71,14 +71,14 @@
 	        },
 
             showNotificationRequestErrorWithCustomText(text, e) {
-                this.createNotification(text, e)
+                this.createNotificationError(text, e)
             },
 
 	        showNotificationRequestError(e) {
-		        this.createNotification('Произошла ошибка при получении/отправке данных', e)
+		        this.createNotificationError('Произошла ошибка при получении/отправке данных', e)
 	        },
 
-	        createNotification(text, e) {
+	        createNotificationError(text, e) {
 		        let notificationText = ''
 		        if (text) {
 			        notificationText = `${ text }: `

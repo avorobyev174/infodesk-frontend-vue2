@@ -5,7 +5,40 @@
         @submit="submit"
         @close="clear"
     >
-        <template v-slot:fields v-if="[
+        <template v-slot:fields v-if="[ Reports.PYRAMID_LOADED_BY_CUSTOMER_ADDRESS ].includes(id)">
+            <v-select
+                v-model="sort"
+                label="Выборка по"
+                :items="sortItems"
+                :rules="requiredRules"
+                item-text="title"
+                item-value="value"
+            />
+        </template>
+        <template v-slot:fields v-else-if="[ Reports.NOT_ACTIVE_IN_PYRAMID ].includes(id)">
+            <v-text-field
+                v-model="days"
+                label="Количество дней без ответа"
+                type="number"
+                hide-spin-buttons
+                :rules="daysRules"
+            />
+        </template>
+        <template v-slot:fields v-else-if="[
+        	Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS
+        ].includes(id)">
+            <v-combobox
+                :items="serviceCustomerAddresses"
+                item-text="title"
+                item-value="value"
+                label="Адреса"
+                v-model="customerAddress"
+                :rules="requiredRules"
+                outlined
+            >
+            </v-combobox>
+        </template>
+        <template v-slot:fields v-else-if="[
         	Reports.STORAGE_METER_BY_SERIAL_NUMBER,
             Reports.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER
         ].includes(id)">
@@ -15,7 +48,7 @@
                 item-value="index"
                 label="Тип"
                 v-model="type"
-                :rules="selectRules"
+                :rules="requiredRules"
                 outlined
             >
             </v-combobox>
@@ -36,7 +69,7 @@
                 item-value="value"
                 label="Местонахождение"
                 v-model="location"
-                :rules="selectRules"
+                :rules="requiredRules"
                 outlined
                 v-if="[ 5, 7, 10 ].includes(id)"
             >
@@ -47,7 +80,7 @@
                 item-value="staffId"
                 label="Сотрудник"
                 v-model="employee"
-                :rules="selectRules"
+                :rules="requiredRules"
                 outlined
                 v-if="[ 6, 8, 9 ].includes(id)"
             >
@@ -56,7 +89,7 @@
                 type="date"
                 label="Начало периода"
                 v-model="startDate"
-                :rules="dateRules"
+                :rules="requiredRules"
                 clearable
                 outlined
             >
@@ -65,7 +98,7 @@
                 type="date"
                 label="Конец периода"
                 v-model="endDate"
-                :rules="dateRules"
+                :rules="requiredRules"
                 clearable
                 outlined
             >
@@ -75,27 +108,24 @@
 </template>
 
 <script>
-	import { mapGetters } from 'vuex'
+	import { mapGetters, mapActions } from 'vuex'
     import DialogWithDataSlot from "../../utils-components/dialog/DialogWithDataSlot"
 	import DictionaryMixin from "../../mixins/DictionaryMixin"
 	import { Reports } from "../const"
+    import { createCustomerAddressesArray } from '../../service/js/assignments-filter-values'
 
 	export default {
 		name: "DataInputReportDialog",
         components: {
             DialogWithDataSlot
         },
-        mixins: [ DictionaryMixin ],
-        computed: {
-	        ...mapGetters({
-                types: 'storage/getMeterTypes',
-                locations: 'storage/getLocations',
-                employees: 'storage/getStorageEmployees',
-	        }),
-        },
 		data: () => ({
 			Reports,
+			days: 0,
+			sortItems: [ { title: 'Время создания записи', value: 0 },  { title: 'Время загрузки в пирамиду', value: 1 } ],
+			sort: { title: 'Время создания записи', value: 0 },
             type: { index: 121, title: 'AIU5' },
+            customerAddress: null,
             location: { text: 'Склад', value: 0 },
             employee: { name: 'Авдонин И. Д.', staffId: 107315 },
             serialNumber: '',
@@ -104,21 +134,47 @@
 			title: '',
             startDate: '',
             endDate: '',
+            serviceCustomerAddresses: [],
 			serialNumberRules: [
 				v => !!v || 'Обязательно к заполнению',
 				v => v && String(v).length >= 6 || 'Должно быть не меньше 6 символов',
 			],
-			dateRules: [
+			requiredRules: [
 				v => !!v || 'Обязательно к заполнению',
 			],
-			selectRules: [
-				v => !!v || 'Обязательно к заполнению',
+			daysRules: [
+				v => v !== '' || 'Обязательно к заполнению',
+				v => v >= 0 || 'Не должно быть меньше нуля',
 			],
         }),
+		mixins: [ DictionaryMixin ],
+		inject: [ 'showNotificationRequestError' ],
+		computed: {
+			...mapGetters({
+				types: 'storage/getMeterTypes',
+				locations: 'storage/getLocations',
+				employees: 'storage/getStorageEmployees',
+				assignments: 'service/getAssignments',
+			}),
+		},
         methods: {
-	        open({ id, name }) {
+			...mapActions('service', [
+				'fetchAllAssignments'
+            ]),
+
+	        async open({ id, name }) {
             	this.id = id
             	this.title = name
+
+                if (id === Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS) {
+                	try {
+                	    await this.fetchAllAssignments()
+                        this.serviceCustomerAddresses = createCustomerAddressesArray(this.assignments)
+                    } catch (e) {
+                        this.showNotificationRequestError(e)
+	                }
+                }
+
             	this.$refs.DataInputDialog.dialogOpen()
             },
 
@@ -165,7 +221,17 @@
 				            startDate: this.startDate,
 				            endDate: this.endDate
 			            }; break
+                    case 15: reportInputData = {
+	                    customerAddress: this.customerAddress
+                    }; break
+		            case 16: reportInputData = {
+                        days: this.days
+		            }; break
+		            case 17: reportInputData = {
+			            sort: this.sort
+		            }; break
 	            }
+
                 return this.$emit('submit', {
 	                id: this.id,
 	                title: this.title,

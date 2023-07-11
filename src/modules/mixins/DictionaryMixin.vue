@@ -91,6 +91,10 @@
                 if (account) {
                 	const [ secondName, firstName, middleName ] = account.name.split(' ')
                     return `${ secondName } ${ firstName[0] }. ${ middleName[0] }.`
+                } else {
+                	if (accountId === 0) {
+                		return 'отсутствует'
+                    }
                 }
                 return accountId
 			},

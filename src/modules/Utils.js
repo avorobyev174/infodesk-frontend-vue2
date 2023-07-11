@@ -1,3 +1,5 @@
+import * as XLSX from 'xlsx/xlsx.mjs'
+
 function stringToArrayBuffer(str) {
 	let buf = new ArrayBuffer(str.length)
 	let view = new Uint8Array(buf)
@@ -46,6 +48,15 @@ function formatDate(dateToFormat, withTime) {
 	return `${ day }.${ month }.${ year }`
 }
 
+function saveDataArrayToExcelFile(dataArray, sheetName, colsWidthArray, fileName) {
+	const workBook = XLSX.utils.book_new()
+	workBook.SheetNames.push(sheetName)
+	const workSheet = XLSX.utils.aoa_to_sheet(dataArray)
+	workBook.Sheets[sheetName] = workSheet
+	workSheet['!cols'] = colsWidthArray
+	XLSX.writeFile(workBook, `${ fileName }.xlsx`)
+}
+
 function getDate() {
 	return dateFormat(new Date())
 }
@@ -54,5 +65,6 @@ export {
 	stringToArrayBuffer,
 	getDate,
 	dateFormat,
-	formatDate
+	formatDate,
+	saveDataArrayToExcelFile
 }

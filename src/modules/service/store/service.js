@@ -1,5 +1,7 @@
 import { get, post, put } from 'axios'
 
+const serverModuleName = 'meter-service'
+
 export const service = {
 	state: () => ({
 		assignments: [],
@@ -27,8 +29,8 @@ export const service = {
 			state.assignmentsLogs = assignmentsLogs
 		},
 		
-		setLoading(state, bool) {
-			state.loading = bool
+		setLoading(state, loading) {
+			state.loading = loading
 		}
 	},
 	actions: {
@@ -36,7 +38,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.service.serverModuleName }/assignments`,
+					this.state.serverUrl + `/api/${ serverModuleName }/assignments`,
 					{ options },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				

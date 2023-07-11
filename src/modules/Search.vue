@@ -29,11 +29,7 @@
                        color="primary"
                        type="submit"
                     >
-                        <v-icon
-                            left
-                        >
-                            mdi-magnify
-                        </v-icon>
+                        <v-icon left>mdi-magnify</v-icon>
                         Поиск
                     </v-btn>
                 </v-card-actions>
@@ -97,8 +93,9 @@
 </template>
 
 <script>
-    import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+    import { mapActions } from "vuex"
     import DictionaryMixin from "./mixins/DictionaryMixin"
+    import FavoriteModuleMixin from "./mixins/FavoriteModuleMixin"
 
     export default {
         name: 'Search',
@@ -119,41 +116,29 @@
         inject: [
         	'showNotificationSuccess',
             'showNotificationInfo',
-            'showNotificationWarning',
-            'setBackgroundImage'
+            'setBackgroundImage',
+            'showNotificationRequestError'
         ],
-        mixins: [ DictionaryMixin ],
+        mixins: [ DictionaryMixin, FavoriteModuleMixin ],
         computed: {
-            ...mapGetters({
-	            isLogin: 'getIsLogin'
-            }),
-
             lastDateTitle() {
                 return this.meterData.dateTime !== '' ? 'Последние показания' : 'Последние показания отсутствуют'
             }
         },
         mounted() {
-            if (this.isLogin) {
-	            return
-            }
-            //
-	        // if (!this.$store.getters.getActiveModules.filter(({ name }) => name === this.$route.name.toLowerCase()).length) {
-		    //     this.$router.push('/')
-	        // }
-
 	        this.setBackgroundImage(true)
-        },
-        created() {
-            const isFavorite = $cookies.get('common_favorite_module')
-            this.setFavoriteModuleColor(isFavorite === '/search' ? this.colorGold : '')
         },
         methods: {
             ...mapActions('search', [ 'getMeterBySerialNumber' ]),
-            ...mapMutations([ 'setFavoriteModuleColor' ]),
 
             async getMeterData() {
                 if (!this.$refs.form.validate()) {
                     return
+                }
+                try {
+
+                } catch (e) {
+                    this.showNotificationRequestError(e)
                 }
                 this.loading = true
                 const response = await this.getMeterBySerialNumber(this.serialNumber)
@@ -171,14 +156,14 @@
                         this.customer_type = meterInfo[0].customer_type
                     } else {
                         this.customer_type = 'отсутствует'
-                        this.showNotificationInfo('Счетчик найден, запрограммирован УИТ, но не загружен в пирамиду (причина - нет данных от СТЭК)')
+                        this.showNotificationInfo('Счетчик найден, запрограммирован УИТ, но не загружен в пирамиду (причина - нет данных от СТЭКа)')
 
                     }
 
                     this.customer_address = meterInfo[0].customer_address ? meterInfo[0].customer_address : 'отсутствует'
                     this.personal_account = meterInfo[0].personal_account ? meterInfo[0].personal_account : 'отсутствует'
                 } else {
-                    this.showNotificationWarning('Счетчик не найден')
+                    this.showNotificationInfo('Счетчик не найден')
                     this.show = false
                     return
                 }

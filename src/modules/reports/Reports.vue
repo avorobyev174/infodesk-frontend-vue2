@@ -91,16 +91,6 @@
             </v-tooltip>
         </template>
         </v-treeview>
-        <non-active-in-pyramid-report
-            ref="ReportActiveDialog"
-            @okButtonClickEvent="getNonActiveInPyramidReport"
-            title="Параметры отчета"
-        />
-        <meter-count-by-address-report
-            ref="reportDialogCount"
-            @okButtonClickEvent="getPyramidLoadedByAddressReport"
-            title="Параметры отчета"
-        />
         <data-input-report-dialog
             @submit="showReportData"
             ref="DataInputReportDialog"
@@ -114,43 +104,43 @@
 </template>
 
 <script>
-	import { mapActions } from "vuex"
-	import saveCountByAddressReportToExcel from "./js/saveCountByAddressReportToExcel"
-	import saveLoadedInPyramidByCustomerAddressReportToExcel from "./js/saveLoadedInPyramidByCustomerAddressReportToExcel"
-	import saveFromUitToStorageReportToExcel from "../reports/js/saveFromUitToStorageReportToExcel"
-	import saveNotLoadedInPyramidReportToExcel from "../reports/js/saveNotLoadedInPyramidReportToExcel"
-	import saveNonActivePyramidMetersToExcelFile from "../reports/js/saveNonActiveMetersDataToExcel"
-	import saveLastTimeDataToExcelFile from "../reports/js/saveLastTimeDataToExcel"
-	import saveRotecDataToExcelFile from "./js/saveRotecDataToExcel"
-	import NonActiveInPyramidReport from "./components/NonActiveInPyramidReport"
-	import MeterCountByAddressReport from "./components/MeterCountByAddressReport"
-	import ReportItemsMixin from './mixins/ReportItemsMixin'
+	import { mapGetters } from "vuex"
     import DataResultReportDialog from "./components/DataResultReportDialog"
+	import DataInputReportDialog from "./components/DataInputReportDialog"
 	import StorageMixin from "../storage/mixins/StorageMixin"
 	import ReportStorageMixin from "./mixins/ReportStorageMixin"
-    import DataInputReportDialog from "./components/DataInputReportDialog"
-    import { dateFormat } from "../Utils"
+	import ReportPyramidMixin from "./mixins/ReportPyramidMixin"
+	import ReportAlphaMixin from "./mixins/ReportAlphaMixin"
 	import DictionaryMixin from "../mixins/DictionaryMixin"
 	import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
 	import ReportServiceMixin from "./mixins/ReportServiceMixin"
+	import ReportProgrammingMixin from "./mixins/ReportProgrammingMixin"
+    import { getReportItemsByRole, executeAndSaveReport } from "./utils"
+	import { saveDataArrayToExcelFile } from "../Utils"
 
 	export default {
 		name: "Reports",
 		components: {
-			NonActiveInPyramidReport,
-			MeterCountByAddressReport,
 			DataResultReportDialog,
-			DataInputReportDialog
+			DataInputReportDialog,
         },
 		data: () => ({
 			moduleName: 'reports',
             expand: false,
-            selectedItem: null,
             reportData: [],
             reportTitle: '',
             reportItems: [],
 		}),
-		mixins: [ ReportItemsMixin, StorageMixin, ReportStorageMixin, DictionaryMixin, FavoriteModuleMixin, ReportServiceMixin ],
+		mixins: [
+			StorageMixin,
+			ReportAlphaMixin,
+			ReportPyramidMixin,
+			ReportServiceMixin,
+			ReportProgrammingMixin,
+            ReportStorageMixin,
+            DictionaryMixin,
+            FavoriteModuleMixin,
+        ],
 		inject: [
             'showNotificationRequestError',
             'showNotificationInfo',
@@ -161,193 +151,21 @@
 		        formatDate: this.formatDate,
 	        }
         },
+		computed: {
+			...mapGetters({
+				roles: 'getRoles',
+			}),
+		},
 		mounted() {
 			this.setBackgroundImage(true)
-            this.reportItems = this.getReportItems()
+            this.reportItems = getReportItemsByRole(this.roles.report_module)
 		},
 		methods: {
-			...mapActions('reports',
-				[
-					'getCountByAddress',
-					'getMeterFromRepairToStorageCount',
-					'getDataByNotInPyramid',
-					'getNonActiveInPyramid',
-					'getLoadedPyramidCountByCustomerAddress',
-					'getAlphaLastTimeDataReport',
-					'getRotecMetersInfo',
-				]),
+			saveDataArrayToExcelFile,
+			executeAndSaveReport,
 
 			localFuncCall(item) {
-				this[ item.func ](item)
-			},
-
-			async getAlphaReport(item) {
-				item.loading = true
-				try {
-                    const response = await this.getAlphaLastTimeDataReport()
-                    saveLastTimeDataToExcelFile(response)
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				} finally {
-					item.loading = false
-				}
-			},
-
-			async getPyramidLoadedByCustomerAddressReport(item) {
-				item.loading = true
-				try {
-					const response = await this.getLoadedPyramidCountByCustomerAddress()
-					//console.log(response)
-					let editedResponse = response.map((row, i) => {
-						let finalRow = []
-						finalRow.length = 14
-						finalRow[0] = i + 1
-						finalRow[1] = row.address
-						if (row.data.length) {
-							row.data.forEach(dataMonth => {
-								const date = new Date(dataMonth.month_loaded)
-								const month = date.getMonth() + 1
-								finalRow[month + 1] = dataMonth.count
-							})
-						}
-						return finalRow
-					})
-					//console.log(editedResponse)
-					saveLoadedInPyramidByCustomerAddressReportToExcel(editedResponse)
-
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				} finally {
-					item.loading = false
-				}
-			},
-
-			async getMeterFromRepairToStorageCountReport(item) {
-				item.loading = true
-				try {
-					const response = await this.getMeterFromRepairToStorageCount()
-					//console.log(response)
-					let editedResponse = response.map(row => {
-						return {
-							serialNumber: row.serial_number,
-                            type: row.meter_type,
-                            typeTitle: row.type_name,
-                            date: dateFormat(row.date)
-						}
-					})
-
-					saveFromUitToStorageReportToExcel(editedResponse)
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				} finally {
-					item.loading = false
-				}
-			},
-
-			async getNotInPyramidReport(item) {
-				item.loading = true
-				try {
-					const response = await this.getDataByNotInPyramid()
-					//console.log(response)
-
-					let editedResponse = response.map(row => {
-						return [ row.serial_number, row.name, row.address, row.phone, new Date(row.created), row.inStorage ? 'да' : 'нет' ]
-					})
-
-					saveNotLoadedInPyramidReportToExcel(editedResponse)
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				} finally {
-					item.loading = false
-				}
-			},
-
-			async reportCountByAddressDialogOpen(item) {
-				this.$refs.reportDialogCount.open()
-				this.selectedItem = item
-			},
-
-			async getNonActiveInPyramidReport(days) {
-				this.selectedItem.loading = true
-                try {
-                    const response = await this.getNonActiveInPyramid(days)
-                    //console.log(response)
-                    let nonActiveMetersArray = []
-
-                    response.forEach(meter => {
-                        let address = meter.customer_address
-
-                        nonActiveMetersArray.push([
-                            meter.serial_number,
-                            this.ipAddresses.find(address => meter.ip_address === address.value).text,
-                            meter.port,
-                            meter.phone,
-                            address,
-							meter.last_date_time ? new Date(meter.last_date_time) : 'данные отсутствуют'
-                        ])
-                    })
-
-                    saveNonActivePyramidMetersToExcelFile(nonActiveMetersArray)
-                } catch (e) {
-                    this.showNotificationRequestError(e)
-                } finally {
-					this.selectedItem.loading = false
-                }
-            },
-
-			async getPyramidLoadedByAddressReport(created) {
-				this.selectedItem.loading = true
-				try {
-					const response = await this.getCountByAddress(created)
-					//console.log(response)
-					let editedResponse = response.map((row, i) => {
-						let finalRow = []
-                        finalRow.length = 14
-                        finalRow[0] = i + 1
-                        finalRow[1] = row.address === '' ? 'отсутствует' : row.address
-                        if (row.months.length) {
-                            row.months.forEach((month) => {
-								finalRow[month.month + 1] = month.count
-                            })
-                        }
-						return finalRow
-					})
-
-                    let monthsSum = []
-					for (let i = 0; i < 12; i++) {
-						const sum = editedResponse.reduce((acc, cur) => {
-							return acc += cur[i + 2] ? parseInt(cur[i + 2]) : 0
-						}, 0)
-						monthsSum.push(sum)
-					}
-					//console.log(monthsSum)
-					monthsSum.unshift('Итого')
-					monthsSum.unshift(editedResponse.length + 1)
-					editedResponse = editedResponse.concat([monthsSum])
-					saveCountByAddressReportToExcel(editedResponse)
-
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				} finally {
-					this.selectedItem.loading = false
-				}
-			},
-
-			async getRotecReport(item) {
-				item.loading = true
-				try {
-					const meters =  await this.getRotecMetersInfo()
-                    saveRotecDataToExcelFile(meters, this.getIpAddressTitle)
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				} finally {
-					item.loading = false
-				}
-			},
-
-			async activePyramidDialogOpen(item) {
-				this.$refs.ReportActiveDialog.open()
-				this.selectedItem = item
+				this[ item.executeFunction ](item)
 			},
 
 			async dataInputReportDialogOpen(item) {
@@ -367,10 +185,13 @@
 					case 11: return this.showRepairAndMaterialStorageReport(reportItem)
 					case 12: return this.showSpentMaterialsByMonthStorageReport(reportItem)
 					case 14: return this.showAssignmentEventsBySerialNumberReport(reportItem)
+					case 15: return this.showAssignmentEventsByCustomerAddress(reportItem)
+					case 16: return this.showNonActiveInPyramidReport(reportItem)
+					case 17: return this.showPyramidLoadedByAddressReport(reportItem)
 				}
 			},
 
-			async showDataResultReportDialog(dialogTitle, reportHeaders, getReportDataFunction) {
+			async showDataResultReportDialog({ dialogTitle, additionalTitle, headers, getReportDataFunction }, height, width) {
 				const { DataInputReportDialog, DataResultReportDialog } = this.$refs
 				DataInputReportDialog.setLoading(true)
 				try {
@@ -378,11 +199,8 @@
 					if (!data.length) {
 						return this.showNotificationInfo('Информация отсутствует')
 					}
-					DataResultReportDialog.open({
-						headers: reportHeaders,
-						dialogTitle,
-						data
-					})
+					console.log({ dialogTitle, additionalTitle, headers, getReportDataFunction })
+					DataResultReportDialog.open({ dialogTitle, additionalTitle, headers, data }, height, width)
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				} finally {

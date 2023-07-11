@@ -3,7 +3,20 @@ import axios from "axios"
 export const serviceReports = {
     actions: {
         async getAssignmentEventsBySerialNumberReport({ rootState }, reqData) {
-            return sendReqAndGetData(rootState,'post','get-assignments-events-by-serial-number-report', reqData)
+            return sendReqAndGetData(
+                rootState,
+                'post',
+                'get-assignment-events-by-serial-number-report',
+                reqData
+            )
+        },
+        async getAssignmentEventsByCustomerAddressReport({ rootState }, reqData) {
+            return sendReqAndGetData(
+                rootState,
+                'post',
+                'get-assignment-events-by-customer-address-report',
+                reqData
+            )
         },
     },
     namespaced: true,

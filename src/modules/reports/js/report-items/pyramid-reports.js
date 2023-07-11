@@ -1,0 +1,41 @@
+export const pyramidReports = [
+	{
+		name: 'Выполнение плана установки по месяцам (дома)',
+		download: true,
+		description: 'Количество загруженных в пирамиду счетчиков сгруппированных по адресам входящих в план',
+		executeFunction: 'showPyramidLoadedByCustomerAddressReport',
+		loading: false,
+		show: false
+	},
+	{
+		name: 'Счетчики не загруженные в пирамиду',
+		download: true,
+		description: `Отчет содержит информацию по не загруженным в пирамиду счетчикам:`,
+		columns: `- серийный номер\n- тип\n- принадлежность\n- номер сим карты\n- дата регистрации в модуле "регистрация счетчиков"\n- признак наличия счетчика в данный момент на складе`,
+		executeFunction: 'showNotInPyramidReport',
+		loading: false,
+		show: false,
+	},
+	{
+		id: 16,
+		name:  'Счетчики без активности',
+		download: false,
+		description: 'Отчет содержит информацию по счетчикам которые не передают данные за определенный\nпериод времени:',
+		columns: `- серийный номер\n- ip\n- порт\n- номер сим карты\n- адрес`,
+		params: `Параметры:\n   0 - счетчики вообще не имеющие данных\n   n - количество дней без передачи данных`,
+		executeFunction: 'dataInputReportDialogOpen',
+		loading: false,
+		show: false,
+		open: true,
+	},
+	{
+		id: 17,
+		name:  'Выполнение плана по месяцам (принадлежность)',
+		download: false,
+		description: 'Количество созданных / загруженных в пирамиду счетчиков сгруппированных по принадлежности',
+		executeFunction: 'dataInputReportDialogOpen',
+		loading: false,
+		show: false,
+		open: true,
+	},
+]

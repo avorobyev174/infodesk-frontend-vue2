@@ -1,9 +1,6 @@
 const createServiceEmployeeArray = (assignments, getAccountFullNameFunction) => {
-	const employeesAccIdSet = new Set(
-		assignments
-			.filter(({ owner_id }) => owner_id)
-			.map(({ owner_id }) => owner_id)
-	)
+	const employeesAccIdSet = new Set(assignments.map(({ owner_id }) => owner_id).sort((a, b) => a - b))
+	
 	return Array.from(employeesAccIdSet).map((accId) => ({
 		title: getAccountFullNameFunction(accId),
 		value: accId
@@ -28,6 +25,15 @@ const createBuildingArray = (assignments) => {
 		assignments
 			.filter(({ customer_address }) => customer_address)
 			.map(({ customer_address }) => spliceCustomerAddress(customer_address, true, true))
+	)
+	return  Array.from(buildingsSet)
+}
+
+const createCustomerAddressesArray = (assignments) => {
+	const buildingsSet = new Set(
+		assignments
+			.filter(({ customer_address }) => customer_address)
+			.map(({ customer_address }) => spliceCustomerAddress(customer_address, true, false))
 	)
 	return  Array.from(buildingsSet)
 }
@@ -66,5 +72,6 @@ export  {
 	createServiceAddressesArray,
 	getFilteredAssignments,
 	spliceCustomerAddress,
-	createMeterTypesArray
+	createMeterTypesArray,
+	createCustomerAddressesArray,
 }

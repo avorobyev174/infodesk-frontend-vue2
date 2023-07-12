@@ -259,7 +259,8 @@
 				try {
 					this.resetFilters()
 					this.totalAssignmentsCount = await this.fetchAssignments(this.options)
-					this.createFiltersValues()
+					const allAssignments = await this.fetchAllAssignments(false)
+					this.createFiltersValues(allAssignments)
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				}

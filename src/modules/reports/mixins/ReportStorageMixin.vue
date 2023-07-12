@@ -41,13 +41,12 @@
 		        item.loading = true
 		        try {
 			        const response = await this.getLocationReport()
-			        this.$refs.DataInputReportDialog.close()
 			        const data = response
 				        .map((row) => ({ ...row, meter_location: this.getLocationTitle(row.meter_location) }))
 				        .sort((a, b) => b.count - a.count)
 
 			        this.$refs.DataResultReportDialog.open({
-				        headers: ['Местонахождение', 'Количество'],
+				        headers: [ 'Местонахождение', 'Количество' ],
 				        dialogTitle: item.description,
 				        data
 			        })
@@ -70,13 +69,12 @@
 		        item.loading = true
 		        try {
 			        const response = await this.getOwnerReport()
-			        this.$refs.DataInputReportDialog.close()
 			        const data = response
 				        .map((row) => ({ ...row, current_owner: this.getCurrentOwner(row.current_owner) }))
 				        .sort((a, b) => b.count - a.count)
 
 			        this.$refs.DataResultReportDialog.open({
-				        headers: ['Владелец', 'Количество'],
+				        headers: [ 'Владелец', 'Количество' ],
 				        dialogTitle: item.description,
 				        data
 			        })
@@ -447,7 +445,6 @@
 		            materialTableHtml += '</tbody>'
 
 		            this.$refs.DataResultReportDialog.print(repairTableHtml, materialTableHtml, `Отчет по ремонту приборов учета ${ this.formatDate(today) }`)
-
 	            } catch (e) {
 		            this.showNotificationRequestError(e)
 	            }

@@ -49,6 +49,7 @@
 		methods: {
 			...mapActions('service', [
 				'fetchAssignments',
+				'fetchAllAssignments',
 				'acceptOrDeclineAssignment',
 				'declineAssignment',
 				'getAssignmentsAndEventsInWorkByUser',

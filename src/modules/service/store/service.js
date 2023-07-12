@@ -49,13 +49,16 @@ export const service = {
 			}
 		},
 		
-		async fetchAllAssignments({ state, commit }) {
+		async fetchAllAssignments({ state, commit }, isCommit) {
 			const response = await get(
 				this.state.serverUrl + `/api/${ state.serverModuleName }/all-assignments`,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			const assignments = response.data
-			commit('setAssignments', assignments)
+			if (isCommit) {
+				commit('setAssignments', assignments)
+			}
+			return assignments
 		},
 		
 		async assignmentsFilter({ state, commit }, { filters, options }) {

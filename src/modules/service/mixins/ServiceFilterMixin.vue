@@ -100,11 +100,11 @@
 		        }
 	        },
 
-	        createFiltersValues() {
-		        this.serviceEmployees = createServiceEmployeeArray(this.assignments, this.getAccountFullName)
-		        this.serviceBuildings = createBuildingArray(this.assignments)
-		        this.serviceAddresses = createServiceAddressesArray(this.assignments)
-		        this.serviceMeterTypes = createMeterTypesArray(this.assignments, this.getMeterTypeTitle)
+	        createFiltersValues(allAssignments) {
+		        this.serviceEmployees = createServiceEmployeeArray(allAssignments, this.getAccountFullName)
+		        this.serviceBuildings = createBuildingArray(allAssignments)
+		        this.serviceAddresses = createServiceAddressesArray(allAssignments)
+		        this.serviceMeterTypes = createMeterTypesArray(allAssignments, this.getMeterTypeTitle)
 	        },
 
             getFilterIconColor(val) {

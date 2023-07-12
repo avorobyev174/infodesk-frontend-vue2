@@ -25,7 +25,7 @@
         props: {
 	        filterSelectColor: {
 	        	type: String,
-                required: true
+                required: true,
             },
         }
 	}

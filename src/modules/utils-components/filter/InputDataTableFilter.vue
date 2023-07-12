@@ -1,6 +1,6 @@
 <template>
     <header-filter
-        :filter-select-color="filterColor"
+        :filter-select-color="filterColorValue"
     >
         <template v-slot:filterItem>
             <v-text-field
@@ -21,6 +21,7 @@
 
 <script>
     import DataTableHeaderFilter from "./DataTableHeaderFilter"
+    import { mapState } from "vuex"
 
 	export default {
 		name: "ComboboxDataTableFilter",
@@ -33,6 +34,12 @@
         watch: {
 	        filterValue(val) {
 	        	this.innerFilterValue = val
+            },
+        },
+        computed: {
+	        ...mapState([ 'colorGrey' ]),
+			filterColorValue() {
+				return this.filterColor ? this.filterColor : this.colorGrey
             }
         },
 		props: {
@@ -43,7 +50,7 @@
 			filterValue: String,
 			filterColor: {
 				type: String,
-				required: true
+				required: true,
 			},
 		},
         methods: {

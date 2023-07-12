@@ -78,7 +78,7 @@
 				return
 			}
 			try {
-				await this.fetchAllAssignments()
+				await this.fetchAllAssignments(true)
 				this.createFiltersValues()
 			} catch (e) {
 				this.showNotificationRequestError(e)

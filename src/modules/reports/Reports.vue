@@ -117,6 +117,7 @@
 	import ReportProgrammingMixin from "./mixins/ReportProgrammingMixin"
     import { getReportItemsByRole, executeAndSaveReport } from "./utils"
 	import { saveDataArrayToExcelFile } from "../Utils"
+    import { Reports } from "./const"
 
 	export default {
 		name: "Reports",
@@ -174,24 +175,27 @@
 
 			async showReportData(reportItem) {
 				switch (reportItem.id) {
-					case 3: return this.showMeterStorageReport(reportItem)
-					case 4: return this.showStoragePeriodReport(reportItem)
-					case 5: return this.showLocationByPeriodStorageReport(reportItem)
-					case 6: return this.showEmployeeByPeriodStorageReport(reportItem)
-					case 7: return this.showLocationLogsByPeriodStorageReport(reportItem)
-					case 8: return this.showEmpLogsByPeriodStorageReport(reportItem)
-					case 9: return this.showEmpGroupLogsByPeriodStorageReport(reportItem)
-					case 10: return this.showCurrentCountByLocationStorageReport(reportItem)
-					case 11: return this.showRepairAndMaterialStorageReport(reportItem)
-					case 12: return this.showSpentMaterialsByMonthStorageReport(reportItem)
-					case 14: return this.showAssignmentEventsBySerialNumberReport(reportItem)
-					case 15: return this.showAssignmentEventsByCustomerAddress(reportItem)
-					case 16: return this.showNonActiveInPyramidReport(reportItem)
-					case 17: return this.showPyramidLoadedByAddressReport(reportItem)
+					case Reports.STORAGE_METER_BY_SERIAL_NUMBER: return this.showMeterStorageReport(reportItem)
+					case Reports.STORAGE_SYSTEM_LOGS: return this.showStoragePeriodReport(reportItem)
+					case Reports.STORAGE_LOGS_BY_LOCATION: return this.showLocationByPeriodStorageReport(reportItem)
+					case Reports.STORAGE_IN_OUT_BY_LOCATION: return this.showEmployeeByPeriodStorageReport(reportItem)
+					case Reports.STORAGE_COUNT_BY_LOCATION: return this.showLocationLogsByPeriodStorageReport(reportItem)
+					case Reports.STORAGE_LOGS_BY_OWNER: return this.showEmpLogsByPeriodStorageReport(reportItem)
+					case Reports.STORAGE_IN_OUT_BY_OWNER: return this.showEmpGroupLogsByPeriodStorageReport(reportItem)
+					case Reports.STORAGE_GROUP_BY_OWNER_AND_TYPE: return this.showCurrentCountByLocationStorageReport(reportItem)
+					case Reports.REPAIR_AND_MATERIALS: return this.showRepairAndMaterialStorageReport(reportItem)
+					case Reports.SPENT_MATERIALS: return this.showSpentMaterialsByMonthStorageReport(reportItem)
+					case Reports.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER: return this.showAssignmentEventsBySerialNumberReport(reportItem)
+					case Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS: return this.showAssignmentEventsByCustomerAddressReport(reportItem)
+					case Reports.NOT_ACTIVE_IN_PYRAMID: return this.showNonActiveInPyramidReport(reportItem)
+					case Reports.PYRAMID_LOADED_BY_CUSTOMER_ADDRESS: return this.showPyramidLoadedByAddressReport(reportItem)
+					case Reports.ASSIGNMENT_GROUP_BY_STATUS: return this.showAssignmentGroupByStatusReport(reportItem)
+					case Reports.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER: return this.showAssignmentGroupByStatusAndOwnerReport(reportItem)
+					case Reports.ASSIGNMENT_EVENTS_GROUP_BY_CLOSE_REASON: return this.showAssignmentEventsGroupByCloseReasonReport(reportItem)
 				}
 			},
 
-			async showDataResultReportDialog({ dialogTitle, additionalTitle, headers, getReportDataFunction }, height, width) {
+			async showDataResultReportDialog({ dialogTitle, additionalTitle, headers, getReportDataFunction, data }, height, width) {
 				const { DataInputReportDialog, DataResultReportDialog } = this.$refs
 				DataInputReportDialog.setLoading(true)
 				try {

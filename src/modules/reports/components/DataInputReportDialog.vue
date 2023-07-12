@@ -24,9 +24,7 @@
                 :rules="daysRules"
             />
         </template>
-        <template v-slot:fields v-else-if="[
-        	Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS
-        ].includes(id)">
+        <template v-slot:fields v-else-if="[ Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS ].includes(id)">
             <v-combobox
                 :items="serviceCustomerAddresses"
                 item-text="title"
@@ -38,10 +36,7 @@
             >
             </v-combobox>
         </template>
-        <template v-slot:fields v-else-if="[
-        	Reports.STORAGE_METER_BY_SERIAL_NUMBER,
-            Reports.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER
-        ].includes(id)">
+        <template v-slot:fields v-else-if="[ Reports.STORAGE_METER_BY_SERIAL_NUMBER, Reports.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER ].includes(id)">
             <v-combobox
                 :items="types"
                 item-text="title"
@@ -71,7 +66,18 @@
                 v-model="location"
                 :rules="requiredRules"
                 outlined
-                v-if="[ 5, 7, 10 ].includes(id)"
+                v-if="[ Reports.STORAGE_LOGS_BY_LOCATION, Reports.STORAGE_COUNT_BY_LOCATION, Reports.STORAGE_GROUP_BY_OWNER_AND_TYPE ].includes(id)"
+            >
+            </v-combobox>
+            <v-combobox
+                :items="serviceEmployees"
+                item-text="title"
+                item-value="value"
+                label="Сотрудник"
+                v-model="serviceEmployee"
+                :rules="requiredRules"
+                outlined
+                v-if="[ Reports.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER ].includes(id)"
             >
             </v-combobox>
             <v-combobox
@@ -82,7 +88,11 @@
                 v-model="employee"
                 :rules="requiredRules"
                 outlined
-                v-if="[ 6, 8, 9 ].includes(id)"
+                v-if="[
+                	Reports.STORAGE_IN_OUT_BY_LOCATION,
+                    Reports.STORAGE_LOGS_BY_OWNER,
+                    Reports.STORAGE_IN_OUT_BY_OWNER,
+                ].includes(id)"
             >
             </v-combobox>
             <v-text-field
@@ -112,7 +122,7 @@
     import DialogWithDataSlot from "../../utils-components/dialog/DialogWithDataSlot"
 	import DictionaryMixin from "../../mixins/DictionaryMixin"
 	import { Reports } from "../const"
-    import { createCustomerAddressesArray } from '../../service/js/assignments-filter-values'
+    import { createCustomerAddressesArray, createServiceEmployeeArray } from '../../service/js/assignments-filter-values'
 
 	export default {
 		name: "DataInputReportDialog",
@@ -127,10 +137,11 @@
                 { title: 'Время загрузки в пирамиду', value: 2 }
             ],
 			sort: null,
-            type: { index: 121, title: 'AIU5' },
+            type: null,
             customerAddress: null,
-            location: { text: 'Склад', value: 0 },
-            employee: { name: 'Авдонин И. Д.', staffId: 107315 },
+            location: null,
+            employee: null,
+			serviceEmployee : null,
             serialNumber: '',
             loading: false,
 			id: 0,
@@ -138,6 +149,7 @@
             startDate: '',
             endDate: '',
             serviceCustomerAddresses: [],
+            serviceEmployees: [],
 			serialNumberRules: [
 				v => !!v || 'Обязательно к заполнению',
 				v => v && String(v).length >= 6 || 'Должно быть не меньше 6 символов',
@@ -169,10 +181,11 @@
             	this.id = id
             	this.title = name
 
-                if (id === Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS) {
+                if ([ Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS, Reports.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER ].includes(id)) {
                 	try {
-                	    await this.fetchAllAssignments()
+                	    await this.fetchAllAssignments(true)
                         this.serviceCustomerAddresses = createCustomerAddressesArray(this.assignments)
+                        this.serviceEmployees = createServiceEmployeeArray(this.assignments, this.getAccountFullName)
                     } catch (e) {
                         this.showNotificationRequestError(e)
 	                }
@@ -183,6 +196,7 @@
 
             clear() {
 	            this.employee = null
+	            this.serviceEmployee = null
 	            this.location = null
 	            this.type = null
                 this.serialNumber = ''
@@ -204,33 +218,41 @@
 		            case Reports.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER:
 		            	reportInputData = {	type: this.type.index, serialNumber: this.serialNumber };
 		            	break
-                    case 12:
-		            case 4:
+                    case Reports.STORAGE_SYSTEM_LOGS:
+		            case Reports.SPENT_MATERIALS:
+		            case Reports.ASSIGNMENT_GROUP_BY_STATUS:
 		            	reportInputData = {	startDate: this.startDate, endDate: this.endDate };
 		            	break
-		            case 5:
-		            case 7:
-		            case 10:
+		            case Reports.STORAGE_LOGS_BY_LOCATION:
+		            case Reports.STORAGE_COUNT_BY_LOCATION:
+		            case Reports.STORAGE_GROUP_BY_OWNER_AND_TYPE:
                         reportInputData = {
                             location: this.location.value,
                             startDate: this.startDate,
                             endDate: this.endDate
                         }; break
-		            case 6:
-		            case 8:
-		            case 9:
+		            case Reports.STORAGE_IN_OUT_BY_LOCATION:
+		            case Reports.STORAGE_LOGS_BY_OWNER:
+		            case Reports.STORAGE_IN_OUT_BY_OWNER:
 			            reportInputData = {
 				            empStaffId: this.employee.staffId,
 				            startDate: this.startDate,
 				            endDate: this.endDate
 			            }; break
-                    case 15: reportInputData = {
-	                    customerAddress: this.customerAddress
-                    }; break
-		            case 16: reportInputData = {
+		            case Reports.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER:
+			            reportInputData = {
+				            employee: this.serviceEmployee,
+				            startDate: this.startDate,
+				            endDate: this.endDate
+			            }; break
+                    case Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS:
+                    	reportInputData = {
+                            customerAddress: this.customerAddress
+                        }; break
+		            case Reports.NOT_ACTIVE_IN_PYRAMID: reportInputData = {
                         days: this.days
 		            }; break
-		            case 17: reportInputData = {
+		            case Reports.PYRAMID_LOADED_BY_CUSTOMER_ADDRESS: reportInputData = {
 			            sort: this.sortItems.find(({ value }) => value === this.sort)
 		            }; break
 	            }

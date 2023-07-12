@@ -16,7 +16,7 @@
         <template v-slot:table-data>
             <tr v-for="row in dialogData">
                 <td v-for="value in row"
-                    class="text-center text-wrap"
+                    class="text-center text-wrap word-wrap text-pre"
                     :width="`${ 100 / Object.keys(row).length }%`">
                     {{ value }}
                 </td>
@@ -61,7 +61,7 @@
 		        this.$refs.DataResultDialog.dialogOpen()
             },
 
-            print(repairTableHtml, materialTableHtml, title) {
+            print(firstTable, secondTable, title) {
 	            const newWindow = window.open("МЭК")
 	            const table = document.querySelector('.result-dialog-table .v-data-table__wrapper table')
 
@@ -70,14 +70,14 @@
 	            newWindow.document.write('table { border-collapse: collapse; width: 100%; }')
 	            newWindow.document.write('td, th { border: 1px solid black; text-align: center; border: 1px solid black; padding: 5px }')
 	            newWindow.document.write('th { background-color: #F7F7F7; font-weight: bold; word-break: break-word; }')
-                if (!repairTableHtml) {
+                if (!firstTable) {
 	                newWindow.document.write('h3 { text-align: center; margin: 10px }')
                 }
 	            newWindow.document.write('</style>')
 	            newWindow.document.write('</head>')
 	            newWindow.document.write('<body>')
-	            if (repairTableHtml) {
-		            newWindow.document.write(`<h3 style="text-align: center">${ title }</h3>`)
+	            if (firstTable) {
+		            newWindow.document.write(`<h3 style="text-align: center; white-space: pre;">${ title }</h3>`)
 	            } else {
 		            newWindow.document.write(`<h3 style="${ !this.dialogTitle ? 'margin-bottom: 20px' : '' }">${ this.dialogTitle }</h3>`)
 		            if (this.additionalTitle) {
@@ -85,20 +85,20 @@
 		            }
                 }
 
-                if (repairTableHtml) {
-	                newWindow.document.write(repairTableHtml)
+                if (firstTable) {
+	                newWindow.document.write(firstTable)
                 } else {
 	                newWindow.document.write(table.outerHTML)
                 }
 	            newWindow.document.write('<br>')
-                if (materialTableHtml) {
-	                newWindow.document.write(materialTableHtml)
+                if (secondTable) {
+	                newWindow.document.write(secondTable)
                 }
 	            newWindow.document.write('</body>')
 	            newWindow.document.write('</html>')
 	            newWindow.document.close()
 	            newWindow.print()
-                if (!repairTableHtml) {
+                if (!firstTable) {
 	                newWindow.close()
                 }
             },

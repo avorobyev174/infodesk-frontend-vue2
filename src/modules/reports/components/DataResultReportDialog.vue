@@ -43,8 +43,7 @@
             dialogData: null,
             headers: [],
         }),
-
-	    inject: [ 'showNotificationError' ],
+	    inject: [ 'showNotificationError', 'formatDate' ],
         methods: {
         	open(report, height, width) {
                 const { dialogTitle, additionalTitle, headers, data } = report

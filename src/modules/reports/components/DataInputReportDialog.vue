@@ -122,8 +122,11 @@
 		data: () => ({
 			Reports,
 			days: 0,
-			sortItems: [ { title: 'Время создания записи', value: 0 },  { title: 'Время загрузки в пирамиду', value: 1 } ],
-			sort: { title: 'Время создания записи', value: 0 },
+			sortItems: [
+				{ title: 'Время создания записи', value: 1 },
+                { title: 'Время загрузки в пирамиду', value: 2 }
+            ],
+			sort: null,
             type: { index: 121, title: 'AIU5' },
             customerAddress: null,
             location: { text: 'Склад', value: 0 },
@@ -228,7 +231,7 @@
                         days: this.days
 		            }; break
 		            case 17: reportInputData = {
-			            sort: this.sort
+			            sort: this.sortItems.find(({ value }) => value === this.sort)
 		            }; break
 	            }
 

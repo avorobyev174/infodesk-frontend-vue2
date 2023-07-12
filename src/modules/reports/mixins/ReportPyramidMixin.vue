@@ -82,7 +82,7 @@
 		        }
 		        await this.showDataResultReportDialog({
 			        dialogTitle: title,
-			        additionalTitle: `сортировка - ${ sort?.title?.toLowerCase() }`,
+			        additionalTitle: `выборка по - ${ sort?.title?.toLowerCase() }`,
 			        headers,
 			        getReportDataFunction: getPyramidReportData
 		        },

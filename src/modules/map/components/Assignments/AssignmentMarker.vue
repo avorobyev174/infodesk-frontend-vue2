@@ -3,7 +3,7 @@
         top
         transition="slide-y-transition"
         offset-y
-        :nudge-width="250"
+        :nudge-width="180"
         :nudge-left="120"
         content-class="marker-menu"
         :close-on-content-click="false"
@@ -29,15 +29,26 @@
         </template>
         <div class="marker-container">
             <div
-                v-for="({ address, owner_id, status, id, isShowAcceptButton, isShowDeclineButton }, index) in marker.apartments"
+                v-for="({
+                    address,
+                    owner_id,
+                    status,
+                    id,
+                    isShowAcceptButton,
+                    isShowDeclineButton,
+                    created,
+                    meter_serial_number
+                }, index) in marker.apartments"
                 :key="index"
                 class="marker"
                 :style="`background-color: ${ getAssignmentStatusColor(status) }`"
             >
                 <div>
                     <span class="maker-info">{{ `Адрес: ${ address }` }}</span>
+                    <span class="maker-info">{{ `Серийный номер: ${ meter_serial_number }` }}</span>
                     <span class="maker-info">{{ `Исполнитель: ${ getAccountFullName(owner_id) }` }}</span>
                     <span class="maker-info">{{ `Статус: ${ getAssignmentStatusTitle(status) }` }}</span>
+                    <span class="maker-info">{{ `Дата регистрации: ${ formatDate(created) }` }}</span>
                 </div>
                 <div style="display:flex; gap: 5px">
                     <button-with-tooltip
@@ -83,7 +94,8 @@
             'showNotificationSuccess',
             'showNotificationInfo',
             'showNotificationRequestError',
-            'getAccountFullName'
+            'getAccountFullName',
+            'formatDate'
         ],
 		props: {
 			marker: {

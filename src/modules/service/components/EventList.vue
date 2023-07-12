@@ -31,7 +31,7 @@
                     x-small
                     icon
                     :color="colorRed"
-                    v-if="event.type === AssignmentEventTypes.ACTION && currentAccountId === event.owner_id"
+                    v-if="event.type === AssignmentEventType.ACTION && currentAccountId === event.owner_id"
                     @click="openConfirmationDeleteEventDialog(event)"
                     class="transparent"
                 >
@@ -54,7 +54,7 @@
                         x-small
                         icon
                         :color="colorGrey"
-                        v-if="event.type === AssignmentEventTypes.ACTION && currentAccountId === event.owner_id"
+                        v-if="event.type === AssignmentEventType.ACTION && currentAccountId === event.owner_id"
                         @click="openEditDescriptionDialog(event)"
                         class="transparent"
                     >
@@ -63,7 +63,7 @@
                 </div>
             </v-timeline-item>
         </v-timeline>
-        <v-tooltip top>
+        <v-tooltip top v-if="isButtonVisible">
             <template v-slot:activator="{ on, attrs }">
                 <v-btn
                     class="add-event-button"
@@ -74,14 +74,14 @@
                     v-on="on"
                     dark
                     :color="colorGreen"
-
+                    small
                 >
                     <v-icon>mdi-plus</v-icon>
                 </v-btn>
             </template>
             <span>Добавить событие</span>
         </v-tooltip>
-        <v-tooltip top>
+        <v-tooltip top v-if="isButtonVisible">
             <template v-slot:activator="{ on, attrs }">
                 <v-btn
                     class="close-event-button"
@@ -92,6 +92,7 @@
                     v-on="on"
                     dark
                     :color="colorBlue"
+                    small
                 >
                     <v-icon>mdi-clipboard-check-outline</v-icon>
                 </v-btn>
@@ -136,7 +137,7 @@
 
 <script>
 	import { mapActions, mapState, mapGetters } from 'vuex'
-    import { AssignmentEventType } from "../../../const"
+    import { AssignmentEventType, AssignmentStatus } from "../../../const"
     import SimpleDialog from "../../utils-components/SimpleDialog"
     import DialogWithDataSlotOnlyClose from "../../utils-components/dialog/DialogWithDataSlotOnlyClose"
 
@@ -147,6 +148,9 @@
 	        SimpleDialog
         },
 		data: () => ({
+			AssignmentStatus,
+			AssignmentEventType,
+            isButtonVisible: true,
 			eventListDrawerModel: false,
 			description: '',
             selectedAssignment: null,
@@ -160,7 +164,6 @@
             deleteConfirmationDialogModel: false,
             addOrEditDialogTitle: 'Добавить событие',
             addOrEditDialogButtonTitle: 'Добавить',
-			AssignmentEventTypes: AssignmentEventType,
 		}),
         props: {
 		    assignments: {
@@ -171,6 +174,7 @@
 		inject: [
 			'showNotificationSuccess',
             'showNotificationError',
+            'showNotificationWarning',
             'showNotificationRequestError',
             'formatDate',
             'getAssignmentEventTypeTitle',
@@ -189,7 +193,7 @@
 			selectedActionEvent(newVal) {
 		        this.addOrEditDialogTitle = newVal ? 'Редактирование события' : 'Добавить событие'
 		        this.addOrEditDialogButtonTitle = newVal ? 'Сохранить' : 'Добавить'
-	        }
+	        },
         },
 		methods: {
 			...mapActions('service', [
@@ -205,7 +209,9 @@
 				this.photoUrl = this.$store.state.serverUrl + '/images/no-user-image.png'
 				this.selectedAssignment = assignment
 				this.currentAccountId = currentAccountId
-				const { id, owner_id } = assignment
+				const { id, owner_id, status } = assignment
+                this.isButtonVisible =
+                    ![ AssignmentStatus.CLOSED, AssignmentStatus.CLOSED_AUTO ].includes(status) && currentAccountId === owner_id
 				const account = this.accounts.find(({ id }) => owner_id === id)
 				this.owner = this.getAccountFullName(owner_id)
 				try {
@@ -266,6 +272,9 @@
 					Object.assign(oldAssignment, assignment)
 					this.events.unshift(assignmentEvent)
 				} catch (e) {
+					if (e?.response?.data === 'поручение уже закрыто') {
+						return this.showNotificationWarning('Поручение уже закрыто')
+                    }
 					this.showNotificationRequestError(e)
 				} finally {
 					this.description = ''
@@ -303,12 +312,12 @@
 <style scoped>
     .add-event-button {
         position: absolute !important;
-        bottom: 20px !important;
-        right: 90px !important;
+        top: 20px !important;
+        right: 70px !important;
     }
 
     .close-event-button {
-        bottom: 20px !important;
+        top: 20px !important;
         right: 20px !important;
     }
 

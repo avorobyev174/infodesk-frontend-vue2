@@ -101,7 +101,7 @@
 <script>
     import saveExcelFileForPyramid from "../js/saveLoadDataToPyramidExcel"
     import { mapActions, mapState } from "vuex"
-    import ButtonWithTooltip from "../../utils-components/ButtonWithTooltip"
+    import ButtonWithTooltip from "../../utils-components/button/ButtonWithTooltip"
 
     export default {
         name: "SaveDataToExcelDialog",

@@ -3,11 +3,9 @@
 </template>
 <script>
     import { mapActions } from "vuex"
-    import LogTableMixin from "../../storage/mixins/LogTableMixin"
 
     export default {
         name: 'ReportStorageMixin',
-	    mixins: [ LogTableMixin ],
         mounted() {
 	        this.fetchMeterTypes()
 	        this.fetchStorageEmployees()
@@ -34,7 +32,8 @@
 			        'getCurrentCountByLocationReport',
 			        'getRepairCountAndMaterialReport',
 			        'getSpentByYearReport',
-			        'getMaterialSpentByMonthReport'
+			        'getMaterialSpentByMonthReport',
+                    'getMetersLastLogsReport',
 		        ]),
 
 	        async showLocationStorageReport(item) {
@@ -88,16 +87,14 @@
 		    async showMeterStorageReport({ type, serialNumber, title }) {
 			    try {
 				    const meter = await this.checkMeterInDB({ type, serialNumber })
-				    this.$refs.DataInputReportDialog.close()
-
-                    if (!meter.length) {
-	                    return this.showNotificationInfo('Счетчик отсутсвтвует в базе данных')
+                    if (!meter.guid) {
+	                    return this.showNotificationInfo('Счетчик отсутствует в базе данных')
                     }
 
 				    const response = await this.getMeterReport({ type, serialNumber })
 				    const data = response.map((row) => {
                         let updateField = ''
-                        if ([1, 2, 10].includes(row.oper_type)) {
+                        if ([ 1, 2, 10 ].includes(row.oper_type)) {
 	                        const updFields = this.parseUpdateCustomField(row.update_field)
                             if (updFields.length) {
 	                            updateField = updFields.map((field) => field.value).join(' ')
@@ -130,6 +127,8 @@
                     )
 			    } catch (e) {
 				    this.showNotificationRequestError(e)
+			    } finally {
+				    this.$refs.DataInputReportDialog.close()
 			    }
             },
 
@@ -342,8 +341,6 @@
 		    async showCurrentCountByLocationStorageReport({ startDate, endDate, location, title }) {
 			    try {
 				    const response = await this.getCurrentCountByLocationReport({ startDate, endDate, location })
-				    this.$refs.DataInputReportDialog.close()
-
 				    if (!response.length) {
 					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
@@ -367,6 +364,8 @@
 				    )
 			    } catch (e) {
 				    this.showNotificationRequestError(e)
+			    } finally {
+				    this.$refs.DataInputReportDialog.close()
 			    }
             },
 
@@ -478,6 +477,36 @@
 				    this.showNotificationRequestError(e)
 			    }
 		    },
+
+		    async showLastLogsStorageReport({ serialNumber, title }) {
+			    try {
+				    const reportData = await this.getMetersLastLogsReport({ serialNumber })
+				    if (!reportData.length) {
+					    return this.showNotificationInfo('Информация отсутствует')
+				    }
+
+				    const data = reportData.map(({ meter_type, serial_number, meter_location, lastLog }) => [
+				    	this.getMeterTypeTitle(meter_type),
+					    serial_number,
+					    this.formatDate(lastLog.datetime, true),
+                        this.getLocationTitle(meter_location),
+                    ])
+
+				    this.$refs.DataResultReportDialog.open(
+					    {
+						    headers: [ 'Тип', 'Серийный номер', 'Дата', 'Текущее местонахождение' ],
+						    dialogTitle: title,
+						    data
+					    },
+					    600,
+					    800
+				    )
+			    } catch (e) {
+				    this.showNotificationRequestError(e)
+			    } finally {
+				    this.$refs.DataInputReportDialog.close()
+			    }
+		    }
         }
     }
 </script>

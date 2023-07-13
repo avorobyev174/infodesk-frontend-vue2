@@ -109,6 +109,7 @@
     import VueApexCharts from 'vue-apexcharts'
     import { mapActions, mapGetters, mapMutations } from "vuex"
     import DictionaryMixin from "./mixins/DictionaryMixin"
+    import FavoriteModuleMixin from "./mixins/FavoriteModuleMixin"
 
     export default {
     name: 'General',
@@ -530,7 +531,7 @@
     	'showNotificationRequestError',
         'setBackgroundImage'
     ],
-    mixins: [ DictionaryMixin ],
+    mixins: [ DictionaryMixin, FavoriteModuleMixin ],
     computed: {
         ...mapGetters({
 	        isLogin: 'getIsLogin',
@@ -544,9 +545,7 @@
         }
     },
     created() {
-        window.addEventListener("resize", this.resize);
-        //const isFavorite = $cookies.get('common_favorite_module')
-	    $cookies.get('common_favorite_module') === '/charts' ? this.setFavoriteModuleColor(this.colorGold) : this.setFavoriteModuleColor('')
+        window.addEventListener("resize", this.resize)
     },
     mounted() {
         if (!this.isLogin) {
@@ -574,7 +573,6 @@
         this.windowWidth = window.innerWidth
     },
     methods: {
-        ...mapMutations(['setFavoriteModuleColor']),
         ...mapActions('charts',
             [
                 'getMeterRegistrationChartData',

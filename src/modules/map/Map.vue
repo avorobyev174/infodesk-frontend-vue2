@@ -107,7 +107,7 @@ export default {
 	    MapViewTypes,
 	    mapOptions,
 	    mapCenter,
-	    moduleName: 'map',
+	    module: 'map',
 	    mapDrawerModel: false,
         markers: [],
         legend: [],

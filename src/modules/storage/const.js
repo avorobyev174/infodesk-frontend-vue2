@@ -1,0 +1,16 @@
+const Location = {
+	STORAGE: 0,
+	REPAIR: 1,
+	CHECK: 2,
+	FACTORY: 3,
+	INSTALL: 4,
+	UTILIZATION: 5,
+	VERIFICATION: 6,
+	STORAGE_TEMPORARY: 7,
+	CUSTOMER_WINDOW: 8,
+	PROGRAMMING: 9,
+}
+
+export {
+	Location
+}

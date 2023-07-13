@@ -16,90 +16,92 @@
                 src="@/assets/logo_navbar_mec.webp"
                 max-width="60px"
                 class="ml-1 slideRight"
-                style="visibility: hidden;"
+                style="visibility: hidden; cursor: pointer;"
+                @click="redirectToWelcomePage"
             />
             <v-spacer></v-spacer>
-            <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                        icon
-                        v-bind="attrs"
-                        v-on="on"
-                        @click="setFavoriteModule"
-                        v-show="!isWelcomePage"
-                    >
-                        <v-icon :color="getFavoriteModuleColor">mdi-star</v-icon>
-                    </v-btn>
-                </template>
-                <span>Назначить модуль начальной страницей</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                        icon
-                        v-bind="attrs"
-                        v-on="on"
-                        @click="$router.push('/profile')"
-                    >
-                        <v-icon>mdi-account</v-icon>
-                    </v-btn>
-                </template>
-                <span>Профиль</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                        icon
-                        v-bind="attrs"
-                        v-on="on"
-                        @click="logoutUser(true)"
-                    >
-                        <v-icon>mdi-logout</v-icon>
-                    </v-btn>
-                </template>
-                <span>Выход</span>
-            </v-tooltip>
+            <button-with-tooltip
+                icon="mdi-star"
+                isIcon
+                @click="setFavoriteModule"
+                v-show="!isWelcomePage"
+                :color="favoriteModuleColor"
+                title="Назначить модуль начальной страницей"
+            />
+            <button-with-tooltip
+                icon="mdi-account"
+                isIcon
+                @click="redirectToProfilePage"
+                :color="colorDarkGrey"
+                title="Профиль"
+            />
+            <button-with-tooltip
+                icon="mdi-logout"
+                isIcon
+                @click="logoutUser(true)"
+                :color="colorDarkGrey"
+                title="Выход"
+            />
         </v-app-bar>
     </v-card>
 </template>
 
 <script>
 	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+	import ButtonWithTooltip from "../modules/utils-components/button/ButtonWithTooltip"
 
 	export default {
 		name: 'NavigationBar',
+		components: { ButtonWithTooltip },
 		computed: {
-			...mapGetters([ 'getSideBarState', 'getFavoriteModuleColor' ]),
-			...mapState([ 'colorGreen', 'colorGold' ]),
+			...mapGetters({ favoriteModuleColor: 'common/getFavoriteModuleColor' }),
+			...mapGetters([ 'getSideBarState' ]),
+			...mapState([ 'colorGreen', 'colorGold', 'colorDarkGrey' ]),
 			isWelcomePage () {
 				return this.$route.name === 'Welcome'
 			}
 		},
 		inject: [ 'showNotificationSuccess', 'showNotificationRequestErrorWithCustomText' ],
 		methods: {
-			...mapMutations([ 'setSideBarState', 'setFavoriteModuleColor' ]),
-			...mapActions('utils', [ 'saveSettings' ]),
+			...mapMutations([ 'setSideBarState' ]),
+			...mapMutations('common', [ 'setFavoriteModuleColor' ]),
+			...mapActions('common', [ 'saveSettings' ]),
 			...mapActions([ 'logoutUser' ]),
 
 			async setFavoriteModule() {
 				let route = '/'
 
-				if (!this.getFavoriteModuleColor) {
+				console.log(this.favoriteModuleColor)
+
+				if (!this.favoriteModuleColor) {
 					this.setFavoriteModuleColor(this.colorGold)
 					route = this.$route.fullPath
 					$cookies.set('common_favorite_module', route, '4h')
 				} else {
-					this.setFavoriteModuleColor('')
+					this.setFavoriteModuleColor(this.colorDarkGrey)
 					$cookies.remove('common_favorite_module')
 				}
 				try {
 					const { action } = await this.saveSettings({
-                        settingsName: 'favorite_module',
-                        settingsVal: route
+						module: 'common',
+						settings: 'favorite_module',
+                        value: route
 					})
 					this.showNotificationSuccess(action === 'new' ? 'Настройки созданы' : 'Настройки обновлены')
                 } catch (e) {
 					this.showNotificationRequestErrorWithCustomText('Ошибка при обновлении или создании настроек начальной страницы', e)
+				}
+			},
+
+            redirectToWelcomePage() {
+                if (!this.isWelcomePage) {
+	                this.$router.push('/')
+                }
+            },
+
+			redirectToProfilePage() {
+				if (this.$route.name !== 'Profile') {
+					this.$router.push('/profile')
 				}
 			}
 		}
@@ -109,10 +111,6 @@
 <style scoped>
     /deep/ .v-toolbar__content {
         padding-left: 0px !important;
-    }
-
-    .pointer {
-        cursor: pointer;
     }
 
     @import "../assets/animate.css";

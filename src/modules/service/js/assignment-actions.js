@@ -34,7 +34,10 @@ const defaultAssignmentActions = [
 const filterAssignmentActions = ({ status, owner_id }, currentAccountId) => {
 	return defaultAssignmentActions.map((action) => {
 		// зарегистрировано - нельзя просматривать список событий, редактировать, отклонить
-		if ([ AssignmentStatus.REGISTERED, AssignmentStatus.RE_REGISTERED ].includes(status) && [ 1, 3, 4 ].includes(action.id)) {
+		if ([ AssignmentStatus.REGISTERED ].includes(status) && [ 1, 3, 4 ].includes(action.id)) {
+			return {...action, disabled: true }
+		// зарегистрировано повторно - нельзя редактировать, отклонить
+		} else if ([ AssignmentStatus.RE_REGISTERED ].includes(status) && [ 3, 4 ].includes(action.id)) {
 			return { ...action, disabled: true }
 		// в работе - нельзя редактировать, отклонить если не исполнитель
 		} else if (status === AssignmentStatus.IN_WORK && owner_id && [ 3, 4 ].includes(action.id) && owner_id !== currentAccountId)	{

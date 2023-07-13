@@ -37,7 +37,7 @@
                         :menuActions="menuActions"
                         @refreshAssignments="getAssignments"
                         @openAssignmentsLogsDialog="$refs.ServiceUpdateLogsDialog.dialogOpen()"
-                        @showHideColumns="$refs.ShowHideColumnsDialog.open()"
+                        @showHideColumns="$refs.ShowHideColumnsDialog.dialogOpen()"
                         @opendAssignmentAddDialog="$refs.AddAssignmentDialog.dialogOpen()"
                         @saveAssignmentsToExcel="saveAssignmentsToExcel"
                     />
@@ -132,18 +132,30 @@
             <template v-slot:item.owner_id="{ item }">
                 {{ item.owner_id ? getAccountFullName(item.owner_id) : 'отсутствует' }}
             </template>
-            <template v-slot:item.lastEvent="{ item }">
-                <div class="last-event">
+            <template v-slot:item.lastEvents="{ item }">
+                <div v-if="item.status !== AssignmentStatus.RE_REGISTERED" class="last-event">
                     <span
+                        v-if="item.lastEvents && item.lastEvents.lastEvent && item.lastEvents.lastEvent.close_reason"
                         class="last-event-close-reason"
-                        v-if="item.lastEvent && item.lastEvent.close_reason"
-                        >
-                        {{ `${ getAssignmentEventCloseReasonTitle(item.lastEvent.close_reason) }` }}
+                    >
+                        {{ `${ getAssignmentEventCloseReasonTitle(item.lastEvents.lastEvent.close_reason) }` }}
                     </span>
                     <span
-                        v-if="item.lastEvent &&
-                            ![ AssignmentStatus.REGISTERED, AssignmentStatus.RE_REGISTERED ].includes(item.status)"
-                    >{{ item.lastEvent.description}}</span>
+                        v-if="item.lastEvents && item.lastEvents.lastEvent && item.status !== AssignmentStatus.REGISTERED"
+                    >
+                        {{ item.lastEvents.lastEvent.description}}
+                    </span>
+                </div>
+                <div v-else class="last-event">
+                    <span
+                        v-if="item.lastEvents && item.lastEvents.secondToLastEvent && item.lastEvents.secondToLastEvent.close_reason"
+                        class="last-event-close-reason"
+                    >
+                        {{ `${ getAssignmentEventCloseReasonTitle(item.lastEvents.secondToLastEvent.close_reason) }` }}
+                    </span>
+                    <span v-if="item.lastEvents&& item.lastEvents.secondToLastEvent">
+                        {{ item.lastEvents.secondToLastEvent.description }}
+                    </span>
                 </div>
             </template>
         </v-data-table>
@@ -168,7 +180,7 @@
             :headers="headers"
             :selectedHeaders="selectedHeaders"
             @changeColumns="changeColumnsVisibility"
-            moduleName="service"
+            module="service"
         />
         <action-menu
             ref="actionMenu"
@@ -191,7 +203,7 @@
     import ActionMenu from "../utils-components/menu/ActionMenu"
     import EventList from "./components/EventList"
     import Menu from "../utils-components/menu/Menu"
-    import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
+    import ShowHideColumnsDialog from "../utils-components/show-hide-columns/ShowHideColumnsDialog"
     import ServiceUpdateLogsDialog from "./components/ServiceUpdateLogsDialog"
     import AddAssignmentDialog from "./components/AddAssignmentDialog"
     import ServiceMixin from "./mixins/ServiceMixin"
@@ -224,7 +236,7 @@
 	        DialogCustom
         },
         data: () => ({
-            moduleName: 'service',
+            module: 'service',
 	        selectedAssignment: null,
 	        assignmentActions: [],
 	        totalAssignmentsCount: 0,

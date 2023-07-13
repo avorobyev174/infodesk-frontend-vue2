@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const testUtils = {
     state: () => ({
-        serverModuleName: 'test-utils'
+        serverModule: 'test-utils'
     }),
     actions: {
         async getDataBySerialNumber({state, commit}, metersArr) {

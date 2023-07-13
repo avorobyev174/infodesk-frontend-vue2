@@ -31,7 +31,7 @@ export const registration = {
             { title: 'Не требуется', value: 7, color: 'green lighten-1', message: 'Не требуется'},
             { title: 'В ожидании подтверждения', value: 8, color: 'orange lighten-1', message: 'Обновите статус'},
         ],
-        serverModuleName: 'meter-registration'
+        serverModule: 'meter-registration'
     }),
     getters: {
         getMeters(state) {
@@ -69,7 +69,7 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.post(
-                    this.state.serverUrl + `/api/${ this.state.registration.serverModuleName }/meters`,
+                    this.state.serverUrl + `/api/${ this.state.registration.serverModule }/meters`,
                     { inPyramid: inPyramid },
                     { headers: { 'authorization': $cookies.get('auth_token') } })
                 
@@ -82,7 +82,7 @@ export const registration = {
     
         async fetchTypes({ state, commit }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.registration.serverModuleName }/meter-types`,
+                this.state.serverUrl + `/api/${ this.state.registration.serverModule }/meter-types`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             const meterTypes = response.data.map((type) => ({ value: type.id, text: type.type_name }))
@@ -94,7 +94,7 @@ export const registration = {
                 commit('setLoading', true)
                 
                 const response = await axios.post(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/meter`,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/meter`,
                     {
                         serialNumber: serial_number,
                         type,
@@ -119,7 +119,7 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.delete(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/meters/` + id,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/meters/` + id,
                     { headers: { 'authorization': $cookies.get('auth_token') } })
 
                 return response.data
@@ -133,7 +133,7 @@ export const registration = {
                 commit('setLoading', true)
                 
                 const response = await axios.put(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/meters/` + id,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/meters/` + id,
                     {
                         serialNumber: serial_number,
                         type: type,
@@ -158,7 +158,7 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.get(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/actualize-data-from-rtc`,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/actualize-data-from-rtc`,
                     { headers: { 'authorization': $cookies.get('auth_token') } })
 
                 return response.data
@@ -169,7 +169,7 @@ export const registration = {
 
         async updateMeterDataFromRTC({ state, commit }, { id, phone, status, type }) {
             const response = await axios.put(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/update-meter-from-rtc/` + id,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/update-meter-from-rtc/` + id,
                 { phone, status, type },
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
@@ -180,7 +180,7 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.post(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/send-sms/` + id,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/send-sms/` + id,
                     {
                         phone,
                         serial_number,
@@ -199,7 +199,7 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.post(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/check-sms/` + id,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/check-sms/` + id,
                     {
                         sms_id,
                         serial_number,
@@ -215,7 +215,7 @@ export const registration = {
 
         async actualizeMetersDataFromStek({state, commit}) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/actualize-data-from-stek/`,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/actualize-data-from-stek/`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
@@ -223,7 +223,7 @@ export const registration = {
     
         async actualizeMeterDataFromStek({state, commit}, { id }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/actualize-data-from-stek/` + id,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/actualize-data-from-stek/` + id,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data
@@ -231,7 +231,7 @@ export const registration = {
 
         async updateMeterDataFromStek({ state, commit }, { id, personal_account, customer, customer_address, customer_phone, customer_email, customer_type, kftt }) {
             const response = await axios.put(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/update-meter-from-stek/` + id,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/update-meter-from-stek/` + id,
                 {
                     personal_account,
                     customer,
@@ -261,13 +261,13 @@ export const registration = {
 
                 return response.data
             } finally {
-                commit('setLoading', false);
+                commit('setLoading', false)
             }
         },
 
         async updateMeterAfterLoadInPyramid({ state, commit }, meterArray) {
             const response = await axios.post(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/save-meter-after-load-in-stek`,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/save-meter-after-load-in-stek`,
                 { meterArray: meterArray },
                 { headers: { 'authorization': $cookies.get('auth_token') }})
 
@@ -276,7 +276,7 @@ export const registration = {
 
         async markMeter({ state, commit }, { meter, reason, comment }) {
             const response = await axios.post(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/mark-meter/${meter.id}`,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/mark-meter/${meter.id}`,
                 {
                     data: JSON.stringify(meter),
                     comment: comment,
@@ -291,7 +291,7 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.get(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/broken-meters`,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/broken-meters`,
                     { headers: { 'authorization': $cookies.get('auth_token') } })
 
                 return response.data
@@ -304,7 +304,7 @@ export const registration = {
             try {
                 commit('setLoading', true)
                 const response = await axios.get(
-                    this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/get-non-active-meters-from-pyramid`,
+                    this.state.serverUrl + `/api/${this.state.registration.serverModule}/get-non-active-meters-from-pyramid`,
                     { headers: { 'authorization': $cookies.get('auth_token') } })
 
                 return response.data
@@ -315,7 +315,7 @@ export const registration = {
 
         async refreshMetersDataFromStek({ state, commit }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/refresh-data-from-stek/`,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/refresh-data-from-stek/`,
                 { headers: { 'authorization': $cookies.get('auth_token') }})
 
             return response.data
@@ -323,7 +323,7 @@ export const registration = {
 
         async saveRefreshedMeterDataFromStek({ state, commit }, { id, data, personal_account, customer, customer_address, customer_phone, customer_email, customer_type, kftt}) {
             const response = await axios.put(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/save-refresh-meter-data-from-stek/` + id,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/save-refresh-meter-data-from-stek/` + id,
                 {
                     personal_account,
                     customer,
@@ -342,7 +342,7 @@ export const registration = {
 
         async removeMeterPyramidLoadValue({ state, commit }, meter) {
             const response = await axios.post(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/remove-meter-pyramid-load-value`,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/remove-meter-pyramid-load-value`,
                 { meter },
                 { headers: { 'authorization': $cookies.get('auth_token') }})
 
@@ -351,7 +351,7 @@ export const registration = {
 
         async addMeterPyramidLoadValue({ state, commit }, meter) {
             const response = await axios.post(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/add-meter-pyramid-load-value`,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/add-meter-pyramid-load-value`,
                 { meter },
                 { headers: { 'authorization': $cookies.get('auth_token') }})
 
@@ -360,7 +360,7 @@ export const registration = {
     
         async getParentMirC04Meters({ state, commit }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.registration.serverModuleName}/get-parent-mirc04-meters`,
+                this.state.serverUrl + `/api/${this.state.registration.serverModule}/get-parent-mirc04-meters`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data

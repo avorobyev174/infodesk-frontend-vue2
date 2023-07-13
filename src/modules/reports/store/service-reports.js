@@ -53,11 +53,11 @@ async function sendReqAndGetData(state, reqType, url, data) {
     let response
     if (reqType === 'get') {
         response = await axios.get(
-            state.serverUrl + `/api/${ state.reports.serverModuleName }/${ url }`,
+            state.serverUrl + `/api/${ state.reports.serverModule }/${ url }`,
             { headers: { 'authorization': $cookies.get('auth_token') } })
     } else {
         response = await axios[ reqType ](
-            state.serverUrl + `/api/${ state.reports.serverModuleName }/${ url }`,
+            state.serverUrl + `/api/${ state.reports.serverModule }/${ url }`,
             { ...data },
             { headers: { 'authorization': $cookies.get('auth_token') } })
     }

@@ -2,68 +2,68 @@ import axios from "axios";
 
 export const charts = {
     state: () => ({
-        serverModuleName: 'charts'
+        serverModule: 'charts'
     }),
     actions: {
-        async getMeterRegistrationChartData({state, commit}) {
+        async getMeterRegistrationChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-registration-chart`,
+                this.state.serverUrl + `/api/${ state.serverModule }/meter-registration-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
         },
 
-        async getMeterInPyramidChartData({state, commit}) {
+        async getMeterInPyramidChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-in-pyramid-chart`,
+                this.state.serverUrl + `/api/${state.serverModule }/meter-in-pyramid-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
         },
 
-        async getMeterRegistrationTypesChartData({state, commit}) {
+        async getMeterRegistrationTypesChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-registration-types-chart`,
+                this.state.serverUrl + `/api/${state.serverModule }/meter-registration-types-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
         },
 
-        async getMeterRegistrationStreetsChartData({state, commit}) {
+        async getMeterRegistrationStreetsChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-in-pyramid-houses-chart`,
+                this.state.serverUrl + `/api/${state.serverModule }/meter-in-pyramid-houses-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
         },
 
-        async getMeterRegistrationCustomerTypeChartData({state, commit}) {
+        async getMeterRegistrationCustomerTypeChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-in-pyramid-customer-types-chart`,
+                this.state.serverUrl + `/api/${state.serverModule }/meter-in-pyramid-customer-types-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
         },
 
-        async getMeterRegistrationNotInPyramidTypeChartData({state, commit}) {
+        async getMeterRegistrationNotInPyramidTypeChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-not-in-pyramid-types-chart`,
+                this.state.serverUrl + `/api/${ state.serverModule }/meter-not-in-pyramid-types-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
         },
 
-        async getMeterRegistrationInPyramidCountChartData({state, commit}) {
+        async getMeterRegistrationInPyramidCountChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-in-pyramid-count-chart`,
+                this.state.serverUrl + `/api/${ state.serverModule }/meter-in-pyramid-count-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data
         },
 
-        async getMeterRegistrationActiveInPyramidChartData({state, commit}) {
+        async getMeterRegistrationActiveInPyramidChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${this.state.charts.serverModuleName}/meter-active-in-pyramid-chart`,
+                this.state.serverUrl + `/api/${ state.serverModule }/meter-active-in-pyramid-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data

@@ -5,14 +5,14 @@
         created() {
 			if (this.headers) {
 				this.headers = this.headers.map((header, i) => ({ ...header, index: i }))
-				$cookies.get('meter_service_columns')
-					? this.changeColumnsVisibility($cookies.get('meter_service_columns')
+				$cookies.get(`${ this.module }_columns`)
+					? this.changeColumnsVisibility($cookies.get(`${ this.module }_columns`)
 						.split(',')
-						.map((column) => parseInt(column)))
+						.map((column) => +column))
 					: this.selectedHeaders = this.headers
 			}
         },
-        computed: {
+		computed: {
 	        showHeaders () {
 		        if (this.headers && this.selectedHeaders) {
 			        return this.headers.filter((header) => this.selectedHeaders.includes(header))

@@ -117,7 +117,7 @@
 	import ReportProgrammingMixin from "./mixins/ReportProgrammingMixin"
     import { getReportItemsByRole, executeAndSaveReport } from "./utils"
 	import { saveDataArrayToExcelFile } from "../Utils"
-    import { Reports } from "./const"
+    import { Report } from "./const"
 
 	export default {
 		name: "Reports",
@@ -126,7 +126,7 @@
 			DataInputReportDialog,
         },
 		data: () => ({
-			moduleName: 'reports',
+			module: 'reports',
             expand: false,
             reportData: [],
             reportTitle: '',
@@ -175,23 +175,24 @@
 
 			async showReportData(reportItem) {
 				switch (reportItem.id) {
-					case Reports.STORAGE_METER_BY_SERIAL_NUMBER: return this.showMeterStorageReport(reportItem)
-					case Reports.STORAGE_SYSTEM_LOGS: return this.showStoragePeriodReport(reportItem)
-					case Reports.STORAGE_LOGS_BY_LOCATION: return this.showLocationByPeriodStorageReport(reportItem)
-					case Reports.STORAGE_IN_OUT_BY_LOCATION: return this.showEmployeeByPeriodStorageReport(reportItem)
-					case Reports.STORAGE_COUNT_BY_LOCATION: return this.showLocationLogsByPeriodStorageReport(reportItem)
-					case Reports.STORAGE_LOGS_BY_OWNER: return this.showEmpLogsByPeriodStorageReport(reportItem)
-					case Reports.STORAGE_IN_OUT_BY_OWNER: return this.showEmpGroupLogsByPeriodStorageReport(reportItem)
-					case Reports.STORAGE_GROUP_BY_OWNER_AND_TYPE: return this.showCurrentCountByLocationStorageReport(reportItem)
-					case Reports.REPAIR_AND_MATERIALS: return this.showRepairAndMaterialStorageReport(reportItem)
-					case Reports.SPENT_MATERIALS: return this.showSpentMaterialsByMonthStorageReport(reportItem)
-					case Reports.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER: return this.showAssignmentEventsBySerialNumberReport(reportItem)
-					case Reports.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS: return this.showAssignmentEventsByCustomerAddressReport(reportItem)
-					case Reports.NOT_ACTIVE_IN_PYRAMID: return this.showNonActiveInPyramidReport(reportItem)
-					case Reports.PYRAMID_LOADED_BY_CUSTOMER_ADDRESS: return this.showPyramidLoadedByAddressReport(reportItem)
-					case Reports.ASSIGNMENT_GROUP_BY_STATUS: return this.showAssignmentGroupByStatusReport(reportItem)
-					case Reports.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER: return this.showAssignmentGroupByStatusAndOwnerReport(reportItem)
-					case Reports.ASSIGNMENT_EVENTS_GROUP_BY_CLOSE_REASON: return this.showAssignmentEventsGroupByCloseReasonReport(reportItem)
+					case Report.STORAGE_METER_BY_SERIAL_NUMBER: return this.showMeterStorageReport(reportItem)
+					case Report.STORAGE_SYSTEM_LOGS: return this.showStoragePeriodReport(reportItem)
+					case Report.STORAGE_LOGS_BY_LOCATION: return this.showLocationByPeriodStorageReport(reportItem)
+					case Report.STORAGE_IN_OUT_BY_LOCATION: return this.showEmployeeByPeriodStorageReport(reportItem)
+					case Report.STORAGE_COUNT_BY_LOCATION: return this.showLocationLogsByPeriodStorageReport(reportItem)
+					case Report.STORAGE_LOGS_BY_OWNER: return this.showEmpLogsByPeriodStorageReport(reportItem)
+					case Report.STORAGE_IN_OUT_BY_OWNER: return this.showEmpGroupLogsByPeriodStorageReport(reportItem)
+					case Report.STORAGE_GROUP_BY_OWNER_AND_TYPE: return this.showCurrentCountByLocationStorageReport(reportItem)
+					case Report.REPAIR_AND_MATERIALS: return this.showRepairAndMaterialStorageReport(reportItem)
+					case Report.SPENT_MATERIALS: return this.showSpentMaterialsByMonthStorageReport(reportItem)
+					case Report.STORAGE_LAST_LOGS: return this.showLastLogsStorageReport(reportItem)
+					case Report.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER: return this.showAssignmentEventsBySerialNumberReport(reportItem)
+					case Report.ASSIGNMENT_EVENTS_BY_CUSTOMER_ADDRESS: return this.showAssignmentEventsByCustomerAddressReport(reportItem)
+					case Report.NOT_ACTIVE_IN_PYRAMID: return this.showNonActiveInPyramidReport(reportItem)
+					case Report.PYRAMID_LOADED_BY_CUSTOMER_ADDRESS: return this.showPyramidLoadedByAddressReport(reportItem)
+					case Report.ASSIGNMENT_GROUP_BY_STATUS: return this.showAssignmentGroupByStatusReport(reportItem)
+					case Report.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER: return this.showAssignmentGroupByStatusAndOwnerReport(reportItem)
+					case Report.ASSIGNMENT_EVENTS_GROUP_BY_CLOSE_REASON: return this.showAssignmentEventsGroupByCloseReasonReport(reportItem)
 				}
 			},
 

@@ -78,7 +78,7 @@
 <script>
 	import {mapActions, mapGetters, mapState} from "vuex"
 	import { AssignmentStatus } from "../../../../const"
-    import ButtonWithTooltip from "../../../utils-components/ButtonWithTooltip"
+    import ButtonWithTooltip from "../../../utils-components/button/ButtonWithTooltip"
     import { getMarkerColor, isShowAccept, isShowDecline } from "./utils"
 
 	export default {

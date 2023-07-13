@@ -3,7 +3,7 @@ import { get } from "axios"
 export const map = {
     state: () => ({
         addresses: [],
-        serverModuleName: 'map'
+        serverModule: 'map'
     }),
     getters: {
         getAddresses(state) {
@@ -18,7 +18,7 @@ export const map = {
     actions: {
         async fetchAddresses({ state, commit }) {
             const response = await get(
-                this.state.serverUrl + `/api/${ this.state.map.serverModuleName }/addresses`,
+                this.state.serverUrl + `/api/${ state.serverModule }/addresses`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
             
             const { data } = response

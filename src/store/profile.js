@@ -2,19 +2,19 @@ import axios from "axios";
 
 export const profile = {
     state: () => ({
-        serverModuleName: 'profile'
+        serverModule: 'profile'
     }),
     actions: {
-        async getProfileData({ state, commit }) {
+        async getProfileData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ this.state.profile.serverModuleName }/get-info`,
+                this.state.serverUrl + `/api/${ state.serverModule }/get-info`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
             const [ profileData ] = response.data
             return profileData
         },
-        async changePassword({ state, commit }, { oldPassword, newPassword }) {
+        async changePassword({ state }, { oldPassword, newPassword }) {
             const response = await axios.post(
-                this.state.serverUrl + `/api/${ this.state.profile.serverModuleName }/change-password`,
+                this.state.serverUrl + `/api/${ state.serverModule}/change-password`,
                 { oldPassword , newPassword },
                 { headers: { 'authorization': $cookies.get('auth_token') } })
             return response.data

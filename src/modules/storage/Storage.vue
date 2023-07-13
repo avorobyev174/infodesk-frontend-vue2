@@ -172,7 +172,7 @@
                         class="pr-2"
                         @acceptOrIssue="$refs.acceptOrIssueDialog.open(false)"
                         @register="$refs.registerDialog.open(false)"
-                        @showHideColumns="$refs.showHideColumnsDialog.open()"
+                        @showHideColumns="$refs.ShowHideColumnsDialog.dialogOpen()"
                         @showHideAllMeters="showHideAllMeters"
                         @routerRegister="$refs.registerDialog.open(true)"
                         @routerAcceptOrIssue="$refs.acceptOrIssueDialog.open(true)"
@@ -234,11 +234,11 @@
             :meters="meters"
         ></edit-dialog>
         <show-hide-columns-dialog
-            ref="showHideColumnsDialog"
+            ref="ShowHideColumnsDialog"
             :headers="headers"
             :selectedHeaders="selectedHeaders"
             @changeColumns="changeColumnsVisibility"
-            module-name="storage"
+            module="storage"
         >
         </show-hide-columns-dialog>
         <repair-and-materials-dialog
@@ -253,11 +253,13 @@
     import AcceptOrIssueDialog from "./components/AcceptOrIssueDialog"
     import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
 	import RegisterDialog from "./components/RegisterDialog"
-	import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
+	import ShowHideColumnsDialog from "../utils-components/show-hide-columns/ShowHideColumnsDialog"
     import ActionColumn from "../utils-components/ActionColumn"
     import EditDialog from "./components/EditDialog"
     import StorageMixin from "./mixins/StorageMixin"
     import RepairAndMaterialsDialog from "./components/RepairAndMaterialsDialog"
+    import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin";
+    import ColumnVisibilityMixin from "../mixins/ColumnVisibilityMixin";
 
 	export default {
 		name: "Storage",
@@ -279,7 +281,7 @@
 			filterByOwner: [],
             search: '',
             isSearchMeterView: false,
-			moduleName: 'meter_storage',
+			module: 'storage',
 			disableColumnActions: false,
 			selectedHeaders: [],
 			headers: [
@@ -396,8 +398,26 @@
             isObserver: false,
             isRepairShowAllFilter: false
 		}),
-		mixins: [ StorageMixin ],
+		mixins: [ StorageMixin, FavoriteModuleMixin, ColumnVisibilityMixin ],
 		inject: [ 'showNotificationRequestError' ],
+		provide: function () {
+			return {
+				formatDate: this.formatDate,
+				formatDateIso: this.formatDateIso,
+				getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
+				getMeterTypeTitle: this.getMeterTypeTitle,
+				getMaterialTypeTitle: this.getMaterialTypeTitle,
+				getOwnerTitle: this.getOwnerTitle,
+				getAccuracyClassTitle: this.getAccuracyClassTitle,
+				getConditionTitle: this.getConditionTitle,
+				getEmployeeStaffIdByCard: this.getEmployeeStaffIdByCard,
+				getEmployeeTitleByCard: this.getEmployeeTitleByCard,
+				getLocationTitle: this.getLocationTitle,
+				getEmployeeCardByStaffId: this.getEmployeeCardByStaffId,
+				initializeMeters: this.initializeMeters,
+				resetFilters: this.resetFilters,
+			}
+		},
 		computed: {
 			...mapState({
 				loading: state => state.storage.meterLoading,
@@ -409,7 +429,6 @@
 				colorGold: state => state.colorGold,
 			}),
 			...mapGetters({
-				getCookies: 'getCookies',
 				meters: 'storage/getMeters',
 				searchMetersView: 'storage/getSearchMetersView',
 				activeModules: 'getActiveModules',
@@ -417,9 +436,6 @@
 				staffId: 'getStaffId',
 				isLogin: 'getIsLogin',
 			}),
-			showHeaders() {
-				return this.headers.filter(header => this.selectedHeaders.includes(header))
-			}
 		},
 		watch: {
 			options: {
@@ -446,19 +462,6 @@
 				}
 			},
 		},
-		created() {
-			this.setCookies()
-
-			$cookies.get('meter_storage_columns')
-				? this.changeColumnsVisibility($cookies.get('meter_storage_columns').split(',').map(column => +column))
-				: this.selectedHeaders = this.headers
-
-			const isFavorite = $cookies.get('common_favorite_module')
-
-			isFavorite === '/storage'
-				? this.setFavoriteModuleColor(this.colorGold)
-				: this.setFavoriteModuleColor('')
-		},
         mounted() {
 	        if (!this.isLogin) {
 		        return
@@ -482,26 +485,8 @@
 
 	        this.initializeOther()
         },
-        provide: function () {
-	        return {
-		        formatDate: this.formatDate,
-		        formatDateIso: this.formatDateIso,
-		        getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
-		        getMeterTypeTitle: this.getMeterTypeTitle,
-		        getMaterialTypeTitle: this.getMaterialTypeTitle,
-		        getOwnerTitle: this.getOwnerTitle,
-		        getAccuracyClassTitle: this.getAccuracyClassTitle,
-		        getConditionTitle: this.getConditionTitle,
-		        getEmployeeStaffIdByCard: this.getEmployeeStaffIdByCard,
-		        getEmployeeTitleByCard: this.getEmployeeTitleByCard,
-		        getLocationTitle: this.getLocationTitle,
-		        getEmployeeCardByStaffId: this.getEmployeeCardByStaffId,
-		        initializeMeters: this.initializeMeters,
-		        resetFilters: this.resetFilters,
-	        }
-        },
+
 		methods: {
-			...mapMutations(['setFavoriteModuleColor', 'setMeters']),
 			...mapMutations('storage', ['setMeters', 'setSearchMetersView']),
 			...mapActions('storage', [
                 'meterFilter',
@@ -513,30 +498,6 @@
 				'fetchMaterialsTypes',
 				'getMeterTypesInRepair',
             ]),
-
-            //Обработка куки
-			setCookies() {
-				if (this.getCookies) {
-					this.settings.forEach(setting => this.checkAndSetCookieValue(setting))
-				}
-			},
-
-			checkAndSetCookieValue(settings) {
-				const cookieName = `${ this.moduleName }_${ settings }`
-				if (!$cookies.get(cookieName)) {
-					const module = this.getCookies[ this.moduleName ]
-					if (module) {
-						const cookie = module.find(cookie => cookie.settings === settings)
-						if (cookie) {
-							$cookies.set(cookieName, cookie.value, '4h')
-						}
-					}
-				}
-			},
-
-			changeColumnsVisibility(columns) {
-				this.selectedHeaders = this.headers.filter(header => columns.includes(header.index))
-			},
 
 			//Инициализация компонента
             async initializeMeters() {

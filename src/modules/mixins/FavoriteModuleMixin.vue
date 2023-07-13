@@ -3,17 +3,23 @@
 
 	export default {
 		name: "FavoriteModuleMixin",
-        created() {
-			if (this.moduleName) {
-				const color = $cookies.get('common_favorite_module') === `/${ this.moduleName }` ? this.colorGold : ''
-				this.setFavoriteModuleColor(color)
-			}
+        mounted() {
+	        this.setFavoriteModuleFavorite()
         },
+		updated() {
+			this.setFavoriteModuleFavorite()
+		},
         computed: {
-	        ...mapState([ 'colorGold' ]),
+	        ...mapState([ 'colorGold', 'colorDarkGrey' ]),
         },
 		methods: {
-			...mapMutations(['setFavoriteModuleColor']),
+			...mapMutations('common', [ 'setFavoriteModuleColor' ]),
+            setFavoriteModuleFavorite() {
+	            if (this.module) {
+		            const color = $cookies.get('common_favorite_module') === `/${ this.module }` ? this.colorGold : this.colorDarkGrey
+		            this.setFavoriteModuleColor(color)
+	            }
+            }
 		}
 	}
 </script>

@@ -68,7 +68,7 @@
         mixins: [ DialogMixin ],
 	    computed: {
 		    ...mapGetters({
-			    meterTypes: 'getMeterTypes',
+			    meterTypes: 'getMeterProgTypes',
 		    })
 	    },
         mounted() {

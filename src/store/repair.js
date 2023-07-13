@@ -4,7 +4,7 @@ export const repair = {
 	state: () => ({
 		meters: [],
 		isMetersLoading: false,
-		serverModuleName: 'meter-repair'
+		serverModule: 'meter-repair'
 	}),
 	getters: {
 		getMeters(state) {
@@ -24,7 +24,7 @@ export const repair = {
 			try {
 				commit('setLoading', true)
 				const response = await get(
-					this.state.serverUrl + `/api/${ this.state.repair.serverModuleName }/meters`,
+					this.state.serverUrl + `/api/${ state.serverModule }/meters`,
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
 				commit('setMeters', response.data)
@@ -38,7 +38,7 @@ export const repair = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.repair.serverModuleName }/set-prog-value`,
+					this.state.serverUrl + `/api/${ state.serverModule }/set-prog-value`,
 					{ id, value },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 					

@@ -23,7 +23,7 @@ export default [
 	{
 		text: 'Последние данные события',
 		align: 'center',
-		value: 'lastEvent',
+		value: 'lastEvents',
 		sortable: false,
 		width: '160px',
 	},

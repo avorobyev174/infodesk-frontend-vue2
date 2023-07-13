@@ -109,6 +109,7 @@
 	import SimpleDialog from "../utils-components/SimpleDialog"
 	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
 	import RegistrationMixin from "../registration/mixins/RegistrationMixin"
+	import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin";
 
 	export default {
 		name: "Repair",
@@ -117,7 +118,7 @@
 		},
 		data: () => ({
 			search: '',
-			moduleName: 'meter_repair',
+			module: 'repair',
 			programmingDialogModel: false,
 			currentItem: {},
 			headers: [
@@ -165,16 +166,8 @@
 		        }
 	        }
         },
-		mixins: [ RegistrationMixin ],
-		created() {
-			const isFavorite = $cookies.get('common_favorite_module')
-
-			isFavorite === '/repair'
-				? this.setFavoriteModuleColor(this.colorGold)
-				: this.setFavoriteModuleColor('')
-		},
+		mixins: [ RegistrationMixin, FavoriteModuleMixin ],
 		methods: {
-			...mapMutations([ 'setFavoriteModuleColor' ]),
 	        ...mapActions('repair', [
 		        'fetchMeters',
                 'setProgrammingValue'

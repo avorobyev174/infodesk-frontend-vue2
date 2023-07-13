@@ -39,7 +39,7 @@
 </template>
 
 <script>
-    import {mapActions, mapState} from "vuex";
+    import { mapActions, mapState } from "vuex"
 
     export default {
         name: "ShowHideColumsDialog",
@@ -57,18 +57,18 @@
               required: true
           }
         },
-        inject: [ 'showNotificationSuccess', 'showNotificationRequestErrorWithCustomText', 'moduleName' ],
+        inject: [ 'showNotificationSuccess', 'showNotificationRequestErrorWithCustomText', 'module' ],
         computed: {
             ...mapState([ 'colorBlue', 'colorGreen' ])
         },
         methods: {
-            ...mapActions('registration', ['saveSettings']),
+            ...mapActions('common', ['saveSettings']),
             open() {
                 this.columns = this.selectedHeaders.map((header) => header.index)
                 this.dialogModel = true
             },
             save() {
-                $cookies.set(`${this.moduleName}_pyramid`, this.columns, '3h')
+                $cookies.set(`${ this.module }_pyramid`, this.columns, '4h')
 
                 this.saveSettings(this.columns).then(
                     response =>  {

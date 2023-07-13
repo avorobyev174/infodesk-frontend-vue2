@@ -2,12 +2,12 @@ import axios from "axios"
 
 export const reports = {
     state: () => ({
-        serverModuleName: 'reports'
+        serverModule: 'reports'
     }),
     actions: {
         async getAlphaLastTimeDataReport({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ state.serverModuleName }/alpha-last-time-data-report`,
+                this.state.serverUrl + `/api/${ state.serverModule }/alpha-last-time-data-report`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data
@@ -15,7 +15,7 @@ export const reports = {
         
         async getLoadedPyramidCountByCustomerAddressReport({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ state.serverModuleName }/get-meter-loaded-count-by-customer-address`,
+                this.state.serverUrl + `/api/${ state.serverModule }/get-meter-loaded-count-by-customer-address`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data
@@ -23,7 +23,7 @@ export const reports = {
         
         async getMeterFromRepairToStorageCountReport({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ state.serverModuleName }/get-meter-from-repair-to-storage-report`,
+                this.state.serverUrl + `/api/${ state.serverModule }/get-meter-from-repair-to-storage-report`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data
@@ -31,7 +31,7 @@ export const reports = {
         
         async getDataByNotInPyramidReport({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ state.serverModuleName }/get-meter-not-loaded-in-pyramid`,
+                this.state.serverUrl + `/api/${ state.serverModule }/get-meter-not-loaded-in-pyramid`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data
@@ -39,7 +39,7 @@ export const reports = {
     
         async getNonActiveInPyramidReport({ state }, days) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ state.serverModuleName }/get-non-active-meters-from-pyramid/` + days,
+                this.state.serverUrl + `/api/${ state.serverModule }/get-non-active-meters-from-pyramid/` + days,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data
@@ -47,7 +47,7 @@ export const reports = {
     
         async getCountByAddressReport({ state }, sort) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ state.serverModuleName }/get-meter-count-by-address/` + sort,
+                this.state.serverUrl + `/api/${ state.serverModule }/get-meter-count-by-address/` + sort,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
         
             return response.data
@@ -55,7 +55,7 @@ export const reports = {
     
         async getRotecMeterReport({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${ state.serverModuleName }/get-rotec-meters-info`,
+                this.state.serverUrl + `/api/${ state.serverModule }/get-rotec-meters-info`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
             
             return response.data

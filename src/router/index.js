@@ -4,7 +4,6 @@ import Registration from '../modules/registration/MeterRegistration'
 import Charts from "../modules/Charts"
 import Search from "../modules/Search"
 import Map from "../modules/map/Map"
-import Meters from "../modules/Meters"
 import Login from "../modules/Login"
 import PageNotFound from "../modules/PageNotFound"
 import Profile from "../profile/Profile"
@@ -43,11 +42,6 @@ const routes = [
     path: '/search',
     name: 'Search',
     component: Search
-  },
-  {
-    path: '/meters',
-    name: 'Meters',
-    component: Meters
   },
   {
     path: '/login',

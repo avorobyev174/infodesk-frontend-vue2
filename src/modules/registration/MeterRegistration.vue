@@ -60,7 +60,7 @@
               @groupSmsSend="$refs.singleAndGroupSmsSendDialog.open()"
               @groupSmsStatusCheck="$refs.singleAndGroupSmsSendDialog.checkSmsStatusForAllAvailableMeters()"
               @actualizeFromStek="$refs.actualizeDataFromStekDialog.open()"
-              @showHideColums="$refs.showHideColumnsDialog.open()"
+              @showHideColums="$refs.ShowHideColumnsDialog.dialogOpen()"
               @showBrokenMeters="$refs.brokenMetersDialog.open()"
           />
           <excel-menu
@@ -69,11 +69,11 @@
           />
           <!-- Диалог видимости колонок -->
           <show-hide-columns-dialog
-            ref="showHideColumnsDialog"
+            ref="ShowHideColumnsDialog"
             :headers="headers"
             :selectedHeaders="selectedHeaders"
             @changeColumns="changeColumnsVisibility"
-            moduleName="programming"
+            module="programming"
           />
           <!-- Диалог добавления/изменения -->
           <add-or-edit-dialog
@@ -229,12 +229,14 @@ import AddOrEditDialog from "./components/AddOrEditDialog"
 import ActualizeDataFromRTCDialog from "./components/ActualizeDataFromRTCDialog"
 import SingleAndGroupSmsSendDialog from "./components/SingleAndGroupSmsSendDialog"
 import MainMenu from "./components/MainMenu"
-import ShowHideColumnsDialog from "../utils-components/ShowHideColumnsDialog"
+import ShowHideColumnsDialog from "../utils-components/show-hide-columns/ShowHideColumnsDialog"
 import ExcelMenu from "./components/ExcelMenu"
 import RefreshDataFromStekToPyramidDialog from "./components/RefreshDataFromStekToPyramidDialog"
 import SimpleDialog from "../utils-components/SimpleDialog"
 import BrokenMetersDialog from "./components/BrokenMetersDialog"
 import RegistrationMixin from "./mixins/RegistrationMixin"
+import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin";
+import ColumnVisibilityMixin from "../mixins/ColumnVisibilityMixin";
 
 export default {
   name: "MeterRegistration",
@@ -249,7 +251,7 @@ export default {
     actualizeDataFromRTCDialog: ActualizeDataFromRTCDialog,
     singleAndGroupSmsSendDialog: SingleAndGroupSmsSendDialog,
     mainMenu: MainMenu,
-    showHideColumnsDialog: ShowHideColumnsDialog,
+    ShowHideColumnsDialog,
     simpleDialog: SimpleDialog,
     brokenMetersDialog: BrokenMetersDialog
   },
@@ -263,7 +265,7 @@ export default {
     showPyramidIconColor: 'grey',
     showPyramidToolTipTitle: 'Показать загруженные в пирамиду',
     showMetersBroken: false,
-    moduleName: 'meter_registration',
+    module: 'programming',
     settings: ['columns'],
     search: '',
     selectedHeaders: [],
@@ -320,14 +322,13 @@ export default {
       getStatusTitle: this.getStatusTitle,
       getSmsTitleBySmsStatus: this.getSmsTitleBySmsStatus,
       getIpAddressTitle: this.getIpAddressTitle,
-      moduleName: this.moduleName
+      module: this.module
     }
   },
   computed: {
     ...mapGetters({
       meters: 'registration/getMeters',
       types: 'registration/getTypes',
-      getCookies: 'getCookies',
       isLogin: 'getIsLogin',
     }),
     ...mapState({
@@ -339,25 +340,8 @@ export default {
       colorGrey: state => state.colorGrey,
       colorGold: state => state.colorGold,
     }),
-    showHeaders () {
-      return this.headers.filter(header => this.selectedHeaders.includes(header))
-    }
   },
-  created() {
-    this.setCookies()
-    this.headers = this.headers.map((header, i) => ({ ... header, index: i }))
-    $cookies.get('meter_registration_columns')
-      ? this.changeColumnsVisibility($cookies.get('meter_registration_columns').split(',').map(column => parseInt(column)))
-      : this.selectedHeaders = this.headers
-
-    const isFavorite = $cookies.get('common_favorite_module')
-    if (isFavorite === '/programming') {
-      this.setFavoriteModuleColor(this.colorGold)
-    } else {
-      this.setFavoriteModuleColor('')
-    }
-  },
-  mixins: [ RegistrationMixin ],
+  mixins: [ RegistrationMixin, FavoriteModuleMixin, ColumnVisibilityMixin ],
   mounted() {
     if (!this.isLogin) {
       return
@@ -382,7 +366,6 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['setFavoriteModuleColor']),
     ...mapActions('registration', [
       'fetchMeters',
       'fetchTypes',
@@ -394,30 +377,6 @@ export default {
     ...mapActions('repair', [
       'setProgrammingValue'
     ]),
-
-    setCookies() {
-      if (this.getCookies) {
-        this.settings.forEach((settings) => this.checkAndSetCookieValue(settings))
-      }
-    },
-
-    //Обработка куки
-    checkAndSetCookieValue(settings) {
-      const cookieName = `${this.moduleName}_${settings}`
-      if (!$cookies.get(cookieName)) {
-        const module = this.getCookies[this.moduleName]
-        if (module) {
-          const cookie = module.find(cookie => cookie.settings === settings)
-          if (cookie) {
-            $cookies.set(cookieName, cookie.value, '4h')
-          }
-        }
-      }
-    },
-
-    changeColumnsVisibility(columns) {
-      this.selectedHeaders = this.headers.filter(({ index }) => columns.includes(index))
-    },
 
     //Обработчик события ручной загрузки данных
     async initialize() {

@@ -52,16 +52,17 @@
 </template>
 
 <script>
-    import {mapActions, mapGetters, mapMutations, mapState} from "vuex"
+    import { mapActions, mapState } from "vuex"
     import axios from "axios"
-    import jwt from "jsonwebtoken"
 
     export default {
         name: "Login",
         data: () => ({
             name: null,
             password: null,
-            loginRules: [v => !!v || 'Обязательно к заполнению'],
+            loginRules: [
+            	v => !!v || 'Обязательно к заполнению'
+            ],
             showPassword: false,
         }),
         inject: [ 'showNotificationSuccess', 'showNotificationRequestError', 'setBackgroundImage'],
@@ -73,7 +74,7 @@
 	        this.setBackgroundImage(true)
         },
         computed: {
-	        ...mapState([ 'colorGreen', 'serverUrl' ]),
+	        ...mapState([ 'serverUrl' ]),
         },
         methods: {
             ...mapActions([ 'loginUser' ]),
@@ -91,7 +92,6 @@
                     const { authToken, roleToken, cookies } = response.data
                     this.showNotificationSuccess('Успешный вход')
                     this.loginUser({ authToken, roleToken, cookies })
-
                 } catch (e) {
                     console.log(e)
                     this.showNotificationRequestError(e)

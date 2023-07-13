@@ -10,7 +10,7 @@
         >
             <v-list dense>
                 <v-list-item
-                    v-for="{ title, icon, url } in availableModules"
+                    v-for="{ title, icon, url } in activeModules"
                     :key="title"
                     :to="url"
                     style="text-decoration: none;"
@@ -58,20 +58,16 @@
 				{ title: 'Утилиты', icon: 'mdi-cog-outline', url: '/test-utils', name: 'test-utils' },
 				{ title: 'Управление', icon: 'mdi-shield-crown-outline', url: '/admin', name: 'admin' },
 			],
-			availableModules: [],
+			activeModules: [],
 			drawer: true,
 		}),
-		inject: [ 'showNotificationRequestError', 'showNotificationError'],
+		inject: [ 'showNotificationError'],
 		computed: {
 			...mapGetters({
 				getSideBarState: 'getSideBarState',
-				isLogin: 'getIsLogin'
 			}),
 		},
 		mounted() {
-			if (!this.isLogin) {
-				return
-            }
             const options = jwt.verify($cookies.get('role_token'), process.env.VUE_APP_ROLE_KEY)
 
             if (!options) {
@@ -84,10 +80,12 @@
             const roles = JSON.parse(options.roles)
 
             if (accessModules.length) {
-                this.availableModules = this.modules.filter((module) => accessModules.includes(module.name))
-                this.$store.commit('setActiveModules', this.availableModules)
+                this.activeModules = this.modules.filter((module) => accessModules.includes(module.name))
+                this.$store.commit('setActiveModules', this.activeModules)
             } else {
-                this.$router.push('/')
+            	if (this.$route.name !== 'Welcome') {
+		            this.$router.push('/')
+	            }
             }
 
             if (staffId) {

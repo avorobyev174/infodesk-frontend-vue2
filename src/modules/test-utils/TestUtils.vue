@@ -72,32 +72,13 @@
             'setBackgroundImage'
         ],
         computed: {
-	        ...mapGetters({
-		        isLogin: 'getIsLogin'
-	        }),
             ...mapState(['colorGreen', 'colorGrey', 'colorRed', 'colorOrange', 'colorBlue']),
         },
-        created() {
-            const isFavorite = $cookies.get('common_favorite_module')
-            if (isFavorite === '/test-utils') {
-                this.setFavoriteModuleColor(this.colorGold)
-            } else {
-                this.setFavoriteModuleColor('')
-            }
-
-	        // if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
-		    //     this.$router.push('/')
-
-	        this.setBackgroundImage(true)
-        },
         mounted() {
-	        if (!this.isLogin) {
-		        return
-	        }
+
         },
 	    methods: {
             ...mapActions('testUtils', ['getDataBySerialNumber', 'goTest', 'goTest1', 'goTest2']),
-            ...mapMutations(['setFavoriteModuleColor']),
             async getMeterInfoBySerialNumberReport() {
                 this.loadingMeterInfoBySerialNumberReport = true
                 //console.log(this.serialNumbers)
@@ -221,18 +202,6 @@
 				    this.loadingNotInPyramidReport = false
 			    }
 		    },*/
-
-            dateFormat(dateToFormat) {
-	            const date = new Date(dateToFormat)
-	            let day = String(date.getDate())
-	            let month = String(date.getMonth() + 1)
-	            const year = date.getFullYear()
-
-	            day = day.length < 2 ? day.padStart(2, '0') : day
-	            month = month.length < 2 ? month.padStart(2, '0') : month
-
-	            return `${day}.${month}.${year}`
-            }
         }
     }
 </script>

@@ -5,7 +5,7 @@ export const service = {
 	state: () => ({
 		assignments: [],
 		loading: false,
-		serverModuleName: 'meter-service',
+		serverModule: 'meter-service',
 		assignmentsLogs: [],
 		assignmentCloseReasonTypes: [],
 		assignmentEventTypes: [],
@@ -37,7 +37,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/assignments`,
+					this.state.serverUrl + `/api/${ state.serverModule }/assignments`,
 					{ options },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
@@ -51,7 +51,7 @@ export const service = {
 		
 		async fetchAllAssignments({ state, commit }, isCommit) {
 			const response = await get(
-				this.state.serverUrl + `/api/${ state.serverModuleName }/all-assignments`,
+				this.state.serverUrl + `/api/${ state.serverModule }/all-assignments`,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			const assignments = response.data
@@ -65,7 +65,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/filter`,
+					this.state.serverUrl + `/api/${ state.serverModule }/filter`,
 					{ filters, options },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				const { assignments, totalAssignmentsCount } = response.data
@@ -80,7 +80,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await get(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/assignments-and-events-by-user-in-work`,
+					this.state.serverUrl + `/api/${ state.serverModule }/assignments-and-events-by-user-in-work`,
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
 				const assignments = response.data
@@ -92,7 +92,7 @@ export const service = {
 		
 		async fetchAssignmentsLogs({ state, commit }) {
 			const response = await get(
-				this.state.serverUrl + `/api/${ state.serverModuleName }/assignments-logs`,
+				this.state.serverUrl + `/api/${ state.serverModule }/assignments-logs`,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			const logs = response.data
@@ -110,7 +110,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await get(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/assignment-events/${ assignmentId }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/assignment-events/${ assignmentId }`,
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
 				return response.data
@@ -123,7 +123,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/assignment-accept-decline/${ id }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/assignment-accept-decline/${ id }`,
 					{ isDecline },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 
@@ -138,7 +138,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/add-assignment`,
+					this.state.serverUrl + `/api/${ state.serverModule }/add-assignment`,
 					{ type, serialNumber },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
@@ -153,7 +153,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/add-action-assignment-event/${ assignmentId }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/add-action-assignment-event/${ assignmentId }`,
 					{ description },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 
@@ -168,7 +168,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await put(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/change-action-event/${ actionEventId }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/change-action-event/${ actionEventId }`,
 					{ description },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 
@@ -183,7 +183,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/delete-action-assignment-event/${ eventId }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/delete-action-assignment-event/${ eventId }`,
 					{},
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
@@ -198,7 +198,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/close-assignment/${ assignmentId }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/close-assignment/${ assignmentId }`,
 					{ closeReason, description },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
@@ -212,7 +212,7 @@ export const service = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModuleName }/save-assignment-contacts/${ assignmentId }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/save-assignment-contacts/${ assignmentId }`,
 					{ contacts },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				

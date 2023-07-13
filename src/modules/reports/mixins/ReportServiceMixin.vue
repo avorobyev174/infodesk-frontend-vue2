@@ -1,6 +1,6 @@
 <script>
 	import { mapActions } from "vuex"
-	import {AssignmentEventType} from "../../../const";
+	import { AssignmentEventType } from "../../../const"
 
 	export default {
 		name: "ReportServiceMixin",
@@ -131,9 +131,6 @@
                         count,
                         ((count / totalClosedEvents) * 100).toFixed(2)
                     ])
-
-
-		        console.log(closeReasonsData)
 
                 return { modifiedEventsData, closeReasonsData }
 	        },

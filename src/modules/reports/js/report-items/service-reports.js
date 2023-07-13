@@ -1,7 +1,7 @@
 export const serviceReports = [
     {
 		id: 14,
-		name: 'События поручений по прибору учета',
+		name: 'События по прибору учета',
 		download: false,
 		description: 'Количество событий по серийному номеру прибора учета',
 	    executeFunction: 'dataInputReportDialogOpen',
@@ -11,7 +11,7 @@ export const serviceReports = [
 	},
 	{
 		id: 15,
-		name: 'События поручений по адресу',
+		name: 'События по адресу',
 		download: false,
 		description: 'Количество событий по адресу прибора учета',
 		executeFunction: 'dataInputReportDialogOpen',
@@ -21,7 +21,7 @@ export const serviceReports = [
 	},
 	{
 		id: 18,
-		name: 'Информация по поручениям за период',
+		name: 'Информация за период',
 		download: false,
 		description: 'Информация по поручениям сгруппированная по статусу за период',
 		executeFunction: 'dataInputReportDialogOpen',
@@ -32,7 +32,7 @@ export const serviceReports = [
 	},
 	{
 		id: 19,
-		name: 'Информация по поручениям за период по сотруднику',
+		name: 'Информация за период по сотруднику',
 		download: false,
 		description: 'Информация по поручениям сгруппированная по статусу и сотруднику за период',
 		executeFunction: 'dataInputReportDialogOpen',
@@ -43,7 +43,7 @@ export const serviceReports = [
 	},
 	{
 		id: 20,
-		name: 'Причины закрытия поручений',
+		name: 'Причины закрытия',
 		download: false,
 		description: 'Информация по поручениям сгруппированная по причинам закрытия за весь период',
 		executeFunction: 'showAssignmentEventsGroupByCloseReasonReport',

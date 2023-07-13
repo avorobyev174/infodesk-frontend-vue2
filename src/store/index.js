@@ -7,7 +7,7 @@ Vue.use(Vuex)
 import { registration } from "@/store/registration"
 import { charts } from "@/store/charts"
 import { profile } from "@/store/profile"
-import { utils } from "@/store/utils"
+import { common } from "@/store/common"
 import { testUtils } from "@/store/test-utils"
 import { reports } from "@/modules/reports/store/reports"
 import { search } from "@/store/search"
@@ -35,15 +35,16 @@ export default new Vuex.Store({
         colorGreen: 'green lighten-1',
         colorOrange: 'orange lighten-1',
         colorGrey: 'grey lighten-1',
+        colorDarkGrey: 'grey',
         colorGold: '#ecc700',
         serverUrl: process.env.NODE_ENV === "production" ? production : dev,
         cookies: [],
-        favoriteModuleColor: '',
         assignmentEventTypes: [],
         assignmentCloseReasonTypes: [],
         assignmentStatuses: [],
         accounts: [],
         meterTypes: [],
+        meterProgTypes: [],
         ipAddresses: [],
         simStatuses: [],
     },
@@ -59,14 +60,6 @@ export default new Vuex.Store({
 
         getIsLogin(state) {
             return state.isLogin
-        },
-
-        getCookies(state) {
-            return state.cookies
-        },
-
-        getFavoriteModuleColor(state) {
-            return state.favoriteModuleColor
         },
 
         getStaffId(state) {
@@ -87,6 +80,10 @@ export default new Vuex.Store({
     
         getMeterTypes(state) {
             return state.meterTypes
+        },
+    
+        getMeterProgTypes(state) {
+            return state.meterProgTypes
         },
     
         getAssignmentEventTypes(state) {
@@ -127,14 +124,6 @@ export default new Vuex.Store({
             state.isLogin = isLogin
         },
 
-        setCookies(state, cookies) {
-            state.cookies = cookies
-        },
-
-        setFavoriteModuleColor(state, color) {
-            state.favoriteModuleColor = color
-        },
-
         setStaffId(state, staffId) {
             state.staffId = staffId
         },
@@ -153,6 +142,7 @@ export default new Vuex.Store({
                 assignmentCloseReasonTypes,
                 accounts,
                 meterTypes,
+                meterProgTypes,
                 ipAddresses,
                 simStatuses,
                 assignmentStatuses
@@ -162,6 +152,7 @@ export default new Vuex.Store({
             state.assignmentCloseReasonTypes = assignmentCloseReasonTypes
             state.accounts = accounts
             state.meterTypes = meterTypes
+            state.meterProgTypes = meterProgTypes
             state.ipAddresses = ipAddresses
             state.simStatuses = simStatuses
             state.assignmentStatuses = assignmentStatuses
@@ -173,22 +164,16 @@ export default new Vuex.Store({
         async loginUser({ state, commit }, { authToken, roleToken, cookies }) {
             $cookies.set('auth_token', authToken, '4h')
             $cookies.set('role_token', roleToken, '4h')
-
             commit('setLogin', true)
-            commit('setCookies', cookies)
 
-            let redirect = '/'
-
-            if (cookies && cookies.common && cookies.common.length) {
-                cookies.common.forEach((cookie) => {
+            for (const module of Object.keys(cookies)) {
+                for (const cookie of cookies[ module ]) {
                     if (cookie.settings === 'favorite_module') {
-                        redirect = cookie.value
-                        $cookies.set(`common_${ cookie.settings }`, cookie.value, '4h')
+                        await router.push(cookie.value)
                     }
-                })
+                    $cookies.set(`${ module }_${ cookie.settings }`, cookie.value, '4h')
+                }
             }
-            
-            await router.push(redirect)
         },
 
         async logoutUser({ state, commit }, isRedirectToLoginPage) {
@@ -200,7 +185,9 @@ export default new Vuex.Store({
                 if (isRedirectToLoginPage) {
                     await router.push('/login')
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.log(e)
+            }
         },
 
         async fetchDictionaries({ state, commit }) {
@@ -222,7 +209,7 @@ export default new Vuex.Store({
         registration,
         charts,
         profile,
-        utils,
+        common,
         testUtils,
         search,
         reports,

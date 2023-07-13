@@ -2,7 +2,7 @@
     <div>
         <v-data-table
             height="31vh"
-            :loading="loading"
+            :loading="logLoading"
             class="elevation-1 log-table"
             :items-per-page="5"
             loading-text="Идет загрузка логов..."
@@ -67,111 +67,42 @@
                 <p class="pt-4">Нет данных...</p>
             </template>
         </v-data-table>
-        <dialog-with-form
-            ref="dialogForm"
-            :dialog-open="dialogModel"
+        <dialog-with-data-slot
+            ref="DialogWithDataSlot"
             title="Редактирование"
-            @okButtonClickEvent="saveComment"
-            @cancelButtonClickEvent="close"
+            @submit="saveComment"
         >
-            <template v-slot:form-data>
+            <template v-slot:fields>
                 <v-text-field
                     v-model="comment"
                     label="Комментарий"
                     type="text"
                 ></v-text-field>
             </template>
-        </dialog-with-form>
+        </dialog-with-data-slot>
     </div>
 </template>
 
 <script>
 	import { mapActions, mapGetters, mapState } from "vuex"
 	import LogTableMixin from "./mixins/LogTableMixin"
-	import DialogWithForm from "../utils-components/DialogWithForm"
+	import DialogWithDataSlot from "../utils-components/dialog/DialogWithDataSlot"
+	import headers from "./js/log-table-headers"
 
 	export default {
 		name: "LogTable",
 		components: {
-			DialogWithForm
+			DialogWithDataSlot
         },
 		data: () => ({
-			headers: [
-				{
-					text: 'ID',
-                    align: 'center',
-                    value: 'id',
-                    sortable: true,
-                    class: 'header-color',
-					width: '80px'
-                },
-				{
-					text: 'Дата операции',
-					value: 'datetime',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-                    class: 'header-color'
-				},
-				{
-					text: 'Тип операции',
-					value: 'oper_type',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					class: 'header-color'
-				},
-				{
-					text: 'Отдающий',
-					value: 'issuing_person',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					class: 'header-color'
-				},
-				{
-					text: 'Принимающий',
-					value: 'accepted_person',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					class: 'header-color'
-				},
-				{
-					text: 'Комментарий',
-					value: 'comment_field',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					class: 'header-color',
-					width: '15vw'
-				},
-				{
-					text: 'Доп. информация',
-					value: 'update_field',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					class: 'header-color',
-					width: '30vw'
-				},
-			],
+			headers,
             comment: '',
-            item: {},
-            dialogModel: false
+            item: null,
 		}),
 		inject: [ 'showNotificationSuccess', 'showNotificationRequestError' ],
         mixins: [ LogTableMixin ],
 		computed: {
-			...mapState({
-				loading: state => state.storage.logLoading,
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
+			...mapState([ 'logLoading', 'colorGreen', 'colorRed', 'colorOrange', 'colorGrey' ]),
 			...mapGetters({
 				logs: 'storage/getLogs',
 			}),
@@ -180,8 +111,9 @@
 	        ...mapActions('storage', [
 		        'editLogComment',
 	        ]),
+
 			editComment(item) {
-                this.dialogModel = true
+                this.$refs.DialogWithDataSlot.dialogOpen()
                 this.item = item
                 this.comment = item.comment_field
             },
@@ -190,16 +122,13 @@
 	        	try {
                     await this.editLogComment({ comment: this.comment, logId: this.item?.id })
 			        this.item.comment_field = this.comment
-			        this.showNotificationSuccess(`Операция выполнена успешно`, this.colorGreen)
-	                this.close()
+			        this.showNotificationSuccess('Операция редактирования выполнена успешно')
 		        } catch (e) {
                     this.showNotificationRequestError(e)
+		        } finally {
+			        this.$refs.DialogWithDataSlot.dialogClose()
 		        }
             },
-
-            close() {
-	            this.dialogModel = false
-            }
         }
 	}
 </script>

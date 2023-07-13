@@ -69,7 +69,7 @@
                     class="add-event-button"
                     fab
                     absolute
-                    @click="$refs.addOrEditAssignmentEventDialog.dialogOpen()"
+                    @click="$refs.AddOrEditAssignmentEventDialog.dialogOpen()"
                     v-bind="attrs"
                     v-on="on"
                     dark
@@ -101,7 +101,7 @@
         </v-tooltip>
         <dialog-with-data-slot-only-close
             :title="addOrEditDialogTitle"
-            ref="addOrEditAssignmentEventDialog"
+            ref="AddOrEditAssignmentEventDialog"
             @close="addOrEditAssignmentEventDialogClick"
             :close-button-title="addOrEditDialogButtonTitle"
         >
@@ -125,27 +125,26 @@
                 <v-text-field v-model="description" label="Описание"></v-text-field>
             </template>
         </dialog-with-data-slot-only-close>
-        <simple-dialog
-            :dialog-open="deleteConfirmationDialogModel"
-            max-width="700px"
+        <dialog-custom
+            ref="AssignmentEventRemoveDialog"
+            :max-width="700"
             title="Вы уверены что хотите удалить событие?"
-            @okButtonClickEvent="deleteActionEvent"
-            @cancelButtonClickEvent="deleteConfirmationDialogModel = false"
-        ></simple-dialog>
+            @submit="deleteActionEvent"           
+        ></dialog-custom>
     </v-navigation-drawer>
 </template>
 
 <script>
 	import { mapActions, mapState, mapGetters } from 'vuex'
     import { AssignmentEventType, AssignmentStatus } from "../../../const"
-    import SimpleDialog from "../../utils-components/SimpleDialog"
+    import DialogCustom from "../../utils-components/dialog/DialogCustom"
     import DialogWithDataSlotOnlyClose from "../../utils-components/dialog/DialogWithDataSlotOnlyClose"
 
 	export default {
 		name: 'EventList',
         components: {
 	        DialogWithDataSlotOnlyClose,
-	        SimpleDialog
+	        DialogCustom
         },
 		data: () => ({
 			AssignmentStatus,
@@ -161,7 +160,6 @@
             photoUrl: '',
 			closeReason: 1,
 			currentAccountId: 1,
-            deleteConfirmationDialogModel: false,
             addOrEditDialogTitle: 'Добавить событие',
             addOrEditDialogButtonTitle: 'Добавить',
 		}),
@@ -230,12 +228,12 @@
 			},
 
 			openConfirmationDeleteEventDialog(actionEvent) {
-				this.deleteConfirmationDialogModel = true
+				this.$refs.AssignmentEventRemoveDialog.dialogOpen()
                 this.selectedActionEvent = actionEvent
 			},
 
 			async openEditDescriptionDialog(actionEvent) {
-				this.$refs.addOrEditAssignmentEventDialog.dialogOpen()
+				this.$refs.AddOrEditAssignmentEventDialog.dialogOpen()
 				this.selectedActionEvent = actionEvent
 				if (actionEvent) {
 					this.description = actionEvent.description
@@ -243,8 +241,7 @@
 			},
 
 			closeEditDescriptionDialog() {
-				this.$refs.addOrEditAssignmentEventDialog.dialogClose()
-				this.deleteConfirmationDialogModel = false
+				this.$refs.AddOrEditAssignmentEventDialog.dialogClose()
 				this.selectedActionEvent = null
 				this.description = ''
 			},

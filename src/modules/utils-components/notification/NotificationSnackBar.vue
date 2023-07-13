@@ -21,7 +21,7 @@
 
 <script>
     import { mapActions, mapState, mapGetters } from "vuex"
-    import { NOT_AUTHORIZATED_ERROR } from '../../const.js'
+    import { NOT_AUTHORIZATED_ERROR } from '../../../const.js'
 
     export default {
         name: "NotificationSnackBar",

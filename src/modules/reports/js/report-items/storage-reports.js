@@ -122,9 +122,9 @@ export const storageReports = [
 	},
 	{
 		id: 13,
-		name: 'Проверка счетчиков выданных на поверку',
+		name: 'Последний лог счетчиков',
 		download: false,
-		description: 'Проверка счетчиков выданных на поверку по серийному номеру',
+		description: 'Проверка счетчиков по серийному номеру указанному через пробел',
 		executeFunction: 'dataInputReportDialogOpen',
 		loading: false,
 		show: false,

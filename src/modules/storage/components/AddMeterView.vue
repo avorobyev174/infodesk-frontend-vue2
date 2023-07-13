@@ -124,13 +124,11 @@
 	import { mapActions, mapGetters, mapState } from "vuex"
     import correctSound from '../audio/correct.mp3'
     import wrongSound from '../audio/wrong.mp3'
+    import { Location } from '../const'
 
 	export default {
 		name: "AddMeterView",
         data: () => ({
-	        STORAGE_LOCATION: 0,
-	        REPAIR_LOCATION: 1,
-	        SECOND_STORAGE_LOCATION: 7,
 	        loading: false,
 	        headers: [
 		        {
@@ -217,14 +215,7 @@
             }
 		},
 		computed: {
-			...mapState({
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
+			...mapState([ 'colorBlue', 'colorRed', 'colorGreen', 'colorGrey' ]),
 			...mapGetters({
 				types: 'storage/getMeterTypes',
 				options: 'storage/getOptions',
@@ -264,14 +255,11 @@
             },
 
 	        checkLocation(meter) {
-	        	const storageLocations = [ this.STORAGE_LOCATION, this.SECOND_STORAGE_LOCATION ]
+	        	const storageLocations = [ Location.STORAGE, Location.STORAGE_TEMPORARY ]
 	        	if (this.isRouter) {
-			        return meter.oldLocation === this.REPAIR_LOCATION
-                        ? this.newLocation !== this.REPAIR_LOCATION
-                        : this.newLocation === this.REPAIR_LOCATION
-
-			        // return (meter.oldLocation === this.REPAIR_LOCATION && this.newLocation !== this.REPAIR_LOCATION) ||
-				    //     (meter.oldLocation !== this.REPAIR_LOCATION && this.newLocation === this.REPAIR_LOCATION)
+			        return meter.oldLocation === Location.REPAIR
+                        ? this.newLocation !== Location.REPAIR
+                        : this.newLocation === Location.REPAIR
                 } else {
                     const nonStorageLocations = this.locations
                         .map((location) => location.value)
@@ -282,10 +270,6 @@
                     } else {
 	                    return storageLocations.includes(this.newLocation)
                     }
-			        // return (meter.oldLocation === this.STORAGE_LOCATION && this.newLocation !== this.STORAGE_LOCATION) ||
-				    //     (meter.oldLocation !== this.STORAGE_LOCATION && this.newLocation === this.STORAGE_LOCATION) ||
-				    //     (meter.oldLocation === this.SECOND_STORAGE_LOCATION && this.newLocation !== this.SECOND_STORAGE_LOCATION) ||
-				    //     (meter.oldLocation !== this.SECOND_STORAGE_LOCATION && this.newLocation === this.SECOND_STORAGE_LOCATION)
 		        }
 	        },
 
@@ -366,14 +350,14 @@
 		        }
 
 		        this.loading = true
+                const meter = { type: meterType, serialNumber: this.serialNumber }
 		        try {
-			        let meterInDb = this.isRepair
-                        ? await this.checkMeterInRepairDB({ type: meterType, serialNumber: this.serialNumber })
-                        : await this.checkMeterInDB({ type: meterType, serialNumber: this.serialNumber })
-
+			        let checkedMeter = this.isRepair
+                        ? await this.checkMeterInRepairDB(meter)
+                        : await this.checkMeterInDB(meter)
 			        if (this.isRegister) {
 				        //регистрация
-				        if (meterInDb.length) {
+				        if (checkedMeter.guid) {
 					        await wrong.play()
 
 					        return this.showNotificationInfo(
@@ -385,8 +369,8 @@
 				        await correct.play()
 
                         const oldLocation = this.isRouter
-                            ? this.REPAIR_LOCATION
-                            : this.newLocation ? this.SECOND_STORAGE_LOCATION : this.STORAGE_LOCATION
+                            ? Location.REPAIR
+                            : this.newLocation ? Location.STORAGE_TEMPORARY : Location.STORAGE
 
 				        this.meters.unshift({
 					        type: meterType,
@@ -396,7 +380,7 @@
 				        })
 			        } else {
 			        	//прием выдача
-				        if (!meterInDb.length) {
+				        if (!checkedMeter.guid) {
 					        await wrong.play()
 
 					        return this.showNotificationWarning(
@@ -406,23 +390,24 @@
 						         ${ this.isRepair ? 'или не находится в ремонте' : '' }`)
 				        }
 
-				        const [ dbMeter ] = meterInDb
-                        const { meter_location, guid } = dbMeter
-				        // const oldLocation = meterInDb[0].meter_location
-				        // const guid = meterInDb[0].guid
+                        const { meter_location, guid, lastLog } = checkedMeter
+
+				        if (this.newLocation === Location.STORAGE && meter_location === Location.REPAIR) {
+					        const { update_field } = lastLog
+					        if (!this.checkIsMeterFromRepairValid(update_field)) {
+						        return this.showNotificationWarning(
+							        `Счетчик ${ this.getMeterTypeTitle(meterType) } c серийным номером ${ this.serialNumber }
+		                            без статуса работоспособности после ремонта`)
+					        }
+				        }
+
                         const meter = { type: meterType, serialNumber: this.serialNumber, guid }
-
 				        await correct.play()
-
-				        // this.isRepair
-					    //     ? this.meters.unshift({ ...meter, guid })
-                        //     : this.meters.unshift({ ...meter, status: 0, oldLocation, guid })
 
 				        this.meters.unshift(this.isRepair ? { ...meter } : { ...meter, status: 0, oldLocation: meter_location })
                     }
 
                     this.$emit('onMeterCountUpdate', this.meters.length)
-
 			        this.serialNumber = ''
                     this.$emit('onResetValidation', true)
 		        } catch (e) {
@@ -439,12 +424,12 @@
 			        for (const availableMeter of availableMeters) {
 			        	if (!this.meters.find(meter => meter.guid === availableMeter.guid) &&
                                                                 this.checkIfUpdateFieldIsValidForButtonAll(availableMeter)) {
-						        this.meters.push({
-							        type: availableMeter.meter_type,
-							        serialNumber: availableMeter.serial_number,
-							        status: 0,
-							        guid: availableMeter.guid
-						        })
+                            this.meters.push({
+                                type: availableMeter.meter_type,
+                                serialNumber: availableMeter.serial_number,
+                                status: 0,
+                                guid: availableMeter.guid
+                            })
                         }
 			        }
 			        this.$emit('onMeterCountUpdate', this.meters.length)
@@ -496,7 +481,14 @@
 
 	        checkIfUpdateFieldIsValidForButtonAll(availableMeter) {
 		        return availableMeter.updateField ? !availableMeter.updateField.includes('Статус ремонта:')	: true
-	        }
+	        },
+
+	        checkIsMeterFromRepairValid(updateField) {
+	        	if (!updateField) {
+	        		return  false
+                }
+                return updateField.split(';').some((field) => field.includes('Статус ремонта:'))
+            }
         },
 	}
 </script>

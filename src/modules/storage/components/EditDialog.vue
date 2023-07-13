@@ -56,30 +56,28 @@
                 </v-card>
             </v-form>
         </v-dialog>
-        <simple-dialog
-            :dialog-open="dialogDeleteModel"
-            max-width="600px"
-            title="Вы уверены что хотите удалить это счетчик?"
-            @okButtonClickEvent="deleteConfirm"
-            @cancelButtonClickEvent="closeDialogDeleteConfirm"
+        <dialog-custom
+            ref="MeterDeleteDialog"
+            :max-width="600"
+            title="Вы уверены что хотите удалить этот счетчик?"
+            @submit="deleteConfirm"
         />
     </div>
 </template>
 
 <script>
 	import AddOrEditView from "./AddOrEditView"
-	import {mapActions, mapGetters, mapState} from "vuex"
-    import SimpleDialog from "../../utils-components/SimpleDialog"
+	import { mapActions, mapGetters } from "vuex"
+	import DialogCustom from "../../utils-components/dialog/DialogCustom"
 
 	export default {
 		name: "EditDialog",
 		components: {
+			DialogCustom,
 			AddOrEditView,
-			SimpleDialog
 		},
 		data: () => ({
 			dialogModel: false,
-			dialogDeleteModel: false,
 			formValid: true,
 			editedItem: {},
 			saveLoading: false,
@@ -136,7 +134,7 @@
 			delete(item) {
 				this.editedItem = Object.assign({}, item)
 				this.editedIndex = this.meters.indexOf(item)
-				this.dialogDeleteModel = true
+				this.$refs.MeterDeleteDialog.dialogOpen()
 			},
 
 			async deleteConfirm() {
@@ -155,22 +153,13 @@
 						this.showNotificationError(`Что то пошло не так при удалении счетчика ${ meterSerialNumber }`)
 					} else {
 						this.meters.splice(this.editedIndex, 1)
-						this.closeDialogDeleteConfirm()
+						this.$refs.MeterDeleteDialog.dialogClose()
 						this.showNotificationSuccess(`Счетчик ${ meterSerialNumber } успешно удален`)
 						this.resetFilters()
 					}
                 } catch (e) {
 					this.showNotificationRequestError(e)
 				}
-			},
-
-			//Обработчик события отмены удаления счетчика
-			closeDialogDeleteConfirm() {
-				this.dialogDeleteModel = false
-				this.$nextTick(() => {
-					this.editedItem = Object.assign({}, this.defaultItem)
-					this.editedIndex = -1
-				})
 			},
 
 			compareData(meter, newMeterData) {
@@ -207,25 +196,24 @@
 					serialNumber: this.editedItem.serial_number
 				})
 
-                return this.compareData(meter[0], newMeterData)
+                return this.compareData(meter, newMeterData)
 			},
 
 			async save() {
 				this.formSubmit = true
 				const meterData = this.$refs.addOrEditView.getData()
-				const updateField = await this.checkDataAndUpdate(meterData)
-
-                if (!updateField) {
-	                return this.showNotificationInfo('Ничего не отредактировано')
-                }
-
-				if (!this.staffId) {
-					return this.showNotificationWarning(
-						'Операция невозможна, ваш номер сотрудника не определен')
-				}
-
 				this.saveLoading = true
                 try {
+	                const updateField = await this.checkDataAndUpdate(meterData)
+
+	                if (!updateField) {
+		                return this.showNotificationInfo('Ничего не отредактировано')
+	                }
+
+	                if (!this.staffId) {
+		                return this.showNotificationWarning('Операция невозможна, ваш номер сотрудника не определен')
+	                }
+
 	                const res = await this.editMeter({
 		                ...meterData,
 		                editorStaffId: this.staffId,

@@ -1,6 +1,17 @@
 <script>
 	export default {
 		name: "NotificationMixin",
+		provide: function () {
+			return {
+				showNotification: this.showNotification,
+				showNotificationInfo: this.showNotificationInfo,
+				showNotificationError: this.showNotificationError,
+				showNotificationWarning: this.showNotificationWarning,
+				showNotificationSuccess: this.showNotificationSuccess,
+				showNotificationRequestError: this.showNotificationRequestError,
+				showNotificationRequestErrorWithCustomText: this.showNotificationRequestErrorWithCustomText,
+			}
+		},
         methods: {
 	        showNotification(text, color) {
 		        this.$refs.notificationManager?.showNotification(text, color)

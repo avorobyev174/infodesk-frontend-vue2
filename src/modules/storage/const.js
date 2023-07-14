@@ -11,6 +11,23 @@ const Location = {
 	PROGRAMMING: 9,
 }
 
+const Operation = {
+	REGISTRATION_WITHOUT_SERIAL_NUMBER: 0,
+	REPAIR: 1,
+	CHECK: 2,
+	FACTORY: 3,
+	INSTALL: 4,
+	UTILIZATION: 5,
+	VERIFICATION: 6,
+	REGISTRATION: 7,
+	EDIT: 8,
+	STORE: 9,
+	OBJECT: 10,
+	CUSTOMER: 11,
+	PROGRAMMING: 12,
+}
+
 export {
-	Location
+	Location,
+	Operation
 }

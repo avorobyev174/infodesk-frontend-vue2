@@ -5,18 +5,26 @@
 		name: "DictionaryMixin",
 		computed: {
 			...mapGetters({
-				assignmentEventTypes: 'getAssignmentEventTypes',
-				assignmentStatuses: 'getAssignmentStatuses',
-				assignmentCloseReasonTypes: 'getAssignmentCloseReasonTypes',
-				meterTypes: 'getMeterTypes',
-				ipAddresses: 'getIpAddresses',
-				simStatuses: 'getSimStatuses',
-				accounts: 'getAccounts',
-                isLogin: 'getIsLogin'
+				assignmentEventTypes: 'dictionary/getAssignmentEventTypes',
+				assignmentStatuses: 'dictionary/getAssignmentStatuses',
+				assignmentCloseReasonTypes: 'dictionary/getAssignmentCloseReasonTypes',
+				meterTypes: 'dictionary/getMeterTypes',
+				ipAddresses: 'dictionary/getIpAddresses',
+				simStatuses: 'dictionary/getSimStatuses',
+				accounts: 'dictionary/getAccounts',
+				accuracy: 'dictionary/getAccuracy',
+				conditions: 'dictionary/getConditions',
+				locations: 'dictionary/getLocations',
+				operations: 'dictionary/getOperations',
+				lvStates: 'dictionary/getLvStates',
+				owners: 'dictionary/getOwners',
+				materialTypes: 'dictionary/getMaterialTypes',
+				storageEmployees: 'dictionary/getStorageEmployees',
+                isLogin: 'getIsLogin',
             })
 		},
         inject: [ 'showNotificationRequestErrorWithCustomText' ],
-        async mounted() {
+        async created() {
 			if (!this.isLogin) {
 				return
             }
@@ -28,7 +36,7 @@
 	        }
         },
 		methods: {
-            ...mapActions([ 'fetchDictionaries' ]),
+            ...mapActions('dictionary', [ 'fetchDictionaries' ]),
 
 			formatDate(dateToFormat, withTime) {
 				if (!dateToFormat) {
@@ -115,7 +123,7 @@
 			},
 
 			getMeterTypeTitle(meterType) {
-				const mType = this.meterTypes.find((type) => meterType === type.value)
+				const mType = this.meterTypes.find(({ value }) => meterType === value)
 				return mType ? mType.title : meterType
 			},
 
@@ -127,6 +135,73 @@
 			getSimStatusTitle(meterSimStatus) {
 				const status = this.simStatuses.find((status) => meterSimStatus === status.value)
 				return status ? status.title : meterSimStatus
+			},
+
+			getMaterialTypeTitle(materialType) {
+				const type = this.materialTypes.find(({ value }) => +materialType === value)
+				return type ? type.title : materialType
+			},
+
+			getAccuracyClassTitle(accuracy) {
+				const acc = this.accuracy.find(({ value }) => accuracy === value)
+				return acc ? acc.title : accuracy
+			},
+
+			getConditionTitle(condition) {
+				const cond = this.conditions.find(({ value }) => condition === value)
+				return cond ? cond.title : condition
+			},
+
+			getLocationTitle(location) {
+				const loc = this.locations.find(({ value }) => location === value)
+				return loc ? loc.title : location
+			},
+
+			getOwnerTitle(owner) {
+				const own =  this.owners.find(({ value })  => owner === value)
+				return own ? own.title : owner
+			},
+
+			getLVStateTitle(lvState) {
+				const state = this.lvStates.find(({ value }) => lvState === value)
+				return state ? state.title : lvState
+			},
+
+			getOperationTitle(operation) {
+				const oper = this.operations.find(({ value }) => operation === value)
+				return oper ? oper.title : operation
+			},
+
+			getEmployeeTitleByStaffId(staffId) {
+				if (staffId === 0) {
+					return 'отсутствует'
+				}
+				const emp = this.storageEmployees.find(({ staff_id }) => staffId === staff_id)
+				return emp ? emp.name : staffId
+			},
+
+			getEmployeeStaffIdByCard(empCard) {
+				if (!empCard) {
+					return 'неизвестный сотрудник'
+				}
+				const emp = this.storageEmployees.find(({ card }) => +empCard === card)
+				return emp ? emp.staff_id : 'неизвестный сотрудник'
+			},
+
+			getEmployeeCardByStaffId(staffId) {
+				if (!staffId) {
+					return 'неизвестный сотрудник'
+				}
+				const emp = this.storageEmployees.find(({ staff_id }) => staffId === staff_id)
+				return emp ? emp.card : 'неизвестный сотрудник'
+			},
+
+			getEmployeeTitleByCard(empCard) {
+				if (!empCard) {
+					return 'неизвестный сотрудник'
+				}
+				const emp = this.storageEmployees.find(({ card }) => +empCard === card)
+				return emp ? emp.name : 'неизвестный сотрудник'
 			},
 		}
 	}

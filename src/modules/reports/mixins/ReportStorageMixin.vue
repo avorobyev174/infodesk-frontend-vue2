@@ -490,11 +490,12 @@
 					    serial_number,
 					    this.formatDate(lastLog.datetime, true),
                         this.getLocationTitle(meter_location),
+					    lastLog.comment_field,
                     ])
 
 				    this.$refs.DataResultReportDialog.open(
 					    {
-						    headers: [ 'Тип', 'Серийный номер', 'Дата', 'Текущее местонахождение' ],
+						    headers: [ 'Тип', 'Серийный номер', 'Дата', 'Текущее местонахождение', 'Комментарий' ],
 						    dialogTitle: title,
 						    data
 					    },

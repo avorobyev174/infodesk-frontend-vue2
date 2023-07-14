@@ -8,18 +8,6 @@ function stringToArrayBuffer(str) {
 	return buf
 }
 
-function dateFormat(dateToFormat) {
-	const date = new Date(dateToFormat)
-	let day = String(date.getDate())
-	let month = String(date.getMonth() + 1)
-	const year = date.getFullYear()
-	
-	day = day.length < 2 ? day.padStart(2, '0') : day
-	month = month.length < 2 ? month.padStart(2, '0') : month
-	
-	return `${ day }.${ month }.${ year }`
-}
-
 function formatDate(dateToFormat, withTime) {
 	if (!dateToFormat) {
 		return 'отсутствует'
@@ -69,7 +57,6 @@ const isJsonValid = (str) => {
 export {
 	stringToArrayBuffer,
 	isJsonValid,
-	dateFormat,
 	formatDate,
 	saveDataArrayToExcelFile
 }

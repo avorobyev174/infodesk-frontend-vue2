@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx/xlsx.mjs'
 import { saveAs } from 'file-saver'
-import { stringToArrayBuffer, dateFormat } from "../../Utils"
+import { stringToArrayBuffer, formatDate } from "../../Utils"
 const ACCURACY_CLASSES_TYPES = [ 107, 116, 113, 114, 115, 139, 143, 105, 144, 140, 141, 142, 111, 117, 119, 120 ]
 export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
     let pyramidMeterArray = []
@@ -21,8 +21,8 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
         address = address.replaceAll('.',' ')
         const date = new Date(meter.created)
         const yesterdayDate = new Date(date.setDate(date.getDate() - 1))
-        const installDate = `${ dateFormat(date) }`
-        const releaseAndVerificationDate = `${ dateFormat(yesterdayDate) }`
+        const installDate = `${ formatDate(date) }`
+        const releaseAndVerificationDate = `${ formatDate(yesterdayDate) }`
         const accuracyClass = ACCURACY_CLASSES_TYPES.includes(meter.type) ? '' : '1'
         let user = ''
         let type = ''

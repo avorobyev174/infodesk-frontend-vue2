@@ -17,7 +17,6 @@
 				assignments: 'service/getAssignments',
 				currentAccountId: 'getAccountId',
 				isLogin: 'getIsLogin',
-				meterTypes: 'getMeterProgTypes',
 			}),
 			...mapState('service', [ 'loading' ]),
 			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue', 'colorGold' ]),

@@ -41,13 +41,12 @@
 </template>
 
 <script>
-	import { mapActions, mapGetters, mapState } from "vuex"
+	import { mapActions, mapGetters } from "vuex"
 	import {
 		createServiceEmployeeArray,
         createBuildingArray,
         createServiceAddressesArray,
 		getFilteredAssignments,
-		spliceCustomerAddress
 	} from '../../../service/js/assignments-filter-values'
     import { groupAssignmentsByBuilding } from "./utils"
 
@@ -65,10 +64,9 @@
         }),
         inject: [ 'getAccountFullName' ],
 		computed: {
-			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue' ]),
 			...mapGetters({
 				assignments: 'service/getAssignments',
-				assignmentStatuses: 'getAssignmentStatuses',
+				assignmentStatuses: 'dictionary/getAssignmentStatuses',
 				isLogin: 'getIsLogin',
 				currentAccountId: 'getAccountId',
 			}),

@@ -18,7 +18,7 @@
                     </v-card-title>
                     <v-card-text class="m-auto">
                         <v-combobox
-                            :items="meterTypes"
+                            :items="meterProgrammingTypes"
                             item-text="title"
                             item-value="value"
                             label="Тип"
@@ -68,18 +68,18 @@
         mixins: [ DialogMixin ],
 	    computed: {
 		    ...mapGetters({
-			    meterTypes: 'getMeterProgTypes',
+			    meterProgrammingTypes: 'dictionary/getMeterProgrammingTypes',
 		    })
 	    },
-        mounted() {
-            if (this.meterTypes.length) {
-	            this.type = this.meterTypes.at(0)
+        updated() {
+            if (this.meterProgrammingTypes.length) {
+	            this.type = this.meterProgrammingTypes.at(0)
             }
         },
 	    methods: {
         	...mapActions('service', [ 'addAssignment' ]),
 
-            dialogClear() {
+            dialogBeforeClose() {
 	            this.serialNumber = ''
 	            this.type = null
 	            this.$refs.form.resetValidation()
@@ -91,7 +91,6 @@
 	            }
 
                 try {
-	                this.dialogClose()
 	            	const createdAssignment = await this.addAssignment({
                         type: this.type?.value,
                         serialNumber: this.serialNumber
@@ -101,7 +100,7 @@
                 } catch (e) {
                     this.showNotificationRequestErrorWithCustomText('Ошибка при добавлении поручения', e)
                 } finally {
-	                this.dialogClear()
+	                this.dialogClose()
                 }
             }
         }

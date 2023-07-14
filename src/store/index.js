@@ -17,9 +17,9 @@ import { service } from "@/modules/service/store/service"
 import { map } from "@/store/map"
 import { serviceReports } from "@/modules/reports/store/service-reports"
 import { storageReports } from "@/modules/reports/store/storage-reports"
+import { dictionary } from "@/store/dictionary"
 
 import router from '../router/index.js'
-import { get } from "axios"
 
 export default new Vuex.Store({
     state: {
@@ -39,14 +39,6 @@ export default new Vuex.Store({
         colorGold: '#ecc700',
         serverUrl: process.env.NODE_ENV === "production" ? production : dev,
         cookies: [],
-        assignmentEventTypes: [],
-        assignmentCloseReasonTypes: [],
-        assignmentStatuses: [],
-        accounts: [],
-        meterTypes: [],
-        meterProgTypes: [],
-        ipAddresses: [],
-        simStatuses: [],
     },
 
     getters: {
@@ -74,40 +66,8 @@ export default new Vuex.Store({
             return state.accountId
         },
 
-        getDictionaries(state) {
-            return state.dictionaries
-        },
-    
         getMeterTypes(state) {
             return state.meterTypes
-        },
-    
-        getMeterProgTypes(state) {
-            return state.meterProgTypes
-        },
-    
-        getAssignmentEventTypes(state) {
-            return state.assignmentEventTypes
-        },
-    
-        getAssignmentCloseReasonTypes(state) {
-            return state.assignmentCloseReasonTypes
-        },
-    
-        getAccounts(state) {
-            return state.accounts
-        },
-    
-        getAssignmentStatuses(state) {
-            return state.assignmentStatuses
-        },
-    
-        getSimStatuses(state) {
-            return state.simStatuses
-        },
-    
-        getIpAddresses(state) {
-            return state.ipAddresses
         },
     },
 
@@ -134,29 +94,6 @@ export default new Vuex.Store({
 
         setRoles(state, roles) {
             state.roles = roles
-        },
-
-        setDictionaries(state, dictionaries) {
-            const {
-                assignmentEventTypes,
-                assignmentCloseReasonTypes,
-                accounts,
-                meterTypes,
-                meterProgTypes,
-                ipAddresses,
-                simStatuses,
-                assignmentStatuses
-            } = dictionaries
-    
-            state.assignmentEventTypes = assignmentEventTypes
-            state.assignmentCloseReasonTypes = assignmentCloseReasonTypes
-            state.accounts = accounts
-            state.meterTypes = meterTypes
-            state.meterProgTypes = meterProgTypes
-            state.ipAddresses = ipAddresses
-            state.simStatuses = simStatuses
-            state.assignmentStatuses = assignmentStatuses
-            state.dictionaries = dictionaries
         },
     },
 
@@ -189,20 +126,6 @@ export default new Vuex.Store({
                 console.log(e)
             }
         },
-
-        async fetchDictionaries({ state, commit }) {
-            const response = await get(
-                this.state.serverUrl + `/api/common/dictionaries`,
-                { headers: { 'authorization': $cookies.get('auth_token') } })
-
-            const { data } = response
-            const dictionaries = {}
-            for (const { title, value } of data) {
-                dictionaries[title] = value
-            }
-            
-            commit('setDictionaries', dictionaries)
-        },
    },
    
    modules: {
@@ -219,5 +142,6 @@ export default new Vuex.Store({
         repair,
         service,
         map,
+        dictionary,
    }
 })

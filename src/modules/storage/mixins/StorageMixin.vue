@@ -16,6 +16,8 @@
 				conditions: 'storage/getConditions',
 				locations: 'storage/getLocations',
 				materialTypes: 'storage/getMaterialTypes',
+				operations: 'storage/getOperations',
+				lvStates: 'storage/getLVStates',
             })
         },
         methods: {
@@ -135,6 +137,16 @@
 		        }
 		        const emp = this.storageEmployees.find(emp => parseInt(employeeCard) === emp.card)
 		        return emp ? emp.name : 'Неизвестный сотрудник'
+	        },
+
+	        getLVStateTitle(lvState) {
+		        const state = this.lvStates.find((state) => lvState === state.value)
+		        return state ? state.text : lvState
+	        },
+
+	        getOperationTitle(operation) {
+		        const oper = this.operations.find((oper) => operation === oper.value)
+		        return oper ? oper.text : operation
 	        },
         }
 	}

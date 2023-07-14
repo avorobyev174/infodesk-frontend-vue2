@@ -22,7 +22,7 @@ export const storage = {
 			{ text: 'Списание', value: 5 },
 			{ text: 'Поверка', value: 6 },
 			{ text: 'Склад (ВХ)', value: 7 },
-			{ text: 'Окно выдачи потребителю', value: 8 },
+			{ text: 'Выдача потребителю', value: 8 },
 			{ text: 'Программирование(УИТ)', value: 9 },
 		],
 		operations: [

@@ -183,8 +183,8 @@
         computed: {
 	        ...mapState([ 'colorGrey', 'colorRed', 'colorGreen', 'colorBlue' ]),
 	        ...mapGetters({
-		        accounts: 'getAccounts',
-		        assignmentCloseReasonTypes: 'getAssignmentCloseReasonTypes',
+		        accounts: 'dictionary/getAccounts',
+		        assignmentCloseReasonTypes: 'dictionary/getAssignmentCloseReasonTypes',
 	        })
         },
 		watch: {

@@ -1,8 +1,7 @@
 import * as XLSX from 'xlsx/xlsx.mjs'
-import { saveAs } from 'file-saver'
-import { stringToArrayBuffer, formatDate } from "../../Utils"
+import { formatDate } from "../../Utils"
 const ACCURACY_CLASSES_TYPES = [ 107, 116, 113, 114, 115, 139, 143, 105, 144, 140, 141, 142, 111, 117, 119, 120 ]
-export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
+export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
     let pyramidMeterArray = []
     let pyramidIndividualArray = []
     let pyramidBusinessArray = []
@@ -370,11 +369,6 @@ export default function saveExcelFileForPyramid(meters, getIpAddressTitle) {
         { s: { r: 0, c: 1 }, e: { r: 0, c: 6 }},
         { s: { r: 0, c: 7 }, e: { r: 0, c: 8 }}
     ]
-
-    const workBookOut = XLSX.write(workBook, { bookType:'xlsx',  type: 'binary' })
-    saveAs(new Blob(
-        [ stringToArrayBuffer(workBookOut) ],
-        { type: 'application/octet-stream' }),
-        'pyramid.xlsx'
-    )
+    
+    XLSX.writeFile(workBook, 'load_pyramid.xlsx')
 }

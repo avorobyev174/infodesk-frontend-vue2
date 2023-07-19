@@ -107,7 +107,7 @@
 
 <script>
     import VueApexCharts from 'vue-apexcharts'
-    import { mapActions, mapGetters, mapMutations } from "vuex"
+    import { mapActions, mapGetters } from "vuex"
     import DictionaryMixin from "./mixins/DictionaryMixin"
     import FavoriteModuleMixin from "./mixins/FavoriteModuleMixin"
 
@@ -553,23 +553,16 @@
         }
 
 	    this.setBackgroundImage(false)
-
         this.registrationCustomerTypesOptions = { ...this.registrationTypesOptions }
-	    this.fetchTypes().then(
-		    result => {
-			    setTimeout(()=> {
-				    this.getMeterRegistrationChartSeries()
-				    this.getMeterInPyramidChartSeries()
-				    this.getMeterRegistrationTypesChartSeries()
-				    this.getMeterRegistrationStreetsChartSeries()
-				    this.getMeterRegistrationCustomerTypeChartSeries()
-				    this.getMeterRegistrationNotInPyramidTypeChartSeries()
-				    this.getMeterRegistrationInPyramidCountChartSeries()
-				    this.getMeterRegistrationActiveInPyramidChartSeries()
-			    }, 250)
-		    },
-		    error => this.showNotificationRequestError(error)
-	    )
+        this.getMeterRegistrationChartSeries()
+        this.getMeterInPyramidChartSeries()
+        this.getMeterRegistrationTypesChartSeries()
+        this.getMeterRegistrationStreetsChartSeries()
+        this.getMeterRegistrationCustomerTypeChartSeries()
+        this.getMeterRegistrationNotInPyramidTypeChartSeries()
+        this.getMeterRegistrationInPyramidCountChartSeries()
+        this.getMeterRegistrationActiveInPyramidChartSeries()
+
         this.windowWidth = window.innerWidth
     },
     methods: {
@@ -584,9 +577,6 @@
                 'getMeterRegistrationInPyramidCountChartData',
                 'getMeterRegistrationActiveInPyramidChartData'
             ]),
-	    ...mapActions('registration', [
-		    'fetchTypes',
-	    ]),
 
         resize() {
             this.windowWidth = window.innerWidth
@@ -609,7 +599,7 @@
                     { name: 'Зарегистрировано за день', data: series},
                     { name: 'Всего зарегистрировано', data: seriesTotal}
                 ]
-                //this.$apexcharts.exec('registration', 'updateSeries',  series, true)
+                //this.$apexcharts.exec('programming', 'updateSeries',  series, true)
             } catch (e) {
                 this.showNotificationRequestError(e)
             }
@@ -633,7 +623,7 @@
                     { name: 'Добавлено за день', data: series},
                     { name: 'Всего добавлено', data: seriesTotal},
                 ]
-                //this.$apexcharts.exec('registration', 'updateSeries',  series, true)
+                //this.$apexcharts.exec('programming', 'updateSeries',  series, true)
             } catch (e) {
                 this.showNotificationRequestError(e)
             }

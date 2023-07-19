@@ -141,14 +141,7 @@
 			],
 		}),
 		computed: {
-			...mapState({
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
+			...mapState([ 'colorGreen', 'colorOrange', 'colorGrey' ]),
 			...mapGetters({
 				staffId: 'getStaffId',
 				storageTypes: 'storage/getStorageTypes',
@@ -178,7 +171,7 @@
 		},
         methods: {
 	        ...mapActions('storage', [
-		        'registration',
+		        'programming',
 	        ]),
 
 	        issuingPersonOnFocusOut() {

@@ -40,7 +40,6 @@
 
 	export default {
 		name: "DialogWithDataSlot",
-		components: {},
         data: () => ({
 	        formValid: true,
 	        loading: false,
@@ -67,6 +66,7 @@
 
 	        dialogBeforeClose() {
                 this.$refs.form?.resetValidation()
+		        this.loading = false
 		        this.$emit('close')
 	        },
 

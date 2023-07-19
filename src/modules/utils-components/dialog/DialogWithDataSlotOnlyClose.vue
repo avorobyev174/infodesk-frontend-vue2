@@ -16,7 +16,7 @@
                     v-model="formValid"
                     lazy-validation
                     @submit.prevent="closeDialog"
-                    height="500px"
+                    :height="height"
                 >
                     <slot name="fields"/>
                 </v-form>
@@ -56,6 +56,10 @@
             	type: Number,
                 default: 500
             },
+	        height: {
+		        type: Number,
+		        default: 500
+	        },
             closeButtonTitle: {
             	type: String
             }

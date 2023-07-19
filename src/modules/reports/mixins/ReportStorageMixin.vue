@@ -123,7 +123,7 @@
                             data
                         },
                         500,
-                        1000
+                        1200
                     )
 			    } catch (e) {
 				    this.showNotificationRequestError(e)
@@ -159,7 +159,7 @@
 				            data
 			            },
 			            500,
-			            1000
+			            1500
 		            )
 	            } catch (e) {
 		            this.showNotificationRequestError(e)

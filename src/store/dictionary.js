@@ -19,6 +19,8 @@ export const dictionary = {
         materialTypes: [],
         meterProgrammingTypes: [],
         storageEmployees: [],
+        phases: [],
+        smsStatus: [],
     }),
 
     getters: {
@@ -89,6 +91,14 @@ export const dictionary = {
         getStorageEmployees(state) {
             return state.storageEmployees
         },
+    
+        getPhases(state) {
+            return state.phases
+        },
+    
+        getSmsStatuses(state) {
+            return state.smsStatus
+        },
     },
 
     mutations: {
@@ -109,6 +119,8 @@ export const dictionary = {
                 owners,
                 materialTypes,
                 storageEmployees,
+                phases,
+                smsStatus,
             } = dictionaries
     
             state.assignmentEventTypes = assignmentEventTypes
@@ -128,6 +140,8 @@ export const dictionary = {
             state.owners = owners
             state.materialTypes = materialTypes
             state.storageEmployees = storageEmployees
+            state.phases = phases
+            state.smsStatus = smsStatus
         },
     },
 

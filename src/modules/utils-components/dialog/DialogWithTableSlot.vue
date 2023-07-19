@@ -2,7 +2,6 @@
     <v-dialog
         v-model="dialogModel"
         :max-width="maxWidth"
-        @keydown.enter="$emit('submit')"
         @keydown.esc="dialogClose"
         @click:outside="dialogClose"
     >
@@ -11,7 +10,7 @@
                 <p class="m-auto text-h5 text-break text-center pb-1 d-block">{{ dialogTitle }}</p>
                 <p
                     v-show="dialogAdditionalTitle"
-                    class="m-auto text-h5 text-break text-center pb-3 d-block">
+                    class="m-auto text-break text-center pb-3 d-block">
                     {{ dialogAdditionalTitle }}
                 </p>
                 <v-chip v-if="count" :color="colorGrey">{{ count }}</v-chip>
@@ -27,13 +26,11 @@
                     <template v-slot:default>
                         <thead>
                         <tr>
-                            <th v-for="title in tableHeaders" class="text-center text-wrap">
-                                {{ title }}
-                            </th>
+                            <th v-for="title in tableHeaders" class="text-center text-wrap">{{ title }}</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <slot name="table-data"/>
+                            <slot name="table-data"/>
                         </tbody>
                     </template>
                 </v-simple-table>
@@ -41,6 +38,7 @@
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
+                    v-show="!isOnlyClose"
                     color="blue darken-1"
                     text
                     @click="$emit('submit')"
@@ -50,7 +48,7 @@
                 <v-btn
                     color="blue darken-1"
                     text
-                    @click="$emit('reject')"
+                    @click="dialogClose"
                 >
                     {{ rejectButtonTitle }}
                 </v-btn>
@@ -60,7 +58,6 @@
 </template>
 
 <script>
-
     import DialogMixin from "../../mixins/DialogMixin"
     import { mapState } from "vuex"
 
@@ -79,18 +76,19 @@
             dialogTitle: String,
 	        dialogAdditionalTitle: String,
             tableHeaders: Array,
-            submitButtonTitle: {
-                type: String
-            },
-	        rejectButtonTitle: {
-		        type: String
-	        },
+            submitButtonTitle: String,
+	        rejectButtonTitle: String,
             count: [ Number, String ],
-            tableClass: String
+            tableClass: String,
+            isOnlyClose: Boolean
         },
         computed: {
 	        ...mapState([ 'colorGrey' ]),
         },
-
+        methods: {
+        	dialogBeforeClose() {
+		        this.$emit('reject')
+            }
+        }
     }
 </script>

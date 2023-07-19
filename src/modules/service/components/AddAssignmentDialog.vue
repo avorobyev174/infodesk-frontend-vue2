@@ -14,7 +14,7 @@
             >
                 <v-card>
                     <v-card-title>
-                        <span class="m-auto text-h5">Добавление</span>
+                        <span class="m-auto text-h5">Добавить</span>
                     </v-card-title>
                     <v-card-text class="m-auto">
                         <v-combobox

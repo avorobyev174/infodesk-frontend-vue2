@@ -1,64 +1,55 @@
+//Не используется
 <template>
     <div>
         <dialog-with-table-slot
-            :dialog-open="dialogModel"
-            max-width="1200px"
-            title="Групповая отправка смс"
-            :item-titles="titles"
-            :items="groupMetersForRegistration"
-            :success-action-status="successGroupSms"
-            action-button-title="Отправить"
-            :actionButtonLoading="loading"
-            @okButtonClickEvent="sendGroupSmsForRegistration"
-            @cancelButtonClickEvent="close"
+            ref="UpdateDialog"
+            :max-width="1200"
+            dialog-title="Данные по групповой отправке смс"
+            :table-headers="tableHeaders"
+            reject-button-title="Закрыть"
+            is-only-close
+            :count="updatedMeters.length"
         >
-            <template v-slot:table-row-data>
-                <tr
-                    v-for="meter in groupMetersForRegistration"
-                    :key="meter.icc"
-                >
+            <template v-slot:table-data>
+                <tr v-for="meter in groupMetersForRegistration" :key="meter.icc">
                     <td>{{ getMeterTypeTitle(meter.type) }}</td>
                     <td>{{ meter.serial_number }}</td>
                     <td>{{ meter.icc }}</td>
                     <td>{{ getPhaseTitle(meter.phase) }}</td>
                     <td>{{ meter.phone }}</td>
-                    <td>{{ getStatusTitle(meter.status) }}</td>
+                    <td>{{ getSimStatusTitle(meter.status) }}</td>
                     <td class="text-center">
                         <v-chip v-if="meter.sms_status === 1" :color="colorGrey">
-                            {{ getSmsTitleBySmsStatus(meter.sms_status) }}
+                            {{ getSmsTitleByStatus(meter.sms_status) }}
                         </v-chip>
                         <v-chip v-else-if="meter.sms_status === 2 || meter.sms_status === 5" :color="colorOrange">
-                            {{ getSmsTitleBySmsStatus(meter.sms_status) }}
+                            {{ getSmsTitleByStatus(meter.sms_status) }}
                         </v-chip>
                         <v-chip v-else-if="meter.sms_status === 4 || meter.sms_status === 6" :color="colorRed">
-                            {{ getSmsTitleBySmsStatus(meter.sms_status) }}
+                            {{ getSmsTitleByStatus(meter.sms_status) }}
                         </v-chip>
-                        <v-chip v-else :color="colorGreen">{{ getSmsTitleBySmsStatus(meter.sms_status) }}</v-chip>
+                        <v-chip v-else :color="colorGreen">{{ getSmsTitleByStatus(meter.sms_status) }}</v-chip>
                     </td>
                 </tr>
             </template>
         </dialog-with-table-slot>
-        <!-- Диалог отправки смс -->
-        <simple-dialog
-            :dialog-open="smsConfirmDialogModel"
-            max-width="600px"
+        <dialog-custom
+            :max-width="600"
             title="Вы уверены что хотите послать смс?"
-            @okButtonClickEvent="sendSmsForRegistration(meterForSmsRegistration)"
-            @cancelButtonClickEvent="smsConfirmDialogClose"
+            @submit="sendSmsForRegistration(meterForSmsRegistration)"
         />
     </div>
 </template>
 
 <script>
     import { mapActions, mapState } from "vuex"
-    import DialogWithTableSlot from "../../utils-components/DialogWithTableSlot"
-    import SimpleDialog from "../../utils-components/SimpleDialog"
+    import DialogWithTableSlot from "../../utils-components/dialog/DialogWithTableSlot"
+    import DialogCustom from "../../utils-components/dialog/DialogCustom"
 
     export default {
-        name: "SingleAndGroupSmsSendDialog",
+        name: "SmsSendDialog",
         data: () => ({
-            dialogModel: false,
-            titles: [ "Тип", "Серийный номер", "ICC", "Фазность", "Номер телефона", "Статус", "Смс" ],
+            tableHeaders: [ "Тип", "Серийный номер", "ICC", "Фазность", "Номер телефона", "Статус", "Смс" ],
             successGroupSms: false,
             loading: false,
             groupMetersForRegistration: [],
@@ -68,8 +59,8 @@
             groupMetersForCheckingStatus: [],
         }),
         components: {
-            dialogWithTableSlot: DialogWithTableSlot,
-            simpleDialog: SimpleDialog
+	        DialogCustom,
+	        DialogWithTableSlot,
         },
         props: {
             meters: {
@@ -83,21 +74,22 @@
             'showNotificationWarning',
             'showNotificationInfo',
             'getPhaseTitle',
-            'getStatusTitle',
-            'getSmsTitleBySmsStatus',
+            'getSimStatusTitle',
+            'getSmsTitleByStatus',
             'getMeterTypeTitle'
         ],
         computed: {
             ...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange' ])
         },
         methods: {
-            ...mapActions('registration', [
+            ...mapActions('programming', [
                 'registerMeterBySms',
                 'checkMeterSmsStatus',
                 'registerGroupMeterBySms',
                 'checkMeterSmsStatus',
-                'registerGroupMeterBySms']),
-            //Обработчик открытия диалога групповой отправки смс
+                'registerGroupMeterBySms'
+            ]),
+
             open() {
                 this.groupMetersForRegistration = []
 
@@ -200,11 +192,11 @@
                 }
             },
 
-            //Обработчик события отмены отправки смс для счетчика
+           /* //Обработчик события отмены отправки смс для счетчика
             smsConfirmDialogClose() {
                 this.smsConfirmDialogModel = false
                 this.meterForSmsRegistration = null
-            },
+            },*/
 
             //Обработчик отправки смс для регистрации счетчика
             async sendSmsForRegistration(meter) {

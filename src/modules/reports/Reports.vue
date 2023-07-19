@@ -116,7 +116,7 @@
 	import ReportServiceMixin from "./mixins/ReportServiceMixin"
 	import ReportProgrammingMixin from "./mixins/ReportProgrammingMixin"
     import { getReportItemsByRole, executeAndSaveReport } from "./utils"
-	import { saveDataArrayToExcelFile } from "../Utils"
+	import { saveDataToExcelFile } from "../Utils"
     import { Report } from "./const"
 
 	export default {
@@ -162,7 +162,7 @@
             this.reportItems = getReportItemsByRole(this.roles.report_module)
 		},
 		methods: {
-			saveDataArrayToExcelFile,
+			saveDataArrayToExcelFile: saveDataToExcelFile,
 			executeAndSaveReport,
 
 			localFuncCall(item) {

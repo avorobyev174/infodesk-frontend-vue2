@@ -12,7 +12,7 @@
             :footer-props="{
                 showFirstLastPage: true,
                 'items-per-page-text':'счетчиков на странице',
-                'items-per-page-options': [100, 500, 1000]
+                'items-per-page-options': [ 100, 500, 1000 ]
             }"
             loading-text="Идет загрузка счетчиков..."
             fixed-header
@@ -22,17 +22,11 @@
             <template v-slot:no-results>
                 <span>Нет данных...</span>
             </template>
-
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
             </template>
-
             <template v-slot:top>
-                <v-toolbar
-                        flat
-                        height="70px"
-                >
-                    <!-- Поиск -->
+                <v-toolbar flat height="70px">
                     <v-text-field
                         v-model="search"
                         append-icon="mdi-magnify"
@@ -43,7 +37,6 @@
                     />
                 </v-toolbar>
             </template>
-
             <!-- Подмена значений таблицы на лэйблы -->
             <template v-slot:item.type="{ item }">
                 {{ getMeterTypeTitle(item.type) }}
@@ -84,16 +77,6 @@
                     mdi-checkbox-marked-circle-plus-outline
                 </v-icon>
             </template>
-            <!-- Когда нет данных -->
-            <template v-slot:no-data>
-                <p class="pt-4">Нет данных...</p>
-                <v-btn
-                    color="primary"
-                    @click="initializeMeters"
-                >
-                    Перезагрузить
-                </v-btn>
-            </template>
         </v-data-table>
         <simple-dialog
             :dialog-open="programmingDialogModel"
@@ -108,8 +91,9 @@
 <script>
 	import SimpleDialog from "../utils-components/SimpleDialog"
 	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
-	import RegistrationMixin from "../registration/mixins/RegistrationMixin"
+	import RegistrationMixin from "../programming/mixins/ProgrammingMixin"
 	import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin";
+	import DictionaryMixin from "../mixins/DictionaryMixin";
 
 	export default {
 		name: "Repair",
@@ -118,33 +102,27 @@
 		},
 		data: () => ({
 			search: '',
+            loading: false,
 			module: 'repair',
 			programmingDialogModel: false,
 			currentItem: {},
 			headers: [
-				{ text: 'ID', sortable: false, align: 'center', value: 'id'},
-				{ text: 'Тип', value: 'type', sortable: true, align: 'center', cellClass: 'table-small-cell'},
-				{ text: 'Серийный номер', value: 'serial_number', sortable: false, align: 'center', cellClass: 'table-small-cell'},
-				{ text: 'IP адрес', value: 'ip_address', sortable: false, align: 'center', cellClass: 'table-small-cell'},
-				{ text: 'Порт', value: 'port', sortable: false, align: 'center', cellClass: 'table-small-cell'},
-				{ text: 'Связной', value: 'contact', sortable: false, align: 'center', cellClass: 'table-small-cell'},
-				{ text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center', cellClass: 'table-small-cell'},
+				{ text: 'ID', sortable: false, align: 'center', value: 'id' },
+				{ text: 'Тип', value: 'type', sortable: true, align: 'center' },
+				{ text: 'Серийный номер', value: 'serial_number', sortable: false, align: 'center' },
+				{ text: 'IP адрес', value: 'ip_address', sortable: false, align: 'center' },
+				{ text: 'Порт', value: 'port', sortable: false, align: 'center' },
+				{ text: 'Связной', value: 'contact', sortable: false, align: 'center' },
+				{ text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center' },
 			],
 		}),
 		computed: {
 			...mapGetters({
 				meters: 'repair/getMeters',
-				types: 'registration/getTypes',
-				ipAddresses: 'registration/getIpAddress',
 				activeModules: 'getActiveModules',
                 isLogin: 'getIsLogin',
 			}),
-			...mapState({
-				loading: state => state.repair.isMetersLoading,
-				colorGreen: state => state.colorGreen,
-				colorGrey: state => state.colorGrey,
-				colorBlue: state => state.colorBlue,
-			})
+			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue'])
         },
 		inject: [
 			'showNotificationSuccess',
@@ -166,21 +144,18 @@
 		        }
 	        }
         },
-		mixins: [ RegistrationMixin, FavoriteModuleMixin ],
+		mixins: [ DictionaryMixin, FavoriteModuleMixin ],
 		methods: {
 	        ...mapActions('repair', [
 		        'fetchMeters',
                 'setProgrammingValue'
 	        ]),
-			...mapActions('registration', [
-				'fetchTypes'
-			]),
 
 	        async initializeMeters() {
 				try {
-					await this.fetchTypes()
+					this.loading = true
 					await this.fetchMeters()
-					this.showNotificationSuccess('Список счетчиков успешно обновлен')
+					this.loading = false
                 } catch (e) {
 					this.showNotificationRequestError(e)
 				}

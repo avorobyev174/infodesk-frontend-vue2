@@ -1,0 +1,104 @@
+<script>
+	import { mapActions, mapGetters, mapState } from "vuex"
+	import headers from "../js/programming-table-headers"
+	import menuActions from "../js/meters-menu"
+	import { defaultMeterActions } from '../js/meters-actions'
+
+	export default {
+		name: "ProgrammingMixin",
+		data: () => ({
+			headers,
+			menuActions,
+			defaultMeterActions,
+			selectedHeaders: [],
+		}),
+		provide: function () {
+			return {
+				formatDate: this.formatDate,
+				getMeterTypeTitle: this.getMeterTypeTitle,
+				getPhaseTitle: this.getPhaseTitle,
+				getSimStatusTitle: this.getSimStatusTitle,
+				getSmsTitleByStatus: this.getSmsTitleByStatus,
+				getIpAddressTitle: this.getIpAddressTitle,
+				module: this.module,
+				getMeters: this.getMeters,
+			}
+		},
+		computed: {
+			...mapGetters({
+				meters: 'programming/getMeters',
+				isLogin: 'getIsLogin',
+			}),
+			...mapState('programming', [ 'loading' ]),
+			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue' ]),
+		},
+		mounted() {
+			document.onkeydown = (evt) => {
+				if (this.$route.name === 'Programming' && evt.key === 'Alt') {
+					this.getMeters()
+				}
+				if (evt.key === '+' && this.$refs.AddOrEditDialog) {
+					this.$refs.AddOrEditDialog.open()
+				}
+			}
+		},
+		methods: {
+			...mapActions('programming', [
+				'fetchMeters',
+				'fetchAllMeters',
+				'fetchBrokenMeters',
+                'addOrRemovePyramidLoad',
+				'deleteMeter',
+			]),
+			...mapActions('repair', [
+				'setProgrammingValue'
+			]),
+
+			async meterDelete() {
+				this.$refs.MeterDeleteDialog.dialogClose()
+				try {
+					console.log(this.selectedMeter.id)
+					const { id } = await this.deleteMeter(this.selectedMeter.id)
+					if (this.selectedMeter.id === id) {
+						this.showNotificationSuccess(`Счетчик ${ this.selectedMeter.serial_number } успешно удален`)
+						await this.getMeters()
+					}
+				} catch (e) {
+					this.showNotificationRequestError(e)
+				}
+			},
+
+			async addOrRemovePyramidLoadValue(isAdd) {
+				if (isAdd && this.selectedMeter.in_pyramid) {
+					this.$refs.MeterAddPyramidLoadValueDialog.dialogClose()
+					return this.showNotificationInfo(`Счетчик уже загружен в пирамиду`)
+                }
+				if (!isAdd && !this.selectedMeter.in_pyramid) {
+					this.$refs.MeterRemovePyramidLoadValueDialog.dialogClose()
+					return this.showNotificationInfo(`Счетчик еще не загружен в пирамиду`)
+				}
+				isAdd
+                    ? this.$refs.MeterAddPyramidLoadValueDialog.dialogClose()
+                    : this.$refs.MeterRemovePyramidLoadValueDialog.dialogClose()
+				try {
+					await this.addOrRemovePyramidLoad({ meter: this.selectedMeter, isAdd })
+					await this.getMeters()
+					this.showNotificationSuccess('Информация успешно обновлена')
+				} catch (e) {
+					this.showNotificationRequestError(e)
+				}
+			},
+
+			async setIsProgrammed() {
+				this.$refs.MeterProgrammingDialog.dialogClose()
+				try {
+					await this.setProgrammingValue({ id: this.selectedMeter.id, value: 2 })
+					await this.getMeters()
+					this.showNotificationSuccess('Информация успешно обновлена')
+				} catch (e) {
+					this.showNotificationRequestError(e)
+				}
+			},
+		}
+	}
+</script>

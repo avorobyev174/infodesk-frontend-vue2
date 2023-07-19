@@ -34,12 +34,12 @@
             title: {
                 type: String,
                 required: true
-            }
+            },
         },
         methods: {
         	dialogBeforeClose() {
 		        this.$emit('reject')
-            }
+            },
         }
     }
 </script>

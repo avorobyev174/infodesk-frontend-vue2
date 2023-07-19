@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Registration from '../modules/registration/MeterRegistration'
+import Programming from '../modules/programming/Programming'
 import Charts from "../modules/Charts"
 import Search from "../modules/Search"
 import Map from "../modules/map/Map"
@@ -31,7 +31,7 @@ const routes = [
     {
         path: '/programming',
         name: 'Programming',
-        component: Registration
+        component: Programming
     },
     {
         path: '/map',

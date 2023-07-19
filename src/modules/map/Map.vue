@@ -89,7 +89,7 @@ import ResearchMapFilter from "./components/Research/ResearchMapFilter"
 import FilterLegend from "./components/FilterLegend"
 import ResearchMarker from "./components/Research/ResearchMarker"
 import AssignmentMarker from "./components/Assignments/AssignmentMarker"
-import { MapViewTypes } from "../../const"
+import { MapViewType } from "../../const"
 import { mapOptions, mapCenter } from "./js/map-options"
 
 export default {
@@ -104,14 +104,14 @@ export default {
 	    AssignmentMarker,
     },
     data: () => ({
-	    MapViewTypes,
+	    MapViewTypes: MapViewType,
 	    mapOptions,
 	    mapCenter,
 	    module: 'map',
 	    mapDrawerModel: false,
         markers: [],
         legend: [],
-        viewType: MapViewTypes.ASSIGNMENT,
+        viewType: MapViewType.ASSIGNMENT,
         viewTypes: [
             { title: 'Обследования', value: 1 },
             { title: 'Поручения', value: 2 },

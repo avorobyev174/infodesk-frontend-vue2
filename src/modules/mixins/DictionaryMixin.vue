@@ -9,6 +9,7 @@
 				assignmentStatuses: 'dictionary/getAssignmentStatuses',
 				assignmentCloseReasonTypes: 'dictionary/getAssignmentCloseReasonTypes',
 				meterTypes: 'dictionary/getMeterTypes',
+				meterProgrammingTypes: 'dictionary/getMeterProgrammingTypes',
 				ipAddresses: 'dictionary/getIpAddresses',
 				simStatuses: 'dictionary/getSimStatuses',
 				accounts: 'dictionary/getAccounts',
@@ -20,6 +21,8 @@
 				owners: 'dictionary/getOwners',
 				materialTypes: 'dictionary/getMaterialTypes',
 				storageEmployees: 'dictionary/getStorageEmployees',
+				phases: 'dictionary/getPhases',
+				smsStatus: 'dictionary/getSmsStatuses',
                 isLogin: 'getIsLogin',
             })
 		},
@@ -132,9 +135,9 @@
 				return addr ? addr.title : ipAddress
 			},
 
-			getSimStatusTitle(meterSimStatus) {
-				const status = this.simStatuses.find((status) => meterSimStatus === status.value)
-				return status ? status.title : meterSimStatus
+			getSimStatusTitle(simStatus) {
+				const status = this.simStatuses.find((status) => simStatus === status.value)
+				return status ? status.title : simStatus
 			},
 
 			getMaterialTypeTitle(materialType) {
@@ -170,6 +173,21 @@
 			getOperationTitle(operation) {
 				const oper = this.operations.find(({ value }) => operation === value)
 				return oper ? oper.title : operation
+			},
+
+			getPhaseTitle(phase) {
+				const mPhase = this.phases.find(({ value }) => phase === value)
+				return mPhase ? mPhase.title : phase
+			},
+
+			getSmsColorByStatus(status) {
+				const smsStatus = this.smsStatus.find(({ value }) => status === value)
+				return smsStatus ? smsStatus.color : status
+			},
+
+			getSmsTitleByStatus(status) {
+				const smsStatus = this.smsStatus.find(({ value }) => status === value)
+				return smsStatus ? smsStatus.title : status
 			},
 
 			getEmployeeTitleByStaffId(staffId) {

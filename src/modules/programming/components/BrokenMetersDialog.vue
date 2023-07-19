@@ -8,7 +8,7 @@
     >
         <v-card>
             <v-card-title>
-                <span class="m-auto text-h5 text-break text-center py-3">Утилизированные счетчики</span>
+                <span class="m-auto text-h5 text-break text-center py-3">Списанные счетчики</span>
             </v-card-title>
 
             <v-card-text>
@@ -19,19 +19,18 @@
                 class="elevation-1"
                 :search="search"
                 :footer-props="{
-                  showFirstLastPage: true,
-                 'items-per-page-text':'счетчиков на странице',
-                 'items-per-page-options': [10, 20, 40, 100]
+                    showFirstLastPage: true,
+                    'items-per-page-text': 'счетчиков на странице',
+                    'items-per-page-options': [ 10, 20, 40, 100 ]
                 }"
                 loading-text="Идет загрузка счетчиков..."
                 fixed-header
             >
                 <template v-slot:top>
                     <v-toolbar
-                            flat
-                            height="75px"
+                        flat
+                        height="75px"
                     >
-                        <!-- Поиск -->
                         <v-text-field
                             v-model="search"
                             append-icon="mdi-magnify"
@@ -107,7 +106,7 @@
             ...mapState([ 'colorOrange', 'colorBlue' ])
         },
         methods: {
-            ...mapActions('registration', [ 'fetchBrokenMeters' ]),
+            ...mapActions('programming', [ 'fetchBrokenMeters' ]),
             //Обработчик открытия диалога актуализации из ростелекома
             async open() {
                 try {

@@ -4,7 +4,7 @@ import { production, dev } from '../../server-urls.js'
 
 Vue.use(Vuex)
 
-import { registration } from "@/store/registration"
+import { programming } from "@/modules/programming/store/programming"
 import { charts } from "@/store/charts"
 import { profile } from "@/store/profile"
 import { common } from "@/store/common"
@@ -28,7 +28,6 @@ export default new Vuex.Store({
         accountId: 0,
         roles: null,
         activeModules: [],
-        dictionaries: {},
         isLogin: false,
         colorRed: 'red lighten-1',
         colorBlue: 'blue lighten-1',
@@ -65,10 +64,6 @@ export default new Vuex.Store({
         getAccountId(state) {
             return state.accountId
         },
-
-        getMeterTypes(state) {
-            return state.meterTypes
-        },
     },
 
     mutations: {
@@ -97,12 +92,12 @@ export default new Vuex.Store({
         },
     },
 
-   actions: {
+    actions: {
         async loginUser({ state, commit }, { authToken, roleToken, cookies }) {
             $cookies.set('auth_token', authToken, '4h')
             $cookies.set('role_token', roleToken, '4h')
             commit('setLogin', true)
-
+    
             for (const module of Object.keys(cookies)) {
                 for (const cookie of cookies[ module ]) {
                     if (cookie.settings === 'favorite_module') {
@@ -112,7 +107,7 @@ export default new Vuex.Store({
                 }
             }
         },
-
+    
         async logoutUser({ state, commit }, isRedirectToLoginPage) {
             try {
                 $cookies.remove('auth_token')
@@ -126,10 +121,10 @@ export default new Vuex.Store({
                 console.log(e)
             }
         },
-   },
+    },
    
-   modules: {
-        registration,
+    modules: {
+        programming,
         charts,
         profile,
         common,
@@ -143,5 +138,5 @@ export default new Vuex.Store({
         service,
         map,
         dictionary,
-   }
+    }
 })

@@ -68,7 +68,7 @@
             </template>
         </v-data-table>
         <dialog-with-data-slot
-            ref="DialogWithDataSlot"
+            ref="EditCommentDialog"
             title="Редактирование"
             @submit="saveComment"
         >
@@ -113,7 +113,7 @@
 	        ]),
 
 			editComment(item) {
-                this.$refs.DialogWithDataSlot.dialogOpen()
+                this.$refs.EditCommentDialog.dialogOpen()
                 this.item = item
                 this.comment = item.comment_field
             },
@@ -126,7 +126,7 @@
 		        } catch (e) {
                     this.showNotificationRequestError(e)
 		        } finally {
-			        this.$refs.DialogWithDataSlot.dialogClose()
+			        this.$refs.EditCommentDialog.dialogClose()
 		        }
             },
         }

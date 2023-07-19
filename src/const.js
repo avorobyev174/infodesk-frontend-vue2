@@ -17,16 +17,24 @@ const AssignmentStatus = {
 	CLOSED_AUTO: 5,
 }
 
-const MapViewTypes = {
+const MapViewType = {
 	RESEARCH: 1,
 	ASSIGNMENT: 2,
 }
 
 const NOT_AUTHORIZATED_ERROR = 401
 
+const Difference = {
+	KFTT: 0,
+	PERSONAL_ACCOUNT: 1,
+	ADDRESS: 2,
+	NOT_EXIST: 3,
+}
+
 export {
 	AssignmentEventType,
 	NOT_AUTHORIZATED_ERROR,
-	MapViewTypes,
-	AssignmentStatus
+	MapViewType,
+	AssignmentStatus,
+	Difference
 }

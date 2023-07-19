@@ -8,11 +8,11 @@
             @contextmenu:row="actionMenuOpen"
             single-select
             item-key="id"
-            :items-per-page="100"
+            :items-per-page="50"
             :footer-props="{
                 showFirstLastPage: true,
                 'items-per-page-text': 'поручений на странице',
-                'items-per-page-options': [ 100, 250, 500, 1000 ]
+                'items-per-page-options': [ 50, 100, 200, 300 ]
             }"
             loading-text="Идет загрузка поручений..."
             fixed-header
@@ -22,16 +22,13 @@
             :server-items-length="totalAssignmentsCount"
         >
             <template v-slot:no-results>
-                <span>Идет загрузка поручений...</span>
+                <span>Нет данных...</span>
             </template>
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
             </template>
             <template v-slot:top>
-                <v-toolbar
-                    flat
-                    height="70px"
-                >
+                <v-toolbar flat height="70px">
                     <v-spacer/>
                     <service-menu
                         :menuActions="menuActions"
@@ -90,7 +87,7 @@
             <template v-slot:header.customer_address="{ header }">
                 {{ header.text }}
                 <combobox-filter
-                    filterLabel="Принадлежность"
+                    filterLabel="Адрес"
                     v-model="filterByBuilding"
                     :filter-value="filterByBuilding"
                     :filterItems="serviceBuildings"
@@ -183,7 +180,7 @@
             module="service"
         />
         <action-menu
-            ref="actionMenu"
+            ref="ActionMenu"
             :actions="assignmentActions"
             @openEventList="$refs.EventList.open(selectedAssignment, currentAccountId)"
             @acceptAssignment="assignmentAccept(selectedAssignment)"
@@ -211,7 +208,6 @@
     import DictionaryMixin from "../mixins/DictionaryMixin"
     import ColumnVisibilityMixin from "../mixins/ColumnVisibilityMixin"
     import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
-    import DataTableHeaderFilter from "../utils-components/filter/DataTableHeaderFilter"
     import ServiceFilterMixin from "./mixins/ServiceFilterMixin"
     import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
     import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
@@ -230,7 +226,6 @@
 	        ServiceUpdateLogsDialog,
 	        AddAssignmentDialog,
 	        EditContactsDialog,
-	        HeaderFilter: DataTableHeaderFilter,
 	        ComboboxFilter: ComboboxDataTableFilter,
 	        InputFilter: InputDataTableFilter,
 	        DialogCustom
@@ -263,8 +258,7 @@
 		        e.preventDefault()
                 this.selectedAssignment = item
 		        this.assignmentActions = this.filterAssignmentActions(item, this.currentAccountId)
-		        const { actionMenu } = this.$refs
-		        actionMenu.open(e.clientX, e.clientY)
+                this.$refs.ActionMenu.open(e.clientX, e.clientY)
 	        },
 
 			async getAssignments() {
@@ -301,14 +295,14 @@
             },
 
             async assignmentDecline({ id }) {
-	            const { AssignmentDeclineDialog } = this.$refs
-	            AssignmentDeclineDialog.dialogClose()
 	            try {
 		            const updatedAssignment = await this.acceptOrDeclineAssignment({ id, isDecline: true })
 		            this.updateAssignment(updatedAssignment)
 		            this.showNotificationInfo('Поручение успешно отклонено')
 	            } catch (e) {
 		            this.showNotificationRequestError(e)
+	            } finally {
+		            this.$refs.AssignmentDeclineDialog.dialogClose()
 	            }
             },
 

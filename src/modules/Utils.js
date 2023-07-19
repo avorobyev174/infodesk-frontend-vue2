@@ -36,7 +36,7 @@ function formatDate(dateToFormat, withTime) {
 	return `${ day }.${ month }.${ year }`
 }
 
-function saveDataArrayToExcelFile(dataArray, sheetName, colsWidthArray, fileName) {
+function saveDataToExcelFile(dataArray, sheetName, colsWidthArray, fileName) {
 	const workBook = XLSX.utils.book_new()
 	workBook.SheetNames.push(sheetName)
 	const workSheet = XLSX.utils.aoa_to_sheet(dataArray)
@@ -58,5 +58,5 @@ export {
 	stringToArrayBuffer,
 	isJsonValid,
 	formatDate,
-	saveDataArrayToExcelFile
+	saveDataToExcelFile
 }

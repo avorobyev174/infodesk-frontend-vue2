@@ -19,13 +19,6 @@
 			}),
 		},
 		mounted() {
-			if (!this.isLogin) {
-				return
-			}
-
-			// if (!this.$store.getters.getActiveModules.filter(module => module.name === this.$route.name.toLowerCase()).length)
-			// 	this.$router.push('/')
-
 			this.setBackgroundImage(true)
 		},
 	}

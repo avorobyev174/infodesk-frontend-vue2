@@ -37,7 +37,7 @@
                         @updateFromRTC="$refs.UpdateDataFromRTCDialog.open()"
                         @actualizeFromStek="$refs.UpdateDataFromSTEKDialog.open()"
                         @showHideColumns="$refs.ShowHideColumnsDialog.dialogOpen()"
-                        @showBrokenMeters="$refs.brokenMetersDialog.open()"
+                        @showBrokenMeters="$refs.BrokenMetersDialog.open()"
                         @saveExcelDataToPyramid="$refs.SaveDataToExcelDialog.open()"
                         @saveExcelRefreshDataToPyramid="$refs.RefreshDataFromSTEKDialog.open()"
                     />
@@ -217,7 +217,7 @@
             ref="MarkBrokenDialog"
         />
         <broken-meters-dialog
-            ref="brokenMetersDialog"
+            ref="BrokenMetersDialog"
         />
         <dialog-custom
             ref="MeterRemovePyramidLoadValueDialog"

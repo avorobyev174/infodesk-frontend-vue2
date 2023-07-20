@@ -22,7 +22,7 @@
             <v-list-item
                 v-for="(action, i) in actions"
                 :key="i"
-                @click="action.onClick ? $emit(action.onClick) : localFuncCall(action)"
+                @click="action.onClick ? $emit(action.onClick) : executeFunction(action)"
                 v-show="action.visible"
             >
                 <v-list-item-icon>
@@ -37,18 +37,29 @@
             </v-list-item>
         </v-list>
     </v-menu>
+<!--    <storage-menu-->
+<!--        :menu-actions="menuActions"-->
+<!--        :nudge-left="140"-->
+<!--        :nudge-width="200"-->
+<!--    >{{ menuActions }}</storage-menu>-->
 </template>
 
 <script>
-	import {mapGetters, mapState} from "vuex"
+	import { mapGetters } from "vuex"
+    import Menu from "../../utils-components/menu/Menu"
+	import menuActions from "../js/storage-menu"
 
 	export default {
         name: "MainMenu",
+        components: {
+        	StorageMenu: Menu
+        },
         data: () => ({
+	        menuActions,
             actions: [
-	            { id: 1, title: 'Регистрация', onClick: 'register', icon: 'mdi-plus-thick', color: 'primary', visible: true },
+	            { id: 1, title: 'Регистрация', onClick: 'register', icon: 'mdi-plus-box', color: 'primary', visible: true },
                 { id: 2, title: 'Прием/Выдача', onClick: 'acceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
-	            { id: 3, title: 'Регистрация маршрутизатора', onClick: 'routerRegister', icon: 'mdi-plus-thick', color: 'primary', visible: true },
+	            { id: 3, title: 'Регистрация маршрутизатора', onClick: 'routerRegister', icon: 'mdi-plus-box', color: 'primary', visible: true },
 	            { id: 4, title: 'Прием/Выдача маршрутизатора', onClick: 'routerAcceptOrIssue', icon: 'mdi-swap-horizontal-bold', color: 'primary', visible: true },
 	            { id: 5, title: 'Ремонт/Прием материалов', onClick: 'repairOrMaterialsAdd', icon: 'mdi-cog', color: 'primary', visible: true },
 	            { id: 6, title: 'Видимость колонок', onClick: 'showHideColumns', icon: 'mdi-eye', color: 'primary', visible: true },
@@ -72,9 +83,10 @@
 		        this.actions[0].visible = false
 		        this.actions[1].visible = false
 	        }
+	        console.log(this.menuActions)
         },
         methods: {
-	        localFuncCall(action) {
+	        executeFunction(action) {
 		        switch(action.id) {
 			        case 7: this.showHideAllMeters(action); break
 		        }

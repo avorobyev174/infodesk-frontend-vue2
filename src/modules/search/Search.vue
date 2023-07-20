@@ -5,39 +5,31 @@
            lazy-validation
            @submit.prevent="getMeterData"
        >
-            <v-card
-                class="m-3 px-4 pb-4"
-                max-width="500px"
-            >
+            <v-card class="m-3 px-4 pb-4" max-width="500px">
                 <v-card-text class="pb-0">
-                    <p class="text-h6 text-secondary search-card-title">Поиск данных счетчика</p>
-                    <p class="search-card-info">поиск производится по счетчикам из модуля регистрации загруженных в пирамиду</p>
+                    <p class="text-h6 text-secondary search-card-title">Поиск показаний счетчика</p>
+                    <p class="search-card-info">поиск по счетчикам из модуля регистрации загруженных в пирамиду</p>
                 </v-card-text>
                 <v-card-actions class="d-flex justify-content-around px-4">
                     <v-text-field
                         v-model="serialNumber"
                         :rules="serialNumberRules"
-                        required
                         :loading="loading"
                         label="Серийный номер"
                         type="text"
                         clearable
                         class="search-serial-number-input pt-0 pr-1"
                     />
-                    <v-btn
-                       text
-                       color="primary"
-                       type="submit"
-                    >
+                    <v-btn text color="primary" type="submit">
                         <v-icon left>mdi-magnify</v-icon>
                         Поиск
                     </v-btn>
                 </v-card-actions>
            </v-card>
        </v-form>
-       <v-card class="m-3 px-3 pb-4" max-width="500px" v-show="show">
+       <v-card class="m-3 px-3 pb-4" max-width="500px" v-show="isShowMeterData">
            <v-card-text>
-               <p class="text-h6 text-secondary search-card-title">Результаты</p>
+               <p class="text-h6 text-secondary search-card-title">Данные</p>
            </v-card-text>
            <div class="px-4 pb-4">
                <div class="meter-content-data">
@@ -50,7 +42,7 @@
                    <v-text-field
                        v-model="customer_type"
                        readonly
-                       label="Тип клиента"
+                       label="Тип потребителя"
                        type="text"
                    />
                    <v-text-field
@@ -67,7 +59,7 @@
                    />
                </div>
                <v-subheader style="font-size: 13px; height: 16px" class="px-0">{{ lastDateTitle }}</v-subheader>
-               <v-simple-table class="mytable py-2" v-show="meterData.dateTime !== ''">
+               <v-simple-table class="py-2" v-show="dateTime">
                    <template v-slot:default>
                        <thead>
                        <tr>
@@ -79,10 +71,10 @@
                        </thead>
                        <tbody>
                            <tr>
-                               <td>{{ meterData.dateTime }}</td>
-                               <td>{{ meterData.t1 }}</td>
-                               <td>{{ meterData.t2 }}</td>
-                               <td>{{ meterData.total }}</td>
+                               <td class="text-center">{{ dateTime }}</td>
+                               <td class="text-center">{{ t1 }}</td>
+                               <td class="text-center">{{ t2 }}</td>
+                               <td class="text-center">{{ total }}</td>
                             </tr>
                        </tbody>
                    </template>
@@ -94,17 +86,21 @@
 
 <script>
     import { mapActions } from "vuex"
-    import DictionaryMixin from "./mixins/DictionaryMixin"
-    import FavoriteModuleMixin from "./mixins/FavoriteModuleMixin"
+    import DictionaryMixin from "../mixins/DictionaryMixin"
+    import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
+    import { formatDate } from "../Utils"
 
     export default {
         name: 'Search',
         data: () => ({
-            show: false,
+            isShowMeterData: false,
             serialNumber: '',
             meterType: '',
             personal_account: '',
-            meterData: { dateTime: '', t1: '', t2: '', total: '' },
+	        dateTime: '',
+	        t1: '',
+	        t2: '',
+            total: '',
             loading: false,
             customer_address: '',
             customer_type: '',
@@ -122,78 +118,65 @@
         mixins: [ DictionaryMixin, FavoriteModuleMixin ],
         computed: {
             lastDateTitle() {
-                return this.meterData.dateTime !== '' ? 'Последние показания' : 'Последние показания отсутствуют'
+                return this.dateTime ? 'Последние показания' : 'Последние показания отсутствуют'
             }
         },
         mounted() {
 	        this.setBackgroundImage(true)
         },
         methods: {
-            ...mapActions('search', [ 'getMeterBySerialNumber' ]),
+            ...mapActions('search', [ 'getMeterDataBySerialNumber' ]),
 
             async getMeterData() {
                 if (!this.$refs.form.validate()) {
                     return
                 }
                 try {
+	                this.loading = true
+	                const { meter, data } = await this.getMeterDataBySerialNumber(this.serialNumber)
+                    this.clear()
+	                this.loading = false
+                    if (!meter) {
+	                    this.isShowMeterData = false
+	                    return this.showNotificationInfo('Счетчик не найден')
+                    }
 
+                    const { type, personal_account, customer_type, customer_address } = meter
+
+                    this.isShowMeterData = true
+                    this.meterType = this.getMeterTypeTitle(type)
+                    if (customer_type) {
+                        this.customer_type = customer_type
+                    } else {
+                        this.customer_type = 'отсутствует'
+                        this.showNotificationInfo('Счетчик еще не загружен в пирамиду')
+                    }
+
+                    this.customer_address = customer_address ? customer_address : 'отсутствует'
+                    this.personal_account = personal_account ? personal_account : 'отсутствует'
+
+	                if (data.length) {
+		                const meterData = data.flat()
+
+                        const [ t1, t2, total ] = meterData
+		                this.dateTime = formatDate(t1.date_time)
+
+		                this.t1 = parseFloat(t1.value).toFixed(3)
+		                this.t2 = parseFloat(t2.value).toFixed(3)
+		                this.total = parseFloat(total.value).toFixed(3)
+	                }
                 } catch (e) {
                     this.showNotificationRequestError(e)
                 }
-                this.loading = true
-                const response = await this.getMeterBySerialNumber(this.serialNumber)
-                this.loading = false
-                //console.log(response)
-                let meterInfo = response.filter(arr => arr.length === 1)
-                let meterAsdDataInfo = response.filter(arr => arr.length === 3)
-                this.clear()
-
-                if (meterInfo.length) {
-                    this.show = true
-                    meterInfo = meterInfo.flat()
-                    this.meterType = this.getMeterTypeTitle(meterInfo[0].type)
-                    if (meterInfo[0].customer_type) {
-                        this.customer_type = meterInfo[0].customer_type
-                    } else {
-                        this.customer_type = 'отсутствует'
-                        this.showNotificationInfo('Счетчик найден, запрограммирован УИТ, но не загружен в пирамиду (причина - нет данных от СТЭКа)')
-
-                    }
-
-                    this.customer_address = meterInfo[0].customer_address ? meterInfo[0].customer_address : 'отсутствует'
-                    this.personal_account = meterInfo[0].personal_account ? meterInfo[0].personal_account : 'отсутствует'
-                } else {
-                    this.showNotificationInfo('Счетчик не найден')
-                    this.show = false
-                    return
-                }
-
-                if (meterAsdDataInfo.length) {
-                    this.showNotificationSuccess('Счетчик найден')
-                    meterAsdDataInfo = meterAsdDataInfo.flat()
-                    //console.log(meterAsdDataInfo)
-                    let date = new Date(meterAsdDataInfo[0].date_time)
-                    const year = date.getFullYear()
-                    const month = date.getMonth() + 1
-                    const day = date.getDate()
-
-                    this.meterData.dateTime  = `${ day }.${ month }.${ year }`
-
-                    this.meterData.t1 = parseFloat(
-                                meterAsdDataInfo.filter(arr => arr.channel_type === 1001)[0].value).toFixed(3)
-                    this.meterData.t2 = parseFloat(
-                                meterAsdDataInfo.filter(arr => arr.channel_type === 1002)[0].value).toFixed(3)
-                    this.meterData.total = parseFloat(
-                                meterAsdDataInfo.filter(arr => arr.channel_type === 1000)[0].value).toFixed(3)
-                }
-
-
             },
 
             clear() {
                 this.meterType = ''
                 this.personal_account = ''
-                this.meterData = { dateTime: '', t1: '', t2: '', total: '' }
+                this.dateTime = ''
+                this.t1 = ''
+                this.t2 = ''
+                this.total = ''
                 this.customer_address = ''
                 this.customer_type = ''
             }

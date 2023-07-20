@@ -8,13 +8,13 @@ export default [
 	{
 		title: 'Добавить',
 		onClick: 'opendAssignmentAddDialog',
-		icon: 'mdi-plus-box-outline',
+		icon: 'mdi-plus-box',
 		color: 'primary'
 	},
 	{
 		title: 'Журнал обновления системы',
 		onClick: 'openAssignmentsLogsDialog',
-		icon: 'mdi-clipboard-text-search-outline',
+		icon: 'mdi-clipboard-text-search',
 		color: 'primary'
 	},
 	{

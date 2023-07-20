@@ -1,13 +1,5 @@
 import * as XLSX from 'xlsx/xlsx.mjs'
 
-function stringToArrayBuffer(str) {
-	let buf = new ArrayBuffer(str.length)
-	let view = new Uint8Array(buf)
-	for (let i = 0; i < str.length; i++)
-		view[i] = str.charCodeAt(i) & 0xFF
-	return buf
-}
-
 function formatDate(dateToFormat, withTime) {
 	if (!dateToFormat) {
 		return 'отсутствует'
@@ -55,7 +47,6 @@ const isJsonValid = (str) => {
 }
 
 export {
-	stringToArrayBuffer,
 	isJsonValid,
 	formatDate,
 	saveDataToExcelFile

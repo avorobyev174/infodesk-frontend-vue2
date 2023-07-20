@@ -56,6 +56,9 @@
                     <template v-slot:item.type="{ item }">
                         {{ getMeterTypeTitle(item.type) }}
                     </template>
+                    <template v-slot:item.customer_address="{ item }">
+                        {{ spliceCustomerAddress(item.customer_address, true) }}
+                    </template>
                     <template v-slot:item.in_pyramid="{ item }">
                         <v-chip v-if="item.in_pyramid === 0" :color="colorGrey">Не загружен</v-chip>
                         <v-chip v-else :color="colorGreen">Загружен</v-chip>
@@ -68,7 +71,6 @@
                         />
                     </template>
                     <template v-slot:footer.prepend>
-
                     </template>
                     <template v-slot:header.readyToLoad >
                         <v-tooltip bottom>
@@ -97,7 +99,7 @@
 </template>
 
 <script>
-    import saveDataToPyramidExcelFile from "../js/saveDataToPyramidExcelFile"
+    import saveDataToPyramidExcelFile from "../js/save-data-to-pyramid-excel-file"
     import { spliceCustomerAddress } from "../js/meters-filter-values"
     import { mapActions, mapState } from "vuex"
     import ButtonWithTooltip from "../../utils-components/button/ButtonWithTooltip"
@@ -120,13 +122,13 @@
             headers: [
                 { text: '', align: 'center', value: 'readyToLoad', sortable: false  },
                 { text: 'ID', align: 'center', value: 'id', sortable: false  },
-                { text: 'Тип лица', align: 'center', value: 'customer_type', cellClass: 'table-small-cell', sortable: false },
-                { text: 'Тип счетчика', align: 'center', value: 'type', cellClass: 'table-small-cell', sortable: false  },
-                { text: 'Серийный номер', align: 'center', value: 'serial_number', cellClass: 'table-small-cell', sortable: false },
-                { text: 'Номер лицевого', align: 'center', value: 'personal_account', cellClass: 'table-small-cell', sortable: false },
-                { text: 'Наименование', align: 'center', value: 'customer', cellClass: 'table-small-cell', sortable: false },
-                { text: 'Адрес', align: 'center', value: 'customer_address', cellClass: 'table-small-cell', sortable: false  },
-                { text: 'Пирамида', align: 'center', value: 'in_pyramid', sortable: false},
+                { text: 'Тип лица', align: 'center', value: 'customer_type', sortable: false },
+                { text: 'Тип счетчика', align: 'center', value: 'type', sortable: false  },
+                { text: 'Серийный номер', align: 'center', value: 'serial_number', sortable: false },
+                { text: 'Номер лицевого', align: 'center', value: 'personal_account', sortable: false },
+                { text: 'Потребитель', align: 'center', value: 'customer', sortable: false },
+                { text: 'Адрес', align: 'center', value: 'customer_address', sortable: false  },
+                { text: 'Признак загрузки в пирамиду', align: 'center', value: 'in_pyramid', sortable: false},
             ],
         }),
         mixins: [ DialogMixin ],
@@ -149,7 +151,7 @@
         ],
         methods: {
             ...mapActions('programming', [ 'updateMeterLoad', 'fetchAllMeters' ]),
-
+	        spliceCustomerAddress,
             async open() {
                 if (this.hide) {
 	                this.dialogOpen()
@@ -161,7 +163,7 @@
                     const readyToLoadMeters = meters.filter(({ personal_account, in_pyramid }) => personal_account && !in_pyramid)
 
                     for (const meter of readyToLoadMeters) {
-                        const building = spliceCustomerAddress(meter.customer_address, true, true)
+                        const building = this.spliceCustomerAddress(meter.customer_address, true, true)
 	                    this.unloadMeters.push(Object.assign({}, {
 	                    	...meter,
 		                    readyToLoad: false,

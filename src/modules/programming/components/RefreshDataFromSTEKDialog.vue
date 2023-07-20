@@ -28,7 +28,6 @@
                         ref="readyToRefreshCheckBox"
                         :color="colorGreen"
                         v-model="item.readyToRefresh"
-                        @change="test"
                     />
                 </template>
                 <template v-slot:item.oldData.type="{ item }">
@@ -44,7 +43,7 @@
                     <span v-else>{{ checkIfNoExist(item.oldData.personal_account) }}</span>
                 </template>
                 <template v-slot:item.oldData.customer_address="{ item }">
-                    <v-chip  v-if="item.difference.includes(Difference.ADDRESS)" :color="colorOrange">
+                    <v-chip v-if="item.difference.includes(Difference.ADDRESS)" :color="colorOrange">
                         {{ `${ checkIfNoExist(item.oldData.customer_address) } → ${ checkIfNoExist(item.newData.customer_address)}` }}
                     </v-chip>
                     <v-chip v-else-if="item.difference.includes(Difference.NOT_EXIST)" :color="colorRed">
@@ -95,7 +94,7 @@
 
 <script>
     import { mapActions, mapState } from "vuex"
-    import saveDataToPyramidExcelFile from "../js/saveDataToPyramidExcelFile"
+    import saveDataToPyramidExcelFile from "../js/save-data-to-pyramid-excel-file"
     import { saveDataToExcelFile } from "../../Utils"
     import { Difference } from "../../../const"
     import DialogMixin from "../../mixins/DialogMixin"
@@ -113,7 +112,7 @@
                 { text: 'Номер лицевого', align: 'center', value: 'oldData.personal_account', sortable: false },
                 { text: 'Адрес', width: '100px', align: 'center', value: 'oldData.customer_address', sortable: false },
                 { text: 'Коэффициент трансформации', align: 'center', value: 'oldData.kftt', sortable: false },
-                { text: 'Обновлен', align: 'center', value: 'refreshStatus', sortable: false},
+                { text: 'Признак обновления в базе', align: 'center', value: 'refreshStatus', sortable: false},
             ],
 	        emptyMeter: {
 		        comment: null,
@@ -158,7 +157,6 @@
                 try {
                     this.showNotificationInfo('Отправлен запрос на получение обновленных данных из СТЕКа')
                     const { refreshedMeters, totalCount } = await this.refreshMeterDataFromSTEK()
-	                console.log(refreshedMeters)
                     if (!refreshedMeters?.length) {
 	                   return this.showNotificationInfo('Обновленные данные не найдены')
                     }                    
@@ -187,16 +185,13 @@
             async actualizeDataFromSTEK() {
                 try {
                     if (!this.successRefresh) {
-	                    console.log(this.refreshMeters)
 	                    const metersReadyToRefresh = this.refreshMeters.filter(({ readyToRefresh }) => readyToRefresh).map((meterData) => {
 		                    const { id, oldData, newData, difference } = meterData
 		                    const refreshMeterData = newData ? newData : this.emptyMeter
 		                    return { id, oldData, ...refreshMeterData, difference }
 	                    })
-	                    console.log(metersReadyToRefresh)
 	                    this.loading = true
 	                    this.successfullyRefreshedMeters = await this.saveRefreshedMetersDataFromSTEK(metersReadyToRefresh)
-	                    console.log(this.successfullyRefreshedMeters)
                         for (const successfullyRefreshedMeter of this.successfullyRefreshedMeters) {
                         	const refreshMeter = this.refreshMeters.find(({ id }) => successfullyRefreshedMeter.id === id)
 	                        refreshMeter ? refreshMeter.refreshStatus = 'да': refreshMeter.refreshStatus = 'ошибка'
@@ -205,7 +200,6 @@
 	                    this.successRefresh = true
 	                    await this.getMeters()
                     } else {
-                        console.log(this.successfullyRefreshedMeters)
                         const differenceMeters = this.successfullyRefreshedMeters.filter(({ difference }) => !difference.includes(Difference.NOT_EXIST))
                         const deleteMeters = this.successfullyRefreshedMeters
                         if (differenceMeters.length) {
@@ -243,10 +237,6 @@
                     oldAddress
                 ])
             },
-
-	        test() {
-		        console.log(this.refreshMeters)
-            }
         },
     }
 </script>

@@ -2,15 +2,13 @@
     <v-dialog
         v-model="dialogModel"
         :max-width="1200"
-        @keydown.enter="close"
-        @keydown.esc="close"
-        @click:outside="close"
+        @keydown.esc="dialogClose"
+        @click:outside="dialogClose"
     >
         <v-card>
             <v-card-title>
                 <span class="m-auto text-h5 text-break text-center py-3">Списанные счетчики</span>
             </v-card-title>
-
             <v-card-text>
             <v-data-table
                 :headers="titles"
@@ -21,16 +19,13 @@
                 :footer-props="{
                     showFirstLastPage: true,
                     'items-per-page-text': 'счетчиков на странице',
-                    'items-per-page-options': [ 10, 20, 40, 100 ]
+                    'items-per-page-options': [ 10, 25, 50, 100 ]
                 }"
                 loading-text="Идет загрузка счетчиков..."
                 fixed-header
             >
                 <template v-slot:top>
-                    <v-toolbar
-                        flat
-                        height="75px"
-                    >
+                    <v-toolbar flat height="75px">
                         <v-text-field
                             v-model="search"
                             append-icon="mdi-magnify"
@@ -43,103 +38,72 @@
                     </v-toolbar>
                 </template>
                 <template v-slot:no-results>
-                    <span>Данные не найдены</span>
+                    <span>Нет данных...</span>
+                </template>
+                <template v-slot:no-data>
+                    <p class="pt-4">Нет данных...</p>
                 </template>
                 <template v-slot:item.created="{ item }">
                     {{ formatDate(item.created) }}
                 </template>
                 <template v-slot:item.acc_id="{ item }">
-                    {{ getAccountTitle(item.acc_id) }}
+                    {{ getAccountFullName(item.acc_id) }}
                 </template>
                 <template v-slot:item.data.type="{ item }">
                     {{ getMeterTypeTitle(item.data.type) }}
-                </template>
-                <template v-slot:item.reason="{ item }">
-                    <v-chip v-if="item.reason === 1" :color="colorOrange">{{ getBrokenMeterReason(item.reason) }}</v-chip>
-                    <v-chip v-else :color="colorBlue">{{ getBrokenMeterReason(item.reason) }}</v-chip>
                 </template>
             </v-data-table>
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn
-                    color="blue darken-1"
-                    text
-                    @click="close"
-                >
-                    ОК
-                </v-btn>
+                <v-btn color="blue darken-1" text @click="dialogClose">Закрыть</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
 
 <script>
-    import { mapActions, mapState } from "vuex"
+    import { mapActions } from "vuex"
+    import DialogMixin from "../../mixins/DialogMixin"
 
     export default {
         name: "BrokenMetersDialog",
         data: () => ({
 	        search: '',
-            dialogModel: false,
             titles: [
-	            { text: 'Причина', align: 'center', sortable: true, value: 'reason', index: 0},
-	            { text: 'Дата', value: 'created', sortable: true, align: 'center', index: 1 },
-	            { text: 'Сотрудник', value: 'acc_id', sortable: true, align: 'center', index: 2 },
-	            { text: 'Комментарий', value: 'comment', sortable: false, align: 'center', index: 3 },
-	            { text: 'Тип', value: 'data.type', sortable: true, align: 'center', index: 4 },
-	            { text: 'Серийный номер', value: 'data.serial_number', sortable: false, align: 'center', index: 5 },
-	            { text: 'ICC', value: 'data.icc', align: 'center', sortable: false,  index: 6 },
-	            { text: 'Номер телефона', value: 'data.phone', sortable: false, align: 'center', index: 7 },
+	            { text: 'Дата', value: 'created', sortable: true, align: 'center' },
+	            { text: 'Сотрудник', value: 'acc_id', sortable: true, align: 'center' },
+	            { text: 'Комментарий', value: 'comment', sortable: false, align: 'center' },
+	            { text: 'Тип', value: 'data.type', sortable: true, align: 'center' },
+	            { text: 'Серийный номер', value: 'data.serial_number', sortable: false, align: 'center' },
+	            { text: 'ICC', value: 'data.icc', align: 'center', sortable: false },
+	            { text: 'Номер телефона', value: 'data.phone', sortable: false, align: 'center' },
             ],
             meters: [],
-            accounts: []
         }),
+        mixins: [ DialogMixin ],
         inject: [
-        	'showNotificationSuccess',
-            'showNotificationWarning',
+            'showNotificationInfo',
             'showNotificationRequestError',
             'getMeterTypeTitle',
             'formatDate',
+            'getAccountFullName',
         ],
-        computed: {
-            ...mapState([ 'colorOrange', 'colorBlue' ])
-        },
         methods: {
             ...mapActions('programming', [ 'fetchBrokenMeters' ]),
-            //Обработчик открытия диалога актуализации из ростелекома
+
             async open() {
                 try {
-                    let response = await this.fetchBrokenMeters()
-                    this.meters = response.meters.map((row) => ({ ...row, data: JSON.parse(row.data) }))
-                    this.accounts = response.accounts
-
+                    const brokenMeters = await this.fetchBrokenMeters()
+	                this.meters = brokenMeters.map((meter) => ({ ...meter, data: JSON.parse(meter.data) }))
                     if (this.meters.length) {
-                        this.dialogModel = true
+                        this.dialogOpen()
                     } else {
-                        this.showNotificationWarning('В базе не найдено списанных счетчиков')
+                        this.showNotificationWarning('Не найдено списанных счетчиков')
                     }
                 } catch (e) {
                     this.showNotificationRequestError(e)
                 }
-            },
-
-            getBrokenMeterReason(reason) {
-                switch (reason) {
-                    case 1: return 'Списан'
-                    case 2: return 'Обновлен'
-                }
-            },
-
-            getAccountTitle(accountId) {
-                const fullName = this.accounts.find((acc) => acc.id === accountId).full_name
-                const fullNameArr = fullName.split(' ')
-                return `${ fullNameArr[0] } ${ fullNameArr[1].slice(0, 1) }. ${ fullNameArr[2].slice(0, 1) }.`
-            },
-
-            //Обработчик закрытия диалога актуализации
-            close() {
-                this.dialogModel = false
             },
         }
     }

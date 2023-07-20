@@ -3,7 +3,6 @@ import { getReportItemsKeeper } from "./js/report-by-role-items/report-items-kee
 import { getReportItemsRepairer } from "./js/report-by-role-items/report-items-repairer"
 
 const getReportObjectById = (id, reports) => {
-	console.log(reports.find((report) => report.id === id))
 	return reports.find((report) => report.id === id)
 }
 const getReportItemsByRole = (role) => {

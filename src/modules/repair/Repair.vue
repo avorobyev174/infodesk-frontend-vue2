@@ -5,13 +5,13 @@
             :loading="loading"
             sort-by="id"
             height="80vh"
-            class="elevation-1 meter-table"
+            class="elevation-1"
             single-select
-            item-key="ID"
+            item-key="id"
             :items-per-page="100"
             :footer-props="{
                 showFirstLastPage: true,
-                'items-per-page-text':'счетчиков на странице',
+                'items-per-page-text': 'счетчиков на странице',
                 'items-per-page-options': [ 100, 500, 1000 ]
             }"
             loading-text="Идет загрузка счетчиков..."
@@ -20,22 +20,10 @@
             :items="meters"
         >
             <template v-slot:no-results>
-                <span>Нет данных...</span>
+                <p class="pt-4">Нет данных...</p>
             </template>
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
-            </template>
-            <template v-slot:top>
-                <v-toolbar flat height="70px">
-                    <v-text-field
-                        v-model="search"
-                        append-icon="mdi-magnify"
-                        label="Поиск"
-                        hide-details
-                        clearable
-                        class="search-text-input"
-                    />
-                </v-toolbar>
             </template>
             <!-- Подмена значений таблицы на лэйблы -->
             <template v-slot:item.type="{ item }">
@@ -53,7 +41,7 @@
                             v-bind="attrs"
                             v-on="on"
                             :color="colorGrey"
-                            @click="openProgrammingDoneDialog(item)"
+                            @click="openProgrammingDialog(item)"
                         >
                             mdi-checkbox-blank-circle-outline
                         </v-icon>
@@ -78,33 +66,29 @@
                 </v-icon>
             </template>
         </v-data-table>
-        <simple-dialog
-            :dialog-open="programmingDialogModel"
-            max-width="700px"
-            title="Вы уверены что хотите подтвердить загрузку в пирамиду данных?"
-            @okButtonClickEvent="setProgrammingDone"
-            @cancelButtonClickEvent="closeProgrammingDoneDialog"
-        ></simple-dialog>
+        <dialog-custom
+            ref="ProgrammingValueDialog"
+            :max-width="700"
+            title="Вы уверены что хотите подтвердить изменение данных?"
+            @submit="setProgrammingDone"
+        />
     </v-card>
 </template>
 
 <script>
-	import SimpleDialog from "../utils-components/SimpleDialog"
-	import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
-	import RegistrationMixin from "../programming/mixins/ProgrammingMixin"
-	import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin";
-	import DictionaryMixin from "../mixins/DictionaryMixin";
+	import { mapActions, mapGetters, mapState} from "vuex"
+	import DialogCustom from "../utils-components/dialog/DialogCustom"
+	import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
+	import DictionaryMixin from "../mixins/DictionaryMixin"
 
 	export default {
 		name: "Repair",
 		components: {
-			SimpleDialog,
+			DialogCustom,
 		},
 		data: () => ({
 			search: '',
-            loading: false,
 			module: 'repair',
-			programmingDialogModel: false,
 			currentItem: {},
 			headers: [
 				{ text: 'ID', sortable: false, align: 'center', value: 'id' },
@@ -119,10 +103,10 @@
 		computed: {
 			...mapGetters({
 				meters: 'repair/getMeters',
-				activeModules: 'getActiveModules',
                 isLogin: 'getIsLogin',
 			}),
-			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue'])
+			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue']),
+			...mapState('repair', [ 'loading', ])
         },
 		inject: [
 			'showNotificationSuccess',
@@ -153,34 +137,26 @@
 
 	        async initializeMeters() {
 				try {
-					this.loading = true
 					await this.fetchMeters()
-					this.loading = false
                 } catch (e) {
 					this.showNotificationRequestError(e)
 				}
 	        },
 
-			openProgrammingDoneDialog(item) {
-				this.programmingDialogModel = true
+			openProgrammingDialog(item) {
+				this.$refs.ProgrammingValueDialog.dialogOpen()
                 this.currentItem = item
 			},
 
             async setProgrammingDone() {
-	            this.closeProgrammingDoneDialog()
+	            this.$refs.ProgrammingValueDialog.dialogClose()
                 try {
-	                const updatedMeter = await this.setProgrammingValue({ id: this.currentItem.id, value: 1 })
-	                const mainUpdatedMeter = this.meters.find(mainMeter => updatedMeter.id === mainMeter.id)
-	                Object.assign(mainUpdatedMeter, updatedMeter)
-	                this.showNotificationSuccess('ПКЭ успешно обновлен')
+	                await this.setProgrammingValue({ id: this.currentItem.id, value: 1 })
+	                this.showNotificationSuccess('Настройка данных успешна обновлена')
                 } catch (e) {
 	                this.showNotificationRequestError(e)
                 }
             },
-
-			closeProgrammingDoneDialog() {
-				this.programmingDialogModel = false
-			}
 		}
 	}
 </script>

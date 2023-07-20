@@ -3,7 +3,7 @@ import { get, post } from 'axios'
 export const repair = {
 	state: () => ({
 		meters: [],
-		isMetersLoading: false,
+		loading: false,
 		serverModule: 'meter-repair'
 	}),
 	getters: {
@@ -15,8 +15,8 @@ export const repair = {
 		setMeters(state, meters) {
 			state.meters = meters;
 		},
-		setLoading(state, bool) {
-			state.isMetersLoading = bool
+		setLoading(state, loading) {
+			state.loading = loading
 		}
 	},
 	actions: {
@@ -42,7 +42,7 @@ export const repair = {
 					{ id, value },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 					
-				return response.data[0]
+				return response.data
 			} finally {
 				commit('setLoading', false)
 			}

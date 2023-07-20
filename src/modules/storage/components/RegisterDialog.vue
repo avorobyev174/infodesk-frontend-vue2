@@ -171,7 +171,7 @@
 		},
         methods: {
 	        ...mapActions('storage', [
-		        'programming',
+		        'registration',
 	        ]),
 
 	        issuingPersonOnFocusOut() {

@@ -29,9 +29,9 @@ export const charts = {
             return response.data
         },
 
-        async getMeterRegistrationStreetsChartData({ state }) {
+        async getMeterRegistrationBuildingsChartData({ state }) {
             const response = await axios.get(
-                this.state.serverUrl + `/api/${state.serverModule }/meter-in-pyramid-houses-chart`,
+                this.state.serverUrl + `/api/${state.serverModule }/meter-in-pyramid-buildings-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
             return response.data

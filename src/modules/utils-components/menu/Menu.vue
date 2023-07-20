@@ -3,8 +3,8 @@
         open-on-hover
         bottom
         offset-y
-        :nudge-width="250"
-        :nudge-left="250"
+        :nudge-width="nudgeWidth"
+        :nudge-left="nudgeLeft"
     >
         <template v-slot:activator="{ on, attrs }">
             <v-btn
@@ -44,6 +44,14 @@
         	menuActions: {
         		type: Array,
                 required: true
+            },
+            nudgeLeft: {
+	            type: Number,
+	            default: 250
+            },
+            nudgeWidth: {
+	            type: Number,
+	            default: 250
             },
         }
     }

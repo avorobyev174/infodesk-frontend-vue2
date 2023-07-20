@@ -298,11 +298,11 @@ export const programming = {
             try {
                 commit('setLoading', true)
                 const response = await axios.get(
-                    this.state.serverUrl + `/api/${ state.serverModule }/broken-meters`,
+                    this.state.serverUrl + `/api/${ state.serverModule }/get-broken-meters`,
                     { headers: { 'authorization': $cookies.get('auth_token') } })
 
                 return response.data
-                           } finally {
+            } finally {
                 commit('setLoading', false)
             }
         },

@@ -6,7 +6,7 @@
             class="elevation-1 meter-table"
             single-select
             item-key="id"
-            :items-per-page="500"
+            :items-per-page="100"
             :footer-props="{
                 showFirstLastPage: true,
                 'items-per-page-text':'счетчиков на странице',

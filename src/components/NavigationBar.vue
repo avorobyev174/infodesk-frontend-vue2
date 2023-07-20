@@ -71,9 +71,7 @@
 			async setFavoriteModule() {
 				let route = '/'
 
-				console.log(this.favoriteModuleColor)
-
-				if (!this.favoriteModuleColor) {
+				if (this.favoriteModuleColor === 'grey') {
 					this.setFavoriteModuleColor(this.colorGold)
 					route = this.$route.fullPath
 					$cookies.set('common_favorite_module', route, '4h')

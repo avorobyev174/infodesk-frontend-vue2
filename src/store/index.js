@@ -5,14 +5,14 @@ import { production, dev } from '../../server-urls.js'
 Vue.use(Vuex)
 
 import { programming } from "@/modules/programming/store/programming"
-import { charts } from "@/store/charts"
-import { profile } from "@/store/profile"
+import { charts } from "@/modules/charts/store/charts"
+import { profile } from "@/modules/profile/store/profile"
 import { common } from "@/store/common"
 import { testUtils } from "@/store/test-utils"
 import { reports } from "@/modules/reports/store/reports"
-import { search } from "@/store/search"
+import { search } from "@/modules/search/store/search"
 import { storage } from "@/store/storage"
-import { repair } from "@/store/repair"
+import { repair } from "@/modules/repair/store/repair"
 import { service } from "@/modules/service/store/service"
 import { map } from "@/store/map"
 import { serviceReports } from "@/modules/reports/store/service-reports"

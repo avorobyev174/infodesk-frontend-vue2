@@ -22,6 +22,7 @@
 				getIpAddressTitle: this.getIpAddressTitle,
 				module: this.module,
 				getMeters: this.getMeters,
+				getAccountFullName: this.getAccountFullName,
 			}
 		},
 		computed: {

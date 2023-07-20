@@ -8,7 +8,7 @@
             <v-card class="m-3 px-4 pb-4" max-width="500px">
                 <v-card-text class="pb-0">
                     <p class="text-h6 text-secondary search-card-title">Поиск показаний счетчика</p>
-                    <p class="search-card-info">поиск по счетчикам из модуля регистрации загруженных в пирамиду</p>
+                    <p class="search-card-info">поиск по счетчикам зарегистрированным в УИТ</p>
                 </v-card-text>
                 <v-card-actions class="d-flex justify-content-around px-4">
                     <v-text-field
@@ -184,7 +184,7 @@
     }
 </script>
 
-<style>
+<style scoped>
     .search-card-title {
         margin-bottom: 0px !important;
         color: rgba(0, 0, 0, 0.87) !important;

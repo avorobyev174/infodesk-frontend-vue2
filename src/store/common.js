@@ -28,6 +28,15 @@ export const common = {
 
             return response.data
         },
+    
+        async changeCredentials({ state }, { name, login, password }) {
+            const response = await post(
+                this.state.serverUrl + `/api/${ state.serverModule }/change-credentials`,
+                { name, login, password },
+                { headers: { 'authorization': $cookies.get('auth_token') }})
+        
+            return response.data
+        },
     },
     namespaced: true
 }

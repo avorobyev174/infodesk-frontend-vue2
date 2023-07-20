@@ -1,10 +1,10 @@
 <template>
     <v-card>
         <v-data-table
-            :search="search"
             :loading="loading"
+            @contextmenu:row="actionMenuOpen"
             sort-by="id"
-            height="80vh"
+            height="85vh"
             class="elevation-1"
             single-select
             item-key="id"
@@ -18,12 +18,35 @@
             fixed-header
             :headers="headers"
             :items="meters"
+            :options.sync="options"
+            :server-items-length="totalMetersCount"
         >
             <template v-slot:no-results>
                 <p class="pt-4">Нет данных...</p>
             </template>
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
+            </template>
+            <template v-slot:header.type="{ header }">
+                {{ header.text }}
+                <combobox-filter
+                    filterLabel="Тип счетчика"
+                    v-model="filterByMeterType"
+                    :filter-value="filterByMeterType"
+                    :filterItems="reapirMeterTypes"
+                    :filter-color="filterByMeterTypeColor"
+                    @input="acceptFilters"
+                />
+            </template>
+            <template v-slot:header.serial_number="{ header }">
+                {{ header.text }}
+                <input-filter
+                    filterLabel="Серийный номер"
+                    v-model="filterBySerialNumber"
+                    :filter-value="filterBySerialNumber"
+                    :filter-color="filterBySerialNumberColor"
+                    @accept="acceptSerialNumberFilter"
+                />
             </template>
             <!-- Подмена значений таблицы на лэйблы -->
             <template v-slot:item.type="{ item }">
@@ -33,35 +56,13 @@
                 {{ getIpAddressTitle(item.ip_address) }}
             </template>
             <template v-slot:item.prog_value="{ item }">
-                <v-tooltip bottom v-if="item.prog_value === 0">
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-icon
-                            size="25"
-                            class="ma-2"
-                            v-bind="attrs"
-                            v-on="on"
-                            :color="colorGrey"
-                            @click="openProgrammingDialog(item)"
-                        >
-                            mdi-checkbox-blank-circle-outline
-                        </v-icon>
-                    </template>
-                    <span>Подтвердить внесение данных</span>
-                </v-tooltip>
-                <v-icon
-                    v-else-if="item.prog_value === 1"
-                    size="25"
-                    class="ma-2"
-                    :color="colorBlue"
-                >
+                <v-icon v-if="item.prog_value === 0" size="25" class="ma-2" :color="colorGrey">
+                    mdi-checkbox-blank-circle-outline
+                </v-icon>
+                <v-icon v-else-if="item.prog_value === 1" size="25" class="ma-2" :color="colorBlue">
                     mdi-checkbox-marked-circle-outline
                 </v-icon>
-                <v-icon
-                    v-else
-                    size="25"
-                    class="ma-2"
-                    :color="colorGreen"
-                >
+                <v-icon v-else size="25" class="ma-2" :color="colorGreen">
                     mdi-checkbox-marked-circle-plus-outline
                 </v-icon>
             </template>
@@ -70,7 +71,12 @@
             ref="ProgrammingValueDialog"
             :max-width="700"
             title="Вы уверены что хотите подтвердить изменение данных?"
-            @submit="setProgrammingDone"
+            @submit="setProgrammingOption"
+        />
+        <action-menu
+            ref="ActionMenu"
+            :actions="defaultRepairActions"
+            @setProgrammingOption="$refs.ProgrammingValueDialog.dialogOpen()"
         />
     </v-card>
 </template>
@@ -80,16 +86,27 @@
 	import DialogCustom from "../utils-components/dialog/DialogCustom"
 	import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin"
 	import DictionaryMixin from "../mixins/DictionaryMixin"
+	import RepairFilterMixin from "./RepairFilterMixin"
+	import { defaultRepairActions } from "./js/repair-actions"
+    import ActionMenu from "../utils-components/menu/ActionMenu"
+    import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
+    import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
 
 	export default {
 		name: "Repair",
 		components: {
 			DialogCustom,
+			ActionMenu,
+			ComboboxFilter: ComboboxDataTableFilter,
+			InputFilter: InputDataTableFilter,
 		},
 		data: () => ({
+			defaultRepairActions,
 			search: '',
+			selectedMeter: {},
+			totalMetersCount: 0,
 			module: 'repair',
-			currentItem: {},
+			options: {},
 			headers: [
 				{ text: 'ID', sortable: false, align: 'center', value: 'id' },
 				{ text: 'Тип', value: 'type', sortable: true, align: 'center' },
@@ -100,6 +117,11 @@
 				{ text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center' },
 			],
 		}),
+		mixins: [ DictionaryMixin, FavoriteModuleMixin, RepairFilterMixin ],
+		inject: [
+			'showNotificationSuccess',
+			'showNotificationRequestError',
+		],
 		computed: {
 			...mapGetters({
 				meters: 'repair/getMeters',
@@ -108,50 +130,52 @@
 			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue']),
 			...mapState('repair', [ 'loading', ])
         },
-		inject: [
-			'showNotificationSuccess',
-            'showNotificationRequestError',
-        ],
+		watch: {
+			options: {
+				async handler () {
+					!this.isActiveFilters()
+						? await this.getMeters()
+						: await this.acceptFilters()
+				},
+				deep: true,
+			},
+		},
         mounted() {
-	        if (!this.isLogin) {
-		        return
-	        }
-
-	        this.initializeMeters()
-
 	        document.onkeydown = (evt) => {
-		        if (this.$route.name !== 'Repair') {
-			        return
-		        }
-		        if (evt.key === 'Alt') {
-			        this.initializeMeters()
+		        if (this.$route.name === 'Repair' && evt.key === 'Alt') {
+			        this.getMeters()
 		        }
 	        }
         },
-		mixins: [ DictionaryMixin, FavoriteModuleMixin ],
 		methods: {
 	        ...mapActions('repair', [
 		        'fetchMeters',
+		        'fetchAllMeters',
                 'setProgrammingValue'
 	        ]),
 
-	        async initializeMeters() {
+			actionMenuOpen(e, { item }) {
+				e.preventDefault()
+				this.selectedMeter = item
+				this.$refs.ActionMenu.open(e.clientX, e.clientY)
+			},
+
+	        async getMeters() {
 				try {
-					await this.fetchMeters()
+					this.resetFilters()
+					this.totalMetersCount = await this.fetchMeters(this.options)
+					const allMeters = await this.fetchAllMeters(false)
+					this.createFiltersValues(allMeters)
                 } catch (e) {
 					this.showNotificationRequestError(e)
 				}
 	        },
 
-			openProgrammingDialog(item) {
-				this.$refs.ProgrammingValueDialog.dialogOpen()
-                this.currentItem = item
-			},
-
-            async setProgrammingDone() {
+            async setProgrammingOption() {
 	            this.$refs.ProgrammingValueDialog.dialogClose()
                 try {
-	                await this.setProgrammingValue({ id: this.currentItem.id, value: 1 })
+	                await this.setProgrammingValue({ id: this.selectedMeter.id, value: 1 })
+	                await this.getMeters()
 	                this.showNotificationSuccess('Настройка данных успешна обновлена')
                 } catch (e) {
 	                this.showNotificationRequestError(e)

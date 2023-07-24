@@ -76,7 +76,7 @@
                 <v-select
                     v-model="editedItem.phase"
                     :items="phases"
-                    item-text="text"
+                    item-text="title"
                     item-value="value"
                     label="Фазность"
                     required
@@ -90,7 +90,7 @@
                 />
                 <v-select
                     v-model="editedItem.ip_address"
-                    item-text="text"
+                    item-text="title"
                     item-value="value"
                     :items="ipAddresses"
                     label="IP адрес"
@@ -182,11 +182,9 @@
         ],
 	    computed: {
             ...mapGetters({
-                phases: 'programming/getPhases',
+                phases: 'dictionary/getPhases',
                 meterTypes: 'dictionary/getMeterProgrammingTypes',
-                status: 'programming/getStatus',
-                smsStatus: 'programming/getSmsStatus',
-                ipAddresses: 'programming/getIpAddress',
+                ipAddresses: 'dictionary/getIpAddresses',
             }),
             formTitle() { return this.editedIndex === -1 ? 'Добавить' : 'Редактировать' },
         },

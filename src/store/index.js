@@ -106,6 +106,10 @@ export default new Vuex.Store({
                     $cookies.set(`${ module }_${ cookie.settings }`, cookie.value, '4h')
                 }
             }
+            
+            if (router.currentRoute.name === 'Login') {
+                await router.push('/')
+            }
         },
     
         async logoutUser({ state, commit }, isRedirectToLoginPage) {

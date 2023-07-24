@@ -24,6 +24,8 @@
 				phases: 'dictionary/getPhases',
 				smsStatus: 'dictionary/getSmsStatuses',
                 isLogin: 'getIsLogin',
+				storageEmployeesModified: 'dictionary/getStorageEmployeesModified',
+				parseOptions: 'dictionary/getParseOptions',
             })
 		},
         inject: [ 'showNotificationRequestErrorWithCustomText' ],

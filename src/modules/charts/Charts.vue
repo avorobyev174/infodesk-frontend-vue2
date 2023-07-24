@@ -99,6 +99,7 @@
     import programmingAreaOptions from "./js/programming-area-options"
     import programmingInPyramidAreaOptions from "./js/programming-in-pyramid-options"
     import programmingTypesOptions from "./js/programming-types-options"
+    import programmingCustomerTypesOptions from "./js/programming-types-options"
     import programmingPyramidBuildingsOptions from "./js/programming-in-pyramid-buildings-options"
     import programmingInPyramidCountOptions from "./js/programming-in-pyramid-count-options"
     import programmingActiveInPyramidCountOptions from "./js/programming-active-in-pyramid-count-options"
@@ -114,7 +115,7 @@
 	    plan,
         programmingAreaOptions,
         programmingInPyramidAreaOptions,
-        programmingCustomerTypesOptions: {},
+        programmingCustomerTypesOptions,
         programmingTypesOptions,
         programmingPyramidBuildingsOptions,
         programmingInPyramidCountOptions,
@@ -129,7 +130,6 @@
         buildingsSeries: [],
         buildingsChartHeight: 30000,
         addInPyramidSeries: [],
-        windowWidth: 0,
         donutHeight: 350,
         planProgress: ''
     }),
@@ -143,22 +143,12 @@
 	        isLogin: 'getIsLogin',
         }),
     },
-    watch: {
-        windowWidth(newVal) {
-            this.programmingCustomerTypesOptions.legend.position = newVal < 1000 ? 'top' : 'left'
-            this.$refs.pieTypesChart.updateOptions(this.programmingTypesOptions)
-        }
-    },
-    created() {
-        window.addEventListener("resize", this.resize)
-    },
     mounted() {
         if (!this.isLogin) {
 	        return
         }
 
 	    this.setBackgroundImage(false)
-        this.programmingCustomerTypesOptions = { ...this.programmingTypesOptions }
         this.getMeterRegistrationChartSeries()
         this.getMeterInPyramidChartSeries()
         this.getMeterRegistrationTypesChartSeries()
@@ -166,8 +156,6 @@
         this.getMeterRegistrationNotInPyramidTypeChartSeries()
         this.getMeterRegistrationInPyramidCountChartSeries()
         this.getMeterRegistrationActiveInPyramidChartSeries()
-
-        this.windowWidth = window.innerWidth
     },
     methods: {
         ...mapActions('charts',
@@ -181,10 +169,6 @@
                 'getMeterRegistrationInPyramidCountChartData',
                 'getMeterRegistrationActiveInPyramidChartData'
             ]),
-
-        resize() {
-            this.windowWidth = window.innerWidth
-        },
 
         getDataSeries(data) {
 	        const series = []
@@ -219,6 +203,7 @@
                     { name: 'Зарегистрировано за день', data: series },
                     { name: 'Всего зарегистрировано', data: seriesTotal }
                 ]
+	            this.$refs.pieTypesChart.updateOptions(this.programmingTypesOptions)
             } catch (e) {
                 this.showNotificationRequestError(e)
             }

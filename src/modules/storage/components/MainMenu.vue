@@ -83,7 +83,7 @@
 		        this.actions[0].visible = false
 		        this.actions[1].visible = false
 	        }
-	        console.log(this.menuActions)
+	        //console.log(this.menuActions)
         },
         methods: {
 	        executeFunction(action) {

@@ -177,9 +177,9 @@
 		inject: [ 'showNotificationRequestError' ],
 		computed: {
 			...mapGetters({
-				types: 'getMeterTypes',
-				locations: 'storage/getLocations',
-				employees: 'storage/getStorageEmployees',
+				types: 'dictionary/getMeterTypes',
+				locations: 'dictionary/getLocations',
+				employees: 'dictionary/getStorageEmployees',
 				assignments: 'service/getAssignments',
 			}),
 		},
@@ -230,7 +230,7 @@
 			            break
 		            case Report.STORAGE_METER_BY_SERIAL_NUMBER:
 		            case Report.ASSIGNMENT_EVENTS_BY_SERIAL_NUMBER:
-		            	reportInputData = {	type: this.type.index, serialNumber: this.serialNumber };
+		            	reportInputData = {	type: this.type.value, serialNumber: this.serialNumber };
 		            	break
                     case Report.STORAGE_SYSTEM_LOGS:
 		            case Report.SPENT_MATERIALS:

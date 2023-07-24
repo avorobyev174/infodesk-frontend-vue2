@@ -14,6 +14,7 @@
         },
 		methods: {
 			...mapMutations('common', [ 'setFavoriteModuleColor' ]),
+
             setFavoriteModuleFavorite() {
 	            if (this.module) {
 		            const color = $cookies.get('common_favorite_module') === `/${ this.module }` ? this.colorGold : this.colorDarkGrey

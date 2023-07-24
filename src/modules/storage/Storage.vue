@@ -2,8 +2,9 @@
     <v-card>
         <v-data-table
             :loading="loading"
-            height="43vh"
-            class="elevation-1 meter-table"
+            @contextmenu:row="actionMenuOpen"
+            height="80vh"
+            class="elevation-1"
             single-select
             item-key="id"
             :items-per-page="100"
@@ -15,151 +16,58 @@
             loading-text="Идет загрузка счетчиков..."
             fixed-header
             :headers="selectedHeaders"
-            :items="isSearchMeterView ? searchMetersView : meters"
+            :items="meters"
             :options.sync="options"
-            :server-items-length="totalMeters"
-            @click:row="initializeLogs"
+            :server-items-length="totalMetersCount"
         >
             <template v-slot:no-results>
-                <span>Идет загрузка счетчиков...</span>
+                <span>Нет данных...</span>
             </template>
             <template v-slot:no-data>
                 <p class="pt-4">Нет данных...</p>
             </template>
             <template v-slot:header.serial_number="{ header }">
                 {{ header.text }}
-                <v-menu
-                    nudge-bottom="10px"
-                    nudge-left="140px"
-                    offset-y
-                    :close-on-content-click="false"
-                    origin="center center"
-                    transition="scale-transition"
-                    ref="filterBySerialNumberMenu"
-                >
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-btn v-bind="attrs" v-on="on" icon>
-                            <v-icon :color="filterBySerialNumberColor" small>
-                                mdi-filter-plus
-                            </v-icon>
-                        </v-btn>
-                    </template>
-                    <div class="header-filter-wrapper header-filter-serial-number-wrapper">
-                        <v-text-field
-                            class="p-3 pt-5 pb-0"
-                            label="Введите серийный номер"
-                            append-icon="mdi-filter-check"
-                            variant="solo"
-                            @click:append="doFilter(`serialNumber`)"
-                            @keydown.enter="doFilter(`serialNumber`)"
-                            @click:clear="serialNumberClearOnClick"
-                            v-model="filterBySerialNumber"
-                            clearable
-                        >
-                        </v-text-field>
-                    </div>
-                </v-menu>
+                <input-filter
+                    filterLabel="Серийный номер"
+                    v-model="filterBySerialNumber"
+                    :filter-value="filterBySerialNumber"
+                    :filter-color="filterBySerialNumberColor"
+                    @accept="acceptSerialNumberFilter"
+                />
             </template>
             <template v-slot:header.meter_type="{ header }">
                 {{ header.text }}
-                <v-menu
-                    nudge-bottom="10px"
-                    nudge-left="100px"
-                    offset-y
-                    :close-on-content-click="false"
-                    origin="center center"
-                    transition="scale-transition"
-                    ref="filterByTypeMenu"
-                >
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-btn v-bind="attrs" v-on="on" icon>
-                            <v-icon :color="filterByTypeColor" small>
-                                mdi-filter-plus
-                            </v-icon>
-                        </v-btn>
-                    </template>
-                    <div class="header-filter-wrapper header-filter-type-wrapper p-1 pr-2">
-                        <v-combobox
-                            :items="types"
-                            item-text="title"
-                            item-value="index"
-                            label="Выберите тип"
-                            class="p-3 pt-5 pb-0"
-                            v-model="filterByType"
-                            clearable
-                            multiple
-                            @change="doFilter"
-                        >
-                        </v-combobox>
-                    </div>
-                </v-menu>
+                <combobox-filter
+                    filterLabel="Тип счетчика"
+                    v-model="filterByMeterType"
+                    :filter-value="filterByMeterType"
+                    :filterItems="meterTypes"
+                    :filter-color="filterByMeterTypeColor"
+                    @input="acceptFilters"
+                />
             </template>
             <template v-slot:header.meter_location="{ header }">
                 {{ header.text }}
-                <v-menu
-                    nudge-bottom="10px"
-                    nudge-left="180px"
-                    offset-y
-                    :close-on-content-click="false"
-                    origin="center center"
-                    transition="scale-transition"
-                    ref="filterByLocationMenu"
-                >
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-btn v-bind="attrs" v-on="on" icon>
-                            <v-icon :color="filterByLocationColor" small>
-                                mdi-filter-plus
-                            </v-icon>
-                        </v-btn>
-                    </template>
-                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
-                        <v-combobox
-                            :items="locations"
-                            item-text="text"
-                            label="Выберите местонахождение"
-                            class="p-3 pt-5 pb-0"
-                            v-model="filterByLocation"
-                            clearable
-                            multiple
-                            @change="doFilter"
-                        >
-                        </v-combobox>
-                    </div>
-                </v-menu>
+                <combobox-filter
+                    filterLabel="Местонахождение"
+                    v-model="filterByLocation"
+                    :filter-value="filterByLocation"
+                    :filterItems="locations"
+                    :filter-color="filterByLocationColor"
+                    @input="acceptFilters"
+                />
             </template>
             <template v-slot:header.current_owner="{ header }">
                 {{ header.text }}
-                <v-menu
-                    nudge-bottom="10px"
-                    nudge-left="180px"
-                    offset-y
-                    :close-on-content-click="false"
-                    origin="center center"
-                    transition="scale-transition"
-                    ref="filterByOwnerMenu"
-                >
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-btn v-bind="attrs" v-on="on" icon>
-                            <v-icon :color="filterByOwnerColor" small>
-                                mdi-filter-plus
-                            </v-icon>
-                        </v-btn>
-                    </template>
-                    <div class="header-filter-wrapper header-filter-location-wrapper p-1 pr-2">
-                        <v-combobox
-                            :items="storageEmployees"
-                            item-text="name"
-                            item-value="staffId"
-                            label="Выберите сотрудника"
-                            class="p-3 pt-5 pb-0"
-                            v-model="filterByOwner"
-                            clearable
-                            multiple
-                            @change="doFilter"
-                        >
-                        </v-combobox>
-                    </div>
-                </v-menu>
+                <combobox-filter
+                    filterLabel="Владелец"
+                    v-model="filterByOwner"
+                    :filter-value="filterByOwner"
+                    :filterItems="storageEmployeesModified"
+                    :filter-color="filterByOwnerColor"
+                    @input="acceptFilters"
+                />
             </template>
             <template v-slot:top>
                 <v-toolbar
@@ -170,13 +78,13 @@
                     <main-menu
                         v-if="!isObserver"
                         class="pr-2"
-                        @acceptOrIssue="$refs.acceptOrIssueDialog.open(false)"
-                        @register="$refs.registerDialog.open(false)"
+                        @acceptOrIssue="$refs.AcceptOrIssueDialog.open(false)"
+                        @register="$refs.RegisterDialog.open(false)"
                         @showHideColumns="$refs.ShowHideColumnsDialog.dialogOpen()"
                         @showHideAllMeters="showHideAllMeters"
-                        @routerRegister="$refs.registerDialog.open(true)"
-                        @routerAcceptOrIssue="$refs.acceptOrIssueDialog.open(true)"
-                        @repairOrMaterialsAdd="$refs.repairAndMaterialsDialog.open()"
+                        @routerRegister="$refs.RegisterDialog.open(true)"
+                        @routerAcceptOrIssue="$refs.AcceptOrIssueDialog.open(true)"
+                        @repairOrMaterialsAdd="$refs.RepairAndMaterialsDialog.open()"
                     ></main-menu>
                 </v-toolbar>
             </template>
@@ -211,28 +119,18 @@
             <template v-slot:item.current_owner="{ item }">
                 {{ getEmployeeTitleByStaffId(item.current_owner) }}
             </template>
-            <template v-slot:item.actions="{ item }">
-                <action-column
-                    ref="actionColumn"
-                    @edit="$refs.editDialog.edit(item)"
-                    @delete="$refs.editDialog.delete(item)"
-                    :actions="actions"
-                    :disabledActions="disableColumnActions"
-                />
-            </template>
         </v-data-table>
-        <log-table></log-table>
         <accept-or-issue-dialog
-            ref="acceptOrIssueDialog"
-        ></accept-or-issue-dialog>
+            ref="AcceptOrIssueDialog"
+        />
         <register-dialog
-            ref="registerDialog"
+            ref="RegisterDialog"
             :meters="meters"
-        ></register-dialog>
+        />
         <edit-dialog
-            ref="editDialog"
+            ref="EditDialog"
             :meters="meters"
-        ></edit-dialog>
+        />
         <show-hide-columns-dialog
             ref="ShowHideColumnsDialog"
             :headers="headers"
@@ -242,16 +140,27 @@
         >
         </show-hide-columns-dialog>
         <repair-and-materials-dialog
-            ref="repairAndMaterialsDialog"
-        ></repair-and-materials-dialog>
+            ref="RepairAndMaterialsDialog"
+        />
+        <action-menu
+            ref="ActionMenu"
+            :actions="actions"
+            @edit="$refs.EditDialog.edit(selectedMeter)"
+            @remove="$refs.EditDialog.remove(selectedMeter)"
+            @openEventList="$refs.LogList.open(selectedMeter)"
+        />
+        <storage-log-list
+            ref="LogList"
+        />
     </v-card>
 </template>
 
 <script>
+    import { filterActions } from "./js/storage-actions"
     import LogTable from "./LogTable"
 	import MainMenu from "./components/MainMenu"
     import AcceptOrIssueDialog from "./components/AcceptOrIssueDialog"
-    import { mapActions, mapGetters, mapMutations, mapState } from "vuex"
+    import ActionMenu from "../utils-components/menu/ActionMenu"
 	import RegisterDialog from "./components/RegisterDialog"
 	import ShowHideColumnsDialog from "../utils-components/show-hide-columns/ShowHideColumnsDialog"
     import ActionColumn from "../utils-components/ActionColumn"
@@ -259,11 +168,17 @@
     import StorageMixin from "./mixins/StorageMixin"
     import RepairAndMaterialsDialog from "./components/RepairAndMaterialsDialog"
     import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin";
-    import ColumnVisibilityMixin from "../mixins/ColumnVisibilityMixin";
+    import ColumnVisibilityMixin from "../mixins/ColumnVisibilityMixin"
+    import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
+    import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
+    import StorageFilterMixin from "./mixins/StorageFilterMixin"
+    import DictionaryMixin from "../mixins/DictionaryMixin"
+    import StorageLogList from "./components/StorageLogList"
 
 	export default {
 		name: "Storage",
 		components: {
+			StorageLogList,
 			RegisterDialog,
 			MainMenu,
 			LogTable,
@@ -271,371 +186,70 @@
 			ShowHideColumnsDialog,
 			ActionColumn,
 			EditDialog,
-			RepairAndMaterialsDialog
+			RepairAndMaterialsDialog,
+			ComboboxFilter: ComboboxDataTableFilter,
+			InputFilter: InputDataTableFilter,
+			ActionMenu
 		},
 		data: () => ({
 			options: {},
-			filterBySerialNumber: '',
-			filterByType: [],
-			filterByLocation: [],
-			filterByOwner: [],
-            search: '',
-            isSearchMeterView: false,
 			module: 'storage',
-			disableColumnActions: false,
-			selectedHeaders: [],
-			headers: [
-				{
-					text: 'ID',
-                    align: 'center',
-                    value: 'id',
-                    sortable: true,
-                    index: 0,
-					width: '80px',
-				},
-				{
-					text: 'Тип',
-                    value: 'meter_type',
-                    sortable: true,
-                    align: 'center',
-                    cellClass: 'table-small-cell',
-                    index: 1,
-					width: '160px'
-                },
-				{
-					text: 'Серийный номер',
-					value: 'serial_number',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 2,
-                    width: '160px'
-				},
-				{
-					text: 'Класс точности',
-					value: 'accuracy_class',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 3
-				},
-				{
-					text: 'Номер паспорта',
-					value: 'passport_number',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 4
-				},
-				{
-					text: 'Состояние',
-					value: 'condition',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 5,
-					width: '80px'
-				},
-				{
-					text: 'Дата поверки',
-					value: 'calibration_date',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 6
-				},
-				{
-					text: 'Межповерчный интервал',
-					value: 'calibration_interval',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 7,
-					width: '80px'
-				},
-				{
-					text: 'Местоположение',
-					value: 'meter_location',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 8
-				},
-				{
-					text: 'Текущий владелец',
-					value: 'current_owner',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 9
-				},
-				{
-					text: 'Собственник',
-					value: 'property',
-					sortable: false,
-					align: 'center',
-					cellClass: 'table-small-cell',
-					index: 10
-				},
-				{
-					text: 'Действия',
-                    value: 'actions',
-                    sortable: false,
-                    align: 'center',
-                    cellClass: 'table-small-cell',
-                    index: 11
-                },
-			],
-			settings: ['columns'],
-			filterBySerialNumberColor: 'grey',
-			filterByTypeColor: 'grey',
-			filterByLocationColor: 'grey',
-			filterByOwnerColor: 'grey',
-			totalMeters: 0,
-            filters: {},
-            searchMeters: [],
+			totalMetersCount: 0,
 			actions: [],
+			logs: [],
             isObserver: false,
-            isRepairShowAllFilter: false
+            isShowAllMeters: false,
+			selectedMeter: {},
 		}),
-		mixins: [ StorageMixin, FavoriteModuleMixin, ColumnVisibilityMixin ],
+		mixins: [ StorageMixin, StorageFilterMixin, DictionaryMixin, FavoriteModuleMixin, ColumnVisibilityMixin ],
 		inject: [ 'showNotificationRequestError' ],
-		provide: function () {
-			return {
-				formatDate: this.formatDate,
-				formatDateIso: this.formatDateIso,
-				getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
-				getMeterTypeTitle: this.getMeterTypeTitle,
-				getMaterialTypeTitle: this.getMaterialTypeTitle,
-				getOwnerTitle: this.getOwnerTitle,
-				getAccuracyClassTitle: this.getAccuracyClassTitle,
-				getConditionTitle: this.getConditionTitle,
-				getEmployeeStaffIdByCard: this.getEmployeeStaffIdByCard,
-				getEmployeeTitleByCard: this.getEmployeeTitleByCard,
-				getLocationTitle: this.getLocationTitle,
-				getEmployeeCardByStaffId: this.getEmployeeCardByStaffId,
-				initializeMeters: this.initializeMeters,
-				resetFilters: this.resetFilters,
-			}
-		},
-		computed: {
-			...mapState({
-				loading: state => state.storage.meterLoading,
-				colorBlue: state => state.colorBlue,
-				colorRed: state => state.colorRed,
-				colorGreen: state => state.colorGreen,
-				colorOrange: state => state.colorOrange,
-				colorGrey: state => state.colorGrey,
-				colorGold: state => state.colorGold,
-			}),
-			...mapGetters({
-				meters: 'storage/getMeters',
-				searchMetersView: 'storage/getSearchMetersView',
-				activeModules: 'getActiveModules',
-				roles: 'getRoles',
-				staffId: 'getStaffId',
-				isLogin: 'getIsLogin',
-			}),
-		},
 		watch: {
 			options: {
-				handler () {
-					!Object.keys(this.filters).length ? this.initializeMeters() : this.doFilter()
+				async handler () {
+					!this.isActiveFilters()
+						? await this.getMeters()
+						: await this.acceptFilters()
 				},
 				deep: true,
 			},
-			filterBySerialNumber: function(newVal) {
-				!newVal ? this.filterBySerialNumberColor = 'grey' : this.filterBySerialNumberColor = 'blue'
-			},
-			filterByType: function(newVal) {
-				!newVal.length ? this.filterByTypeColor = 'grey' : this.filterByTypeColor = 'blue'
-			},
-			filterByLocation: function(newVal) {
-				this.filterByLocationColor = !newVal.length ? 'grey' :'blue'
-			},
-			filterByOwner: function(newVal) {
-				this.filterByOwnerColor = !newVal.length ? 'grey' :'blue'
-			},
-			search: function(newVal) {
-				if (!newVal) {
-					this.searchOnClear()
-				}
-			},
 		},
-        mounted() {
-	        if (!this.isLogin) {
-		        return
-	        }
-
-            document.onkeydown = (evt) => {
-	            if (evt.key === 'Alt' && this.$route.name === 'Storage') {
-		            this.initializeMeters()
-	            }
-            }
-
-	        this.actions = [ { title: 'Изменить', action: 'edit', icon: 'mdi-pencil' } ]
-
-	        if (this.roles?.storage_module === 'admin') {
-		        this.actions.push({ title: 'Удалить', action: 'delete', icon: 'mdi-delete' })
-	        }
-
-	        if (this.roles?.storage_module === 'observer') {
-		        this.isObserver = true
-	        }
-
-	        this.initializeOther()
-        },
-
 		methods: {
-			...mapMutations('storage', ['setMeters', 'setSearchMetersView']),
-			...mapActions('storage', [
-                'meterFilter',
-                'fetchMeterTypes',
-                'fetchMetersPerPage',
-				'fetchLogs',
-				'fetchParseOptions',
-				'fetchStorageEmployees',
-				'fetchMaterialsTypes',
-				'getMeterTypesInRepair',
-            ]),
+			actionMenuOpen(e, { item }) {
+				e.preventDefault()
+				this.selectedMeter = item
+				this.actions = filterActions(this.currentAccountId)
+				this.$refs.ActionMenu.open(e.clientX, e.clientY)
+			},
 
-			//Инициализация компонента
-            async initializeMeters() {
-				this.isSearchMeterView = false
+            async getMeters() {
                 try {
+	                this.resetFilters()
 	                if (this.roles?.storage_module === 'repairer') {
-		                this.options.role = this.isRepairShowAllFilter ? 'keeper' : 'repairer'
+		                this.options.role = this.isShowAllMeters ? 'keeper' : 'repairer'
 	                }
 
-	                this.totalMeters = await this.fetchMetersPerPage(this.options)
-	                this.getMeterTypesInRepair()
+	                this.totalMetersCount = await this.fetchMeters(this.options)
+	                await this.getMeterTypesInRepair()
                 } catch (e) {
 	                this.showNotificationRequestError(e)
                 }
             },
 
-			async initializeLogs(item, row) {
-				row.select(true)
-				try {
-					await this.fetchLogs(item.guid)
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				}
-			},
-
-			initializeOther() {
-				this.fetchMeterTypes()
-				this.fetchStorageEmployees()
-				this.fetchParseOptions()
-				this.fetchMaterialsTypes()
-			},
-
-			//Обработка фильтров
-			async doFilter(inputSource) {
-				if (inputSource === 'serialNumber') {
-					this.$refs.filterBySerialNumberMenu.save()
-				}
-
-                this.checkAllFilters()
-				try {
-                    if (!Object.keys(this.filters).length) {
-                        await this.initializeMeters()
-                    } else {
-                        if (this.roles?.storage_module === 'repairer') {
-                            this.options.role = this.isRepairShowAllFilter ? 'keeper' : 'repairer'
-                        }
-                        this.totalMeters = await this.meterFilter({ filters: this.filters, options: this.options })
-                    }
-				} catch (e) {
-					this.showNotificationRequestError(e)
-				}
-			},
-
-			resetFilters() {
-				this.filterBySerialNumber = ''
-				this.filterByType = []
-				this.filterByLocation = []
-				this.filterByOwner = []
-            },
-
-            checkAllFilters() {
-				if (this.filterBySerialNumber) {
-					this.filters['serialNumber'] = this.filterBySerialNumber.startsWith('0')
-                        ? this.filterBySerialNumber.slice(1)
-                        : this.filterBySerialNumber
-                } else {
-					delete this.filters['serialNumber']
-                }
-
-	            this.filterByType.length
-		            ? this.filters['types'] = this.filterByType.map((type) => type.index)
-	                : delete this.filters['types']
-
-	            this.filterByLocation.length
-                    ? this.filters['locations'] = this.filterByLocation.map((loc) => loc.value)
-                    : delete this.filters['locations']
-
-	            this.filterByOwner.length
-		            ? this.filters['owners'] = this.filterByOwner.map((owner) => owner.staffId)
-		            : delete this.filters['owners']
-            },
-
-			serialNumberClearOnClick() {
-				this.filterBySerialNumber = ''
-				this.doFilter()
-			},
-
 			async showHideAllMeters(actionType) {
                 if (actionType === 'show') {
-                    this.isRepairShowAllFilter = true
+                    this.isShowAllMeters = true
                 } else {
                     this.options.page = 1
-	                this.isRepairShowAllFilter = false
+	                this.isShowAllMeters = false
                     this.resetFilters()
                 }
-                await this.initializeMeters()
+                await this.getMeters()
             },
 		},
 	}
 </script>
-
 <style scoped>
-    .meter-table {
+    .v-overlay {
         border-radius: 0 !important;
     }
-
-    .table-small-cell {
-        font-size: 12px !important;
-    }
-
-    td {
-        text-align: center !important;
-    }
-
-    .selected-headers {
-        max-width: 450px;
-    }
-
-    .search-text-input {
-        max-width: 350px;
-    }
-
-    .header-filter-wrapper {
-        background-color: white;
-        display: flex;
-        align-items: center;
-    }
-
-    .header-filter-serial-number-wrapper {
-        width: 285px;
-    }
-
-    .header-filter-type-wrapper {
-        width: 550px;
-    }
-
-    .header-filter-location-wrapper {
-        width: 350px;
-    }
-
 </style>

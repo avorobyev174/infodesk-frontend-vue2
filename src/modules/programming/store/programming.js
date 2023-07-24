@@ -1,67 +1,23 @@
-import axios, {get, post} from "axios"
+import axios, { get, post } from "axios"
 
 export const programming = {
     state: () => ({
         meters: [],
         loading: false,
-        phases: [
-            { text: '1-ф', value: 1 },
-            { text: '3-ф', value: 3 },
-        ],
-        types: [],
-        status: [
-            { text: 'Отсутствует', value: 1 },
-            { text: 'Действующий', value: 2 },
-            { text: 'Заблокировано', value: 3 },
-        ],
-        ipAddress: [
-            { text: '172.27.2.214', value: 1 },
-            { text: '172.27.30.11', value: 2 },
-            { text: '172.27.32.23', value: 3 },
-            { text: '172.27.2.210', value: 4 },
-        ],
-        smsStatus: [
-            { title: 'Не доступно', value: 0, color: 'black lighten-1', message: 'Пока отправка смс для счетчика не доступна'},
-            { title: 'В ожидании отправки', value: 1, color: 'grey lighten-1', message: 'Отправить смс'},
-            { title: 'В очереди', value: 2, color: 'orange lighten-1', message: 'Обновите статус'},
-            { title: 'Доставлено', value: 3, color: 'green lighten-1', message: 'Смс уже успешно доставлена'},
-            { title: 'Не доставлено', value: 4, color: 'red lighten-1', message: 'Смс не доставлена'},
-            { title: 'Передано оператору', value: 5, color: 'orange lighten-1', message: 'Смс не доставлена'},
-            { title: 'Таймаут 20мин', value: 6, color: 'red lighten-1', message: 'Смс не доставлена'},
-            { title: 'Не требуется', value: 7, color: 'green lighten-1', message: 'Не требуется'},
-            { title: 'В ожидании подтверждения', value: 8, color: 'orange lighten-1', message: 'Обновите статус'},
-        ],
         serverModule: 'meter-registration'
     }),
     getters: {
         getMeters(state) {
             return state.meters
         },
-        getPhases(state) {
-            return state.phases
-        },
-        getTypes(state) {
-            return state.types
-        },
-        getStatus(state) {
-            return state.status
-        },
-        getSmsStatus(state) {
-            return state.smsStatus
-        },
-        getIpAddress(state) {
-            return state.ipAddress
-        },
     },
     mutations: {
         setMeters(state, meters) {
             state.meters = meters
         },
+        
         setLoading(state, loading) {
             state.loading = loading
-        },
-        setTypes(state, types) {
-            state.types = types
         },
     },
     actions: {

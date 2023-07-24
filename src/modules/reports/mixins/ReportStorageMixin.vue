@@ -6,17 +6,9 @@
 
     export default {
         name: 'ReportStorageMixin',
-        mounted() {
-	        this.fetchMeterTypes()
-	        this.fetchStorageEmployees()
-	        this.fetchMaterialsTypes()
-        },
 	    methods: {
 		    ...mapActions('storage', [
-			    'fetchStorageEmployees',
-			    'fetchMeterTypes',
-                'checkMeterInDB',
-                'fetchMaterialsTypes',
+			    'checkMeterInDB',
 		    ]),
 	        ...mapActions('storageReports',
 		        [

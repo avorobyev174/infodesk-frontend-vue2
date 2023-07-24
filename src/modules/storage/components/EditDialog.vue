@@ -37,21 +37,8 @@
                     </v-card-text>
                     <v-card-actions class="pt-4">
                         <v-spacer></v-spacer>
-                        <v-btn
-                            color="primary"
-                            text
-                            @click="close"
-                        >
-                            Отмена
-                        </v-btn>
-                        <v-btn
-                            color="primary"
-                            text
-                            type="submit"
-                            :loading="saveLoading"
-                        >
-                            Сохранить
-                        </v-btn>
+                        <v-btn  color="primary" text @click="close">Отмена</v-btn>
+                        <v-btn color="primary" text type="submit" :loading="saveLoading">Сохранить</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-form>
@@ -101,8 +88,7 @@
 			'showNotificationError',
 			'getEmployeeStaffIdByCard',
 			'getEmployeeTitleByCard',
-			'initializeMeters',
-			'resetFilters',
+			'getMeters',
             'formatDate'
 		],
 		methods: {
@@ -131,7 +117,7 @@
 				this.dialogModel = true
 			},
 
-			delete(item) {
+			remove(item) {
 				this.editedItem = Object.assign({}, item)
 				this.editedIndex = this.meters.indexOf(item)
 				this.$refs.MeterDeleteDialog.dialogOpen()
@@ -155,7 +141,6 @@
 						this.meters.splice(this.editedIndex, 1)
 						this.$refs.MeterDeleteDialog.dialogClose()
 						this.showNotificationSuccess(`Счетчик ${ meterSerialNumber } успешно удален`)
-						this.resetFilters()
 					}
                 } catch (e) {
 					this.showNotificationRequestError(e)
@@ -228,7 +213,6 @@
                         Object.assign(editedMeter, res)
 		                this.showNotificationSuccess('Редактирование выполнено успешно')
 		                this.close()
-		                this.resetFilters()
 	                }
                 } catch (e) {
 	                this.showNotificationRequestError(e)

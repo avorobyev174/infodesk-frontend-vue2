@@ -1,5 +1,4 @@
 <template>
-    <!-- Диалог регистрации -->
     <div>
         <v-dialog
         v-model="dialogModel"
@@ -18,7 +17,7 @@
                 <v-card-title>
                     <span class="m-auto text-h5 pb-2">
                         Регистрация
-                        <v-chip label v-if="regMeters.length" :color="resultColor">
+                        <v-chip label v-if="registrationMeters.length" :color="resultColor">
                             {{ meterCount }}
                         </v-chip>
                     </span>
@@ -35,7 +34,7 @@
                                         v-show="!isRouter"
                                         v-model="storageType"
                                         :items="storageTypes"
-                                        item-text="text"
+                                        item-text="title"
                                         item-value="value"
                                         label="Тип склада"
                                         :disabled="formSubmit"
@@ -58,7 +57,7 @@
                     <v-divider vertical></v-divider>
                     <add-meter-view
                         :form-submit="formSubmit"
-                        :meters="regMeters"
+                        :meters="registrationMeters"
                         :new-location="storageType"
                         ref="addMeterTable"
                         @onResetValidation="resetValidation"
@@ -71,38 +70,10 @@
                 </div>
                 <v-card-actions class="pt-4">
                     <v-spacer></v-spacer>
-                    <v-btn
-                        color="primary"
-                        text
-                        @click="close"
-                        v-if="!formSubmit"
-                    >
-                        Отмена
-                    </v-btn>
-                    <v-btn
-                        v-if="!formSubmit"
-                        color="primary"
-                        text
-                        @click="accept"
-                    >
-                        ОК
-                    </v-btn>
-                    <v-btn
-                        v-if="formSubmit"
-                        color="primary"
-                        text
-                        @click="clear"
-                    >
-                        Очистить
-                    </v-btn>
-                    <v-btn
-                        v-if="formSubmit"
-                        color="primary"
-                        text
-                        @click="close"
-                    >
-                        Закрыть
-                    </v-btn>
+                    <v-btn v-if="!formSubmit" color="primary" text @click="close">Отмена</v-btn>
+                    <v-btn v-if="!formSubmit" color="primary" text @click="accept">ОК</v-btn>
+                    <v-btn v-if="formSubmit" color="primary" text @click="clear">Очистить</v-btn>
+                    <v-btn v-if="formSubmit" color="primary" text @click="close">Закрыть</v-btn>
                 </v-card-actions>
             </v-card>
         </v-form>
@@ -114,6 +85,7 @@
 	import AddMeterView from "./AddMeterView"
 	import { mapActions, mapGetters, mapState } from "vuex"
 	import AddOrEditView from "./AddOrEditView"
+	import { Location, OperationStatus } from "../const"
 
 	export default {
 		name: "RegisterDialog",
@@ -132,7 +104,7 @@
 			issuingPersonLabel: 'Отдающий сотрудник',
 			formValid: true,
 			formSubmit: false,
-			regMeters:  [],
+			registrationMeters:  [],
 			storageType: 0,
 			oldLocationColor: 'grey',
             isRouter: false,
@@ -160,8 +132,7 @@
 			'showNotificationRequestError',
 			'getEmployeeStaffIdByCard',
 			'getEmployeeTitleByCard',
-            'initializeMeters',
-            'resetFilters',
+            'getMeters',
             'formatDate'
 		],
 		provide: function () {
@@ -185,7 +156,7 @@
 	        open(isRouter) {
 	        	this.isRouter = isRouter
                 if ([ 124911, 23745 ].includes(this.staffId)) {
-	                this.storageType = 7
+	                this.storageType = Location.STORAGE_TEMPORARY
                 }
 		        this.dialogModel = true
 	        },
@@ -200,7 +171,7 @@
 		        this.issuingPerson = ''
 		        this.oldLocationColor = this.colorGrey
 		        this.resultColor = this.colorGrey
-		        this.regMeters = []
+		        this.registrationMeters = []
 		        this.formSubmit = false
 		        this.issuingPersonLabel = 'Отдающий сотрудник'
 		        this.resetValidation()
@@ -217,7 +188,7 @@
 			        return
 		        }
 
-                if (!this.regMeters.length) {
+                if (!this.registrationMeters.length) {
                     return this.showNotificationWarning(`Для выполнения операции заполните таблицу`)
                 }
 
@@ -225,54 +196,34 @@
                 this.acceptedPersonStaffId = this.staffId
 
                 if (isNaN(this.acceptedPersonStaffId)) {
-                    return this.showNotificationWarning('Операция с неизвестным принимающим сотрудником не возможна')
+                    return this.showNotificationWarning('Операция с неизвестным сотрудником не возможна')
                 }
 
 		        if (this.issuingPerson && isNaN(this.issuingPersonStaffId)) {
-			        return this.showNotificationWarning('Операция с неизвестным отдающим сотрудником не возможна')
+			        return this.showNotificationWarning('Операция с неизвестным отрудником не возможна')
 		        }
 
                 try {
                     this.formSubmit = true
                     this.$refs.addMeterTable.setLoading(true)
                     const meterData = this.$refs.addOrEditView.getData()
+	                delete meterData.serialNumber
 
-                    const res = await this.registration({
-                        meters: this.regMeters,
+                    const createdMeters = await this.registration({
+                        meters: this.registrationMeters,
                         issuingPersonStaffId: this.isRouter || !this.issuingPerson ? 0 : this.issuingPersonStaffId,
                         acceptedPersonStaffId: this.acceptedPersonStaffId,
 	                    storageType: this.storageType,
                         ...meterData
                     })
-
-                    if (!res.length) {
-                        this.showNotificationError('Что то пошло не так при регистрации')
-                    } else {
-                        let successCount = 0
-                        this.regMeters.forEach((regMeter) => {
-                            const createdMeter = res.find((meter) => meter.serial_number === regMeter.serialNumber)
-                            if (createdMeter?.success) {
-                                successCount++
-                                regMeter.status = 1
-                            } else {
-                                regMeter.status = 2
-                            }
-                        })
-
-                        if (this.regMeters.length === successCount) {
-                            this.showNotificationSuccess('Операция выполнена успешно')
-                            this.resultColor = this.colorGreen
-                            this.oldLocationColor = this.colorGreen
-                        } else {
-                            this.showNotificationWarning('Операция выполнена с ошибками')
-                            this.resultColor = this.colorOrange
-                            this.oldLocationColor = this.colorOrange
-                        }
-
-                        this.meterCount = `${ successCount }/${ this.regMeters.length }`
-	                    this.resetFilters()
-                        this.initializeMeters()
-                    }
+                    const successCount = createdMeters.length
+                    this.registrationMeters.forEach((meter) => {
+                        const createdMeter = createdMeters.find(({ serial_number }) => serial_number === meter.serialNumber)
+	                    meter.status = createdMeter ? OperationStatus.SUCCESS : OperationStatus.ERROR
+                    })
+                    this.showMessage(successCount)
+                    this.meterCount = `${ successCount }/${ this.registrationMeters.length }`
+                    await this.getMeters()
                 } catch (e) {
                     this.showNotificationRequestError(e)
 	                this.formSubmit = false
@@ -281,6 +232,17 @@
                 }
 	        },
 
+            showMessage(successCount) {
+	            if (this.registrationMeters.length === successCount) {
+		            this.showNotificationSuccess('Операция выполнена успешно')
+		            this.resultColor = this.colorGreen
+		            this.oldLocationColor = this.colorGreen
+	            } else {
+		            this.showNotificationWarning('Операция выполнена с ошибками')
+		            this.resultColor = this.colorOrange
+		            this.oldLocationColor = this.colorOrange
+	            }
+            }
         }
 	}
 </script>

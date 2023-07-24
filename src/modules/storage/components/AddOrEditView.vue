@@ -2,9 +2,9 @@
     <div>
         <slot name="storage-select"></slot>
         <v-combobox
-            :items="types"
+            :items="meterTypes"
             item-text="title"
-            item-value="index"
+            item-value="value"
             label="Тип"
             class="pl-1 pt-2 pb-0 pr-3"
             v-model="type"
@@ -33,7 +33,7 @@
         <v-select
             v-model="accuracyClass"
             :items="accuracyClasses"
-            item-text="text"
+            item-text="title"
             item-value="value"
             label="Класс точности"
             :disabled="formSubmit"
@@ -42,7 +42,7 @@
         <v-select
             v-model="condition"
             :items="conditions"
-            item-text="text"
+            item-text="title"
             item-value="value"
             label="Состояние"
             :disabled="formSubmit"
@@ -58,7 +58,7 @@
         <v-select
             v-model="interval"
             :items="intervals"
-            item-text="text"
+            item-text="title"
             item-value="value"
             label="Межповерочный интервал"
             :disabled="formSubmit"
@@ -67,23 +67,23 @@
         <v-select
             v-model="owner"
             :items="owners"
-            item-text="text"
+            item-text="title"
             item-value="value"
             label="Собственник"
             :disabled="formSubmit"
             v-show="!isRouter"
         />
-       <slot name="issuing-person-input"></slot>
+        <slot name="issuing-person-input"></slot>
         <v-text-field
             v-model="comment"
             label="Комментарий"
             :disabled="formSubmit"
-        ></v-text-field>
+        />
     </div>
 </template>
 
 <script>
-	import { mapGetters, mapState } from "vuex"
+	import { mapGetters } from "vuex"
 
 	export default {
 		name: "AddOrEditView",
@@ -100,12 +100,12 @@
         }),
 		computed: {
 			...mapGetters({
-				locations: 'storage/getLocations',
-				accuracyClasses: 'storage/getAccuracyClasses',
-				conditions: 'storage/getConditions',
+				locations: 'dictionary/getLocations',
+				accuracyClasses: 'dictionary/getAccuracy',
+				conditions: 'dictionary/getConditions',
 				intervals: 'storage/getIntervals',
-				owners: 'storage/getOwners',
-				types: 'storage/getMeterTypes',
+				owners: 'dictionary/getOwners',
+				meterTypes: 'dictionary/getMeterTypes',
 			}),
 		},
 		inject: [
@@ -153,7 +153,7 @@
 	        },
 
             setData() {
-	            this.type = { index: this.typeTemp, title: this.getMeterTypeTitle(this.typeTemp) }
+	            this.type = { value: this.typeTemp, title: this.getMeterTypeTitle(this.typeTemp) }
 	            this.serialNumber = this.serialNumberTemp
 	            this.calibrationDate = this.calibrationDateTemp ? this.formatDateIso(this.calibrationDateTemp) : null
 	            this.accuracyClass = this.accuracyClassTemp
@@ -167,7 +167,7 @@
             getData() {
 	        	if (this.isRouter) {
 			        return {
-			        	type: this.type.index,
+			        	type: this.type.value,
 				        serialNumber:  this.serialNumber,
 				        accuracyClass: 0,
 				        condition: 0,
@@ -180,7 +180,7 @@
 			        }
                 } else {
 			        return {
-				        type: this.type.index,
+				        type: this.type.value,
 				        serialNumber:  this.serialNumber,
 				        accuracyClass: this.accuracyClass,
 				        condition: this.condition,

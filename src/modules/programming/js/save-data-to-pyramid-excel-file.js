@@ -27,13 +27,19 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
         let type = ''
         let password = ''
         switch (meter.type) {
+            case 126:
+            case 128:
+            case 129:
+            case 131:
+            case 145:
+                type = 'Приборы с поддержкой протокола СПОДЭС - Меркурий 234 (СПОДЭС)';
+                password = '0107032222222222';
+                user = 'Высокий уровень доступа (HLS)';
+                break;
             case 133:
             case 134:
             case 136:
             case 137:
-            case 126:
-            case 128:
-            case 129:
                 type = 'Приборы с поддержкой протокола СПОДЭС - Меркурий 204 (СПОДЭС)';
                 password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
@@ -42,7 +48,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             case 140:
             case 141:
             case 142:
-            case 131:
+            case 146:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-04 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';

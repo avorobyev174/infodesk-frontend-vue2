@@ -2,8 +2,7 @@
     <div>
         <v-data-table
             height="31vh"
-            :loading="logLoading"
-            class="elevation-1 log-table"
+            class="elevation-1"
             :items-per-page="5"
             loading-text="Идет загрузка логов..."
             fixed-header
@@ -51,9 +50,9 @@
                 </div>
                 <div v-else>
                     <div
-                            v-for="(field, i) in parseUpdateField(item.update_field)"
-                            :key="i"
-                            class="m-2"
+                        v-for="(field, i) in parseUpdateField(item.update_field)"
+                        :key="i"
+                        class="m-2"
                     >
                         <span>{{ field.name }} </span>
                         <v-chip small tag="span" :color="colorOrange">{{ field.oldValue }}</v-chip>
@@ -99,10 +98,18 @@
             comment: '',
             item: null,
 		}),
-		inject: [ 'showNotificationSuccess', 'showNotificationRequestError' ],
+		inject: [
+			'showNotificationSuccess',
+            'showNotificationRequestError',
+            'formatDate',
+            'getLVStateTitle',
+            'getOperationTitle',
+            'getEmployeeTitleByStaffId',
+			'getMeterTypeTitle'
+        ],
         mixins: [ LogTableMixin ],
 		computed: {
-			...mapState([ 'logLoading', 'colorGreen', 'colorRed', 'colorOrange', 'colorGrey' ]),
+			...mapState([ 'colorGreen', 'colorRed', 'colorOrange', 'colorGrey' ]),
 			...mapGetters({
 				logs: 'storage/getLogs',
 			}),
@@ -134,7 +141,4 @@
 </script>
 
 <style>
-    .header-color {
-        background-color: #e0e0e0 !important;
-    }
 </style>

@@ -171,7 +171,7 @@
 			'showNotificationRequestError',
             'getMaterialTypeTitle',
 			'formatDate',
-			'initializeMeters',
+			'getMeters',
 		],
 		methods: {
 			...mapActions('storage', [
@@ -237,7 +237,6 @@
                         materials : this.repairMaterials,
                         updateStr
                     })
-                    console.log(result)
                     if (result?.success) {
                         this.showNotificationSuccess('Операция выполнена успешно')
                         this.resultColorMaterials = this.colorGreen
@@ -245,7 +244,7 @@
 	                    this.formSubmit = false
                         this.showNotificationError('Что то пошло не так при внесении материалов')
                     }
-		            this.initializeMeters()
+		            await this.getMeters()
 	            } catch (e) {
 		            this.showNotificationRequestError(e)
 		            this.formSubmit = false
@@ -262,7 +261,6 @@
 		            this.formSubmit = true
 		            this.$refs.addMaterialTableStorage.setLoading(true)
                     const result = await this.insertMaterialToStorage(this.storageMaterials)
-                    console.log(result)
                     if (result?.success) {
                         this.showNotificationSuccess('Операция выполнена успешно', this.colorGreen)
                     } else {
@@ -295,7 +293,6 @@
 			            comment : this.comment,
 			            updateStr
 		            })
-		            console.log(result)
 		            if (result?.success) {
 			            this.showNotificationSuccess(`Операция выполнена успешно`)
 			            this.resultColorWorkability = this.colorGreen
@@ -303,7 +300,7 @@
 			            this.formSubmit = false
 			            this.showNotificationError('Что то пошло не так при внесении материалов')
 		            }
-		            this.initializeMeters()
+		            await this.getMeters()
 	            } catch (e) {
 		            this.showNotificationRequestError(e)
 		            this.formSubmit = false

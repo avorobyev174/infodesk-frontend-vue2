@@ -4,7 +4,7 @@
             <v-combobox
                 :items="availableMaterialTypes"
                 item-text="title"
-                item-value="id"
+                item-value="value"
                 label="Тип"
                 class="pl-1 pt-2 pb-0 pr-3"
                 v-model="materialType"
@@ -116,12 +116,16 @@
 			'getMaterialTypeTitle',
 		],
 		computed: {
-			...mapState([ 'colorGreen', 'colorRed', 'colorBlue' ]),
-			...mapGetters({ materialTypes: 'storage/getMaterialTypes', }),
+			...mapState([ 'colorGreen', 'colorRed' ]),
+			...mapGetters({
+                materialTypes: 'dictionary/getMaterialTypes',
+            }),
 		},
         mounted() {
-			this.availableMaterialTypes = this.materialTypes.slice(0)
-	        this.materialType = this.availableMaterialTypes[0]
+			if (this.materialTypes?.length) {
+				this.availableMaterialTypes = this.materialTypes.slice(0)
+				this.materialType = this.availableMaterialTypes.at(0)
+			}
         },
 		methods: {
 	        ...mapActions('storage', [ 'checkMeterInDB', ]),
@@ -133,11 +137,11 @@
 
 	        materialAddButtonOnClick() {
 		        if (!this.formSubmit) {
-			        const usedMaterial = this.materials.find(({ materialType }) => materialType === this.materialType.id)
+			        const usedMaterial = this.materials.find(({ materialType }) => materialType === this.materialType.value)
                     const count = parseInt(this.count)
 
 		        	!usedMaterial && count > 0
-				        ? this.materials.unshift({ materialType: this.materialType.id, count })
+				        ? this.materials.unshift({ materialType: this.materialType.value, count })
 				        : usedMaterial.count += count
 		        } else {
 			        this.showNotificationInfo('Операция уже завершена, редактирование списка не доступно')
@@ -158,9 +162,9 @@
 
 	        changeAvailableMaterials(meterType) {
 	        	if (this.specificMaterials[ meterType ]) {
-			        this.availableMaterialTypes = this.materialTypes.filter((materialType) => {
+			        this.availableMaterialTypes = this.materialTypes.filter(({ value }) => {
 				        const specificMaterials = this.specificMaterials[ meterType ]
-				        return (specificMaterials?.includes(materialType.id)) || this.commonMaterials.includes(materialType.id)
+				        return specificMaterials?.includes(value) || this.commonMaterials.includes(value)
 			        })
                 } else {
 			        this.availableMaterialTypes = this.materialTypes.slice(0)

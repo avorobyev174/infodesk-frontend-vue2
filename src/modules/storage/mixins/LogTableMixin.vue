@@ -1,16 +1,6 @@
 <script>
-	import { mapGetters } from "vuex";
-	import StorageMixin from "./StorageMixin"
-
 	export default {
 		name: "LogTableMixin",
-		computed: {
-			...mapGetters({
-				operations: 'storage/getOperations',
-				lvStates: 'storage/getLVStates',
-			}),
-		},
-        mixins: [ StorageMixin ],
         methods: {
 	        parseUpdateField(updateField) {
 		        if (!updateField) {
@@ -31,8 +21,8 @@
 			        switch (name) {
 				        case 'Type':
 					        name = 'Тип'
-					        oldValue = this.getMeterTypeTitle(oldValue)
-					        newValue = this.getMeterTypeTitle(newValue)
+					        oldValue = this.getMeterTypeTitle(+oldValue)
+					        newValue = this.getMeterTypeTitle(+newValue)
 					        break;
 				        case 'SerialNumber':
 					        name = 'Серийный номер'
@@ -108,16 +98,6 @@
 		        }
 
 		        return updateMaterialsFields
-	        },
-
-	        getLVStateTitle(lvState) {
-	        	const state = this.lvStates.find((state) => lvState === state.value)
-		        return state ? state.text : lvState
-	        },
-
-	        getOperationTitle(operation) {
-	        	const oper = this.operations.find((oper) => operation === oper.value)
-		        return oper ? oper.text : operation
 	        },
         }
 	}

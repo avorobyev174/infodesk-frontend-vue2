@@ -1,71 +1,21 @@
 import { get, post } from "axios"
+import { Location } from "../const";
 
 export const storage = {
 	state: () => ({
 		meters: [],
-		searchMetersView: [],
-		meterLoading: false,
-		logLoading: false,
+		loading: false,
 		serverModule: 'meter-storage',
-		meterTypes: [],
 		meterTypesInRepair: [],
-		materialTypes: [],
-		employees: [],
-		storageEmployees: [],
-		logs: [],
-		locations: [
-			{ text: 'Склад', value: 0 },
-			{ text: 'Ремонт(УИТ)', value: 1 },
-			{ text: 'Проверка(УИТ)', value: 2 },
-			{ text: 'Ремонт(завод)', value: 3 },
-			{ text: 'Монтаж', value: 4 },
-			{ text: 'Списание', value: 5 },
-			{ text: 'Поверка', value: 6 },
-			{ text: 'Склад (ВХ)', value: 7 },
-			{ text: 'Выдача потребителю', value: 8 },
-			{ text: 'Программирование(УИТ)', value: 9 },
-		],
-		operations: [
-			{ text: 'Регистрация(без с.н.)', value: 0, notAcceptOrIssueOperation: true },
-			{ text: 'Выдача в ремонт(УИТ)', value: 1, routerOperation: true },
-			{ text: 'Выдача на проверку(УИТ)', value: 2 },
-			{ text: 'Выдача на ремонт(завод)', value: 3, routerOperation: true },
-			{ text: 'Выдача на монтаж', value: 4, routerOperation: true },
-			{ text: 'Списание', value: 5 },
-			{ text: 'Выдача на поверку', value: 6 },
-			{ text: 'Регистрация', value: 7, notAcceptOrIssueOperation: true  },
-			{ text: 'Редактирование', value: 8, notAcceptOrIssueOperation: true },
-			{ text: 'Прием на склад', value: 9 },
-			{ text: 'Установка на объект', value: 10, notAcceptOrIssueOperation: true  },
-			{ text: 'Выдача потребителю', value: 11 },
-			{ text: 'Выдача на программирование', value: 12 }
-		],
+		logs: [],		
 		storageTypes: [
-			{ text: 'Склад', value: 0 },
-			{ text: 'Склад (ВХ)', value: 7 }
-		],
-		conditions: [
-			{ text: 'Новый', value: 0},
-			{ text: 'Б/у', value: 1 }
+			{ title: 'Склад', value: Location.STORAGE },
+			{ title: 'Склад (ВХ)', value: Location.STORAGE_TEMPORARY }
 		],
 		intervals: [
-			{ text: '10', value: 10 },
-			{ text: '16', value: 16 }
+			{ title: '10', value: 10 },
+			{ title: '16', value: 16 }
 		],
-		accuracyClasses: [
-			{ text: '0,5', value: 0 },
-			{ text: '1', value: 1 }
-		],
-		owners: [
-			{ text: 'МЭК', value: 0 },
-			{ text: 'Потребитель', value: 1 }
-		],
-		lvStates: [
-			{ text: 'отсутствует',  value: 0 },
-			{ text: 'не работает', value: 1 },
-			{ text: 'работает', value: 2 }
-		],
-		options: [],
 		parseOptionsTODO: [
 			{ 1: { firstChar: 0, lastChar: 7 } },
 			{ 'Меркурий': { firstChar: 3, lastChar: 10 } },
@@ -86,390 +36,202 @@ export const storage = {
 		getMeters(state) {
 			return state.meters
 		},
-		getSearchMetersView(state) {
-			return state.searchMetersView
-		},
-		getMeterTypes(state) {
-			return state.meterTypes
-		},
-		getMaterialTypes(state) {
-			return state.materialTypes
-		},
-		getMeterRepairTypes(state) {
-			return state.meterTypesInRepair
-		},
-		getAccuracyClasses(state) {
-			return state.accuracyClasses
-		},
-		getConditions(state) {
-			return state.conditions
-		},
-		getIntervals(state) {
-			return state.intervals
-		},
-		getOperations(state) {
-			return state.operations
-		},
-		getLocations(state) {
-			return state.locations
-		},
-		getOwners(state) {
-			return state.owners
-		},
-		getEmployees(state) {
-			return state.employees
-		},
-		getStorageEmployees(state) {
-			return state.storageEmployees
-		},
+	
 		getLogs(state) {
 			return state.logs
 		},
-		getLVStates(state) {
-			return state.lvStates
-		},
-		getOptions(state) {
-			return state.options
-		},
+	
 		getStorageTypes(state) {
 			return state.storageTypes
+		},
+		
+		getIntervals(state) {
+			return state.intervals
+		},
+		
+		getMeterRepairTypes(state) {
+			return state.meterTypesInRepair
 		},
 	},
 	mutations: {
 		setMeters(state, meters) {
 			state.meters = meters
 		},
-		setSearchMetersView(state, meters) {
-			state.searchMetersView = meters
+		
+		setLoading(state, loading) {
+			state.loading = loading
 		},
-		setMeterLoading(state, bool) {
-			state.meterLoading = bool
-		},
-		setLogLoading(state, bool) {
-			state.logLoading = bool
-		},
-		setMeterTypes(state, meterTypes) {
-			state.meterTypes = meterTypes
-		},
-		setMeterTypesInRepair(state, meterTypesInRepair) {
-			state.meterTypesInRepair = meterTypesInRepair
-		},
-		setMaterialTypes(state, materialTypes) {
-			state.materialTypes = materialTypes
-		},
-		setEmployees(state, employees) {
-			state.employees = employees
-		},
-		setStorageEmployees(state, employees) {
-			state.storageEmployees = employees
-		},
+		
 		setLogs(state, logs) {
 			state.logs = logs
 		},
-		setOptions(state, options) {
-			state.options = options
-		}
+		
+		setMeterTypesInRepair(state, meterTypesInRepair) {
+			state.meterTypesInRepair = meterTypesInRepair
+		},
 	},
 	actions: {
-		async fetchMeters({ state, commit }) {
+		async fetchMeters({ state, commit }, options) {
 			try {
-				commit('setMeterLoading', true)
-				const response = await get(
-					this.state.serverUrl + `/api/${ this.state.storage.serverModule }/meters`,
-					{ headers: { 'authorization': $cookies.get('auth_token') } })
-				
-				commit('setMeters', response.data)
-				return response.data
-			} finally {
-				commit('setMeterLoading', false)
-			}
-		},
-		
-		async fetchMetersPerPage({ state, commit }, options) {
-			try {
-				commit('setMeterLoading', true)
+				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.storage.serverModule }/meters`,
+					this.state.serverUrl + `/api/${ state.serverModule }/meters`,
 					{ options },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
-				commit('setMeters', response.data.rows)
-				return response.data.total
+				const { meters, totalMetersCount } = response.data
+				commit('setMeters', meters)
+				return totalMetersCount
 			} finally {
-				commit('setMeterLoading', false)
+				commit('setLoading', false)
 			}
 		},
 		
-		async fetchMeterTypes({ state, commit }) {
-			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/meter-types`,
-				{ headers: { 'authorization': $cookies.get('auth_token') } })
-			const meterTypes = response?.data
-				.map(({ id, type_name, mnf_id, is_archive }) => ({
-					title: type_name,
-					index: id,
-					option: mnf_id,
-					isArchive: is_archive
-				}))
-				.sort((a, b) => a.title > b.title ? 1 : -1)
-			commit('setMeterTypes', meterTypes)
-		},
-		
-		async fetchMaterialsTypes({ state, commit }) {
-			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/materials-types`,
-				{ headers: { 'authorization': $cookies.get('auth_token') } })
-			
-			commit('setMaterialTypes', response.data.map(type => { return { id: type.id, title: type.item } }))
-		},
-	
-		async fetchStorageEmployees({ state, commit }) {
-			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/storage-employees`,
-				{ headers: { 'authorization': $cookies.get('auth_token') } })
-			
-			const employees = response.data.map(emp => {
-				const nameArr = emp.name.trim().split(' ')
-				const name = `${ nameArr[0] } ${ nameArr[1][0] }. ${ nameArr[2][0] }.`
-				return { staffId: emp.staff_id, name, card: emp.card }
-			}).sort((a, b) => a.name > b.name ? 1 : -1)
-			
-			commit('setStorageEmployees', employees)
-		},
-		
-		async meterFilter({ state, commit }, { filters, options }) {
+		async metersFilter({ state, commit }, { filters, options }) {
 			try {
-				commit('setMeterLoading', true)
+				commit('setLoading', true)
 				const response = await post(
 					this.state.serverUrl +
-					`/api/${ this.state.storage.serverModule }/filter`,
+					`/api/${ state.serverModule }/filter`,
 					{ filters, options },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
-				commit('setMeters', response.data.rows)
-				return response.data.total
+				const { meters, totalMetersCount } = response.data
+				commit('setMeters', meters)
+				return totalMetersCount
 			} finally {
-				commit('setMeterLoading', false)
+				commit('setLoading', false)
 			}
 		},
 		
 		async fetchLogs({ state, commit }, guid) {
 			try {
-				commit('setLogLoading', true)
+				commit('setLoading', true)
 				const response = await get(
-					this.state.serverUrl + `/api/${ this.state.storage.serverModule }/logs/${ guid }`,
+					this.state.serverUrl + `/api/${ state.serverModule }/logs/${ guid }`,
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 					
 				commit('setLogs', response.data)
 			} finally {
-				commit('setLogLoading', false)
+				commit('setLoading', false)
 			}
 		},
 
-		async checkMeterInDB({ state, commit }, { serialNumber, type }) {
+		async checkMeterInDB({ state }, { serialNumber, type }) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/check-meter`,
+				this.state.serverUrl + `/api/${ state.serverModule }/check-meter`,
 				{ serialNumber, type },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
 		
-		async checkMeterInRepairDB({ state, commit }, { serialNumber, type }) {
+		async checkMeterInRepairDB({ state }, { serialNumber, type }) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/check-meter-in-repair`,
+				this.state.serverUrl + `/api/${ state.serverModule }/check-meter-in-repair`,
 				{ serialNumber, type },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
 		
-		async registration({ state, commit },
-		                   {
-		                   	   meters,
-			                   accuracyClass,
-			                   condition,
-			                   issuingPersonStaffId,
-			                   acceptedPersonStaffId,
-			                   storageType,
-			                   interval,
-			                   owner,
-			                   calibration,
-			                   passportNumber,
-			                   comment,
-			                   isRouter,
-		                   }) {
+		async registration({ state }, metersData) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/registration`,
-				{
-					meters,
-					accuracyClass,
-					condition,
-					acceptedPersonStaffId,
-					issuingPersonStaffId,
-					storageType,
-					interval,
-					owner,
-					calibration,
-					passportNumber,
-					comment,
-					isRouter
-				},
+				this.state.serverUrl + `/api/${ state.serverModule }/registration`,
+				metersData,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
 		
-		async editMeter({ state, commit },
-		                   {
-			                   type,
-			                   editorStaffId,
-			                   serialNumber,
-			                   accuracyClass,
-			                   condition,
-			                   interval,
-			                   owner,
-			                   calibration,
-			                   comment,
-			                   passportNumber,
-			                   guid,
-			                   updateField
-		                   }) {
-			
+		async editMeter({ state }, meterData) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/edit`,
-				{
-					type,
-					serialNumber,
-					accuracyClass,
-					condition,
-					editorStaffId,
-					interval,
-					owner,
-					calibration,
-					passportNumber,
-					comment,
-					guid,
-					updateField
-				},
+				this.state.serverUrl + `/api/${ state.serverModule }/edit`,
+				meterData,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
 		
-		async createAcceptOrIssueLog({ state, commit },
-		                {
-		                	meters,
-			                operationType,
-			                newLocation,
-			                issuingPersonStaffId,
-			                acceptedPersonStaffId,
-			                comment
-		                }) {
+		async createAcceptOrIssueLog({ state }, metersData) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/create-accept-or-issue-log`,
-				{
-					meters,
-					operationType,
-					newLocation,
-					issuingPersonStaffId,
-					acceptedPersonStaffId,
-					comment
-				},
+				this.state.serverUrl + `/api/${ state.serverModule }/accept-or-issue`,
+				metersData,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
-		},
-		
-		async fetchParseOptions({ state, commit }) {
-			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/parse-options`,
-				{ headers: { 'authorization': $cookies.get('auth_token') } })
-			
-			commit('setOptions', response.data)
-		},
-		
-		parseSerialNumber({ state, commit }, { parseOption, serialNumber }) {
-			const option = this.state.storage.options.find(option => parseOption === option.id)
-			if (option && option.parse_option) {
-				return option.parse_option.split(',').reduce((sum, cur) => {
-					return sum += serialNumber[cur]
-				}, '')
-			} else {
-				return serialNumber
-			}
 		},
 		
 		async deleteMeter({ state, commit }, { guid, editorStaffId, meter }) {
 			try {
-				commit('setMeterLoading', true)
+				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ this.state.storage.serverModule }/delete`,
+					this.state.serverUrl + `/api/${ state.serverModule }/delete`,
 					{ guid, editorStaffId, meter },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 				
 				return response.data
 			} finally {
-				commit('setMeterLoading', false)
+				commit('setLoading', false)
 			}
 		},
 		
 		async getMeterTypesInRepair({ state, commit }) {
 			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/get-meter-types-in-repair`,
+				this.state.serverUrl + `/api/${ state.serverModule }/get-meter-types-in-repair`,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
-			const meterTypesInRepair = response.data.map(type => type.meter_type)
+			const meterTypesInRepair = response.data.map(({ meter_type }) => meter_type)
 			commit('setMeterTypesInRepair', meterTypesInRepair)
 		},
 		
-		async getAllAvailableMetersFromRepair({ state, commit }) {
+		async getAllAvailableMetersFromRepair({ state }) {
 			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/get-available-meters-from-repair/`,
+				this.state.serverUrl + `/api/${ state.serverModule }/get-available-meters-from-repair/`,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 			
 		},
 		
-		async getAllAvailableMetersByTypeFromRepair({ state, commit }, meterType) {
+		async getAllAvailableMetersByTypeFromRepair({ state }, meterType) {
 			const response = await get(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/get-available-meters-from-repair/` + meterType,
+				this.state.serverUrl + `/api/${ state.serverModule }/get-available-meters-from-repair/` + meterType,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 		
 			return response.data
 		},
 		
-		async insertMeterStorageMaterials({ state, commit }, { meters, materials, updateStr }) {
+		async insertMeterStorageMaterials({ state }, { meters, materials, updateStr }) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/insert-meter-materials`,
+				this.state.serverUrl + `/api/${ state.serverModule }/insert-meter-materials`,
 				{ meters, materials, updateStr },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
 		
-		async insertMaterialToStorage({ state, commit }, materials) {
+		async insertMaterialToStorage({ state }, materials) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/insert-material-to-storage`,
-				{ materials },
+				this.state.serverUrl + `/api/${ state.serverModule }/insert-material-to-storage`,
+				materials,
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
 		
-		async insertMeterWorkStatus({ state, commit }, { meters, isWorkable, comment, updateStr }) {
+		async insertMeterWorkStatus({ state }, { meters, isWorkable, comment, updateStr }) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/insert-meter-work-status`,
+				this.state.serverUrl + `/api/${ state.serverModule }/insert-meter-work-status`,
 				{ meters, isWorkable, comment, updateStr },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
 		},
 		
-		async editLogComment({ state, commit }, { comment, logId }) {
+		async editLogComment({ state }, { comment, logId }) {
 			const response = await post(
-				this.state.serverUrl + `/api/${ this.state.storage.serverModule }/edit-log-comment`,
+				this.state.serverUrl + `/api/${ state.serverModule }/edit-log-comment`,
 				{ comment, logId },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			

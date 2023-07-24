@@ -57,6 +57,7 @@
 			...mapGetters({ favoriteModuleColor: 'common/getFavoriteModuleColor' }),
 			...mapGetters([ 'getSideBarState' ]),
 			...mapState([ 'colorGreen', 'colorGold', 'colorDarkGrey' ]),
+
 			isWelcomePage () {
 				return this.$route.name === 'Welcome'
 			}

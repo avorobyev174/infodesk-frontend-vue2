@@ -27,7 +27,13 @@ const Operation = {
 	PROGRAMMING: 12,
 }
 
+const OperationStatus = {
+	SUCCESS: 1,
+	ERROR: 2,
+}
+
 export {
 	Location,
-	Operation
+	Operation,
+	OperationStatus
 }

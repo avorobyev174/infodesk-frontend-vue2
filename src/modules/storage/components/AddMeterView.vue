@@ -4,7 +4,7 @@
             <v-combobox
                 :items="meterTypes"
                 item-text="title"
-                item-value="index"
+                item-value="value"
                 label="Тип"
                 class="pl-1 pt-2 pb-0 pr-3"
                 v-model="type"
@@ -17,7 +17,7 @@
                 v-if="isRepair"
                 :items="availableByTypeSerials"
                 item-text="title"
-                item-value="index"
+                item-value="value"
                 label="Серийный номер"
                 class="pl-1 pt-2 pb-0 pr-3"
                 :search-input.sync="serialNumber"
@@ -108,10 +108,10 @@
                     tag="span"
                     :color="checkLocation(item) ? resultColor : colorRed">
                     {{ getLocationTitle(newLocation) }}
-                    <v-icon right small v-if="item.status === 1">`
+                    <v-icon right small v-if="item.status === OperationStatus.SUCCESS">`
                         mdi-check-circle-outline
                     </v-icon>
-                    <v-icon right small v-if="item.status === 2">
+                    <v-icon right small v-if="item.status === OperationStatus.ERROR">
                         mdi-close-circle-outline
                     </v-icon>
                 </v-chip>
@@ -124,11 +124,12 @@
 	import { mapActions, mapGetters, mapState } from "vuex"
     import correctSound from '../audio/correct.mp3'
     import wrongSound from '../audio/wrong.mp3'
-    import { Location } from '../const'
+    import { Location, OperationStatus } from '../const'
 
 	export default {
 		name: "AddMeterView",
         data: () => ({
+	        OperationStatus,
 	        loading: false,
 	        headers: [
 		        {
@@ -206,9 +207,11 @@
 			scannerActive(newVal) {
 				this.scannerButtonColor = newVal ? this.colorBlue : this.colorGrey
 			},
+
 			isRouter() {
 				this.fillTypes()
 			},
+
 			isRepair() {
 				this.headers = this.headers.slice(0, this.headers.length - 1)
 				this.fillTypes()
@@ -217,15 +220,14 @@
 		computed: {
 			...mapState([ 'colorBlue', 'colorRed', 'colorGreen', 'colorGrey' ]),
 			...mapGetters({
-				types: 'storage/getMeterTypes',
-				options: 'storage/getOptions',
-				locations: 'storage/getLocations',
+				types: 'dictionary/getMeterTypes',
+				options: 'dictionary/getParseOptions',
+				locations: 'dictionary/getLocations',
 				typesInRepair: 'storage/getMeterRepairTypes'
 			}),
 		},
         methods: {
 	        ...mapActions('storage', [
-		        'parseSerialNumber',
 		        'checkMeterInDB',
 		        'checkMeterInRepairDB',
 		        'getAllAvailableMetersFromRepair',
@@ -234,24 +236,18 @@
 
             fillTypes() {
 	            if (this.isRouter) {
-		            this.meterTypes = this.types.filter((type) => type.option === 41)
-		            this.type = { index: 46, title: 'RTR512.10-6L/EY' }
+		            this.meterTypes = this.types.filter(({ option }) => option === 41)
 	            } else if (this.isRepair) {
-		            this.meterTypes =  this.types.filter(type => this.typesInRepair.includes(type.index))
-		            if (this.meterTypes.length) {
-		            	const [ defaultMeterType ] = this.meterTypes
-		            	const { index, title } = defaultMeterType
-			            this.type = { index, title }
-		            }
-	                this.meterTypeOnChange()
+		            this.meterTypes =  this.types.filter(({ value }) => this.typesInRepair.includes(value))
 	            } else  {
                     this.meterTypes = this.isRegister
-                        ? this.types.filter((type) => !type.isArchive)
+                        ? this.types.filter(({ is_archive }) => !is_archive)
                         : this.types.slice()
-
-		            this.type = { index: 121, title: 'AIU5' }
 	            }
-
+	            if (this.meterTypes?.length) {
+		            this.type = this.meterTypes.at(0)
+		            this.meterTypeOnChange()
+                }
             },
 
 	        checkLocation(meter) {
@@ -262,7 +258,7 @@
                         : this.newLocation === Location.REPAIR
                 } else {
                     const nonStorageLocations = this.locations
-                        .map((location) => location.value)
+                        .map(({ value }) => value)
                         .filter((location) => !storageLocations.includes(location))
 
                     if (storageLocations.includes(meter.oldLocation)) {
@@ -303,16 +299,24 @@
 
 	        async parseSerialNumberOnEnterPress() {
 		        if (this.scannerActive && this.options) {
-			        const parseOption = this.types.find(type => this.type.index === type.index)
-			        if (parseOption && parseOption.option) {
-				        this.serialNumber = await this.parseSerialNumber({
-					        parseOption: parseOption.option,
-					        serialNumber: this.serialNumber
-				        })
+			        const meterParseOption = this.meterTypes.find(({ value }) => this.type.value === value)
+			        const { option } = meterParseOption
+			        if (option) {
+				        this.parseSerialNumber(option)
 			        }
 		        }
 
                 await this.checkMeterAndInsert()
+	        },
+
+	        parseSerialNumber(parseOption) {
+		        const { parse_option } = this.options.find(({ id }) => parseOption === id)
+		        if (parse_option) {
+			        this.serialNumber = parse_option.split(',').reduce((sum, cur) => {
+			        	const letter = this.serialNumber[ cur ]
+				        return sum += letter ? letter : ''
+			        }, '')
+		        }
 	        },
 
 	        serialNumberClear() {
@@ -333,7 +337,7 @@
 		        const correct = new Audio(correctSound)
 		        const wrong = new Audio(wrongSound)
 
-		        const meterType = this.type.index
+		        const meterType = this.type.value
 
 		        //Проверка на счетчики с буквами в серийных номерах и минусом в начале
 		        if (!this.metersWithLetters.includes(meterType)) {
@@ -342,7 +346,7 @@
 			        this.serialNumber = this.serialNumber.slice(1)
 		        }
 
-		        if (this.meters.find(meter => meter.serialNumber === this.serialNumber && meter.type === meterType)) {
+		        if (this.meters.find(({ serialNumber, type }) => serialNumber === this.serialNumber && type === meterType)) {
 			        await wrong.play()
 
 			        return this.showNotificationWarning(`Счетчик с типом ${ this.getMeterTypeTitle(meterType) }
@@ -411,7 +415,6 @@
 			        this.serialNumber = ''
                     this.$emit('onResetValidation', true)
 		        } catch (e) {
-			        console.log(e)
 			        this.showNotificationRequestError(e)
 		        } finally {
 			        this.loading = false
@@ -421,14 +424,14 @@
 	        async addAllAvailableMetersOnClick() {
 	        	if (this.isAddAll) {
 			        const availableMeters = await this.getAllAvailableMetersFromRepair()
-			        for (const availableMeter of availableMeters) {
-			        	if (!this.meters.find(meter => meter.guid === availableMeter.guid) &&
-                                                                this.checkIfUpdateFieldIsValidForButtonAll(availableMeter)) {
+			        for (const { meter_type, serial_number, guid, updateField } of availableMeters) {
+			        	const isValid = this.checkIfUpdateFieldIsValidForButtonAll(updateField)
+			        	if (!this.meters.find((meter) => meter.guid === guid) && isValid) {
                             this.meters.push({
-                                type: availableMeter.meter_type,
-                                serialNumber: availableMeter.serial_number,
+                                type: meter_type,
+                                serialNumber: serial_number,
                                 status: 0,
-                                guid: availableMeter.guid
+                                guid
                             })
                         }
 			        }
@@ -442,23 +445,23 @@
 
             async meterTypeOnChange() {
 	        	if (this.isRepair) {
-			        this.availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.index)
+			        this.availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.value)
                     this.availableByTypeSerials = this.availableByTypeMeters
                         .filter((availableMeter) => this.checkIfUpdateFieldIsValid(availableMeter))
                         .map((availableMeter) => availableMeter.serial_number)
-                    this.$emit('meterTypeChanged', this.type.index)
+                    this.$emit('meterTypeChanged', this.type.value)
                 }
             },
 
 	        async addAllMetersByTypeOnClick() {
-                for (const availableMeter of this.availableByTypeMeters) {
-			        if (!this.meters.find((meter) => meter.guid === availableMeter.guid) &&
-                                                    this.checkIfUpdateFieldIsValidForButtonAll(availableMeter)) {
+                for (const { meter_type, serial_number, guid, updateField } of this.availableByTypeMeters) {
+	                const isValid = this.checkIfUpdateFieldIsValidForButtonAll(updateField)
+			        if (!this.meters.find((meter) => meter.guid === guid) && isValid) {
                         this.meters.push({
-                            type: availableMeter.meter_type,
-                            serialNumber: availableMeter.serial_number,
+                            type: meter_type,
+                            serialNumber: serial_number,
                             status: 0,
-                            guid: availableMeter.guid
+                            guid
                         })
                     }
                 }
@@ -479,15 +482,12 @@
                 return this.currentTab === 'materialInsertTab'
             },
 
-	        checkIfUpdateFieldIsValidForButtonAll(availableMeter) {
-		        return availableMeter.updateField ? !availableMeter.updateField.includes('Статус ремонта:')	: true
+	        checkIfUpdateFieldIsValidForButtonAll(updateField) {
+		        return updateField ? !updateField.includes('Статус ремонта:')	: true
 	        },
 
 	        checkIsMeterFromRepairValid(updateField) {
-	        	if (!updateField) {
-	        		return  false
-                }
-                return updateField.split(';').some((field) => field.includes('Статус ремонта:'))
+                return updateField ? updateField.split(';').some((field) => field.includes('Статус ремонта:')) : false
             }
         },
 	}

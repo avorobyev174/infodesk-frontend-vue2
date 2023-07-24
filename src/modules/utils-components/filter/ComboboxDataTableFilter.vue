@@ -1,6 +1,6 @@
 <template>
     <header-filter
-        :filter-select-color="filterColor"
+        :filter-select-color="filterColorValue"
     >
         <template v-slot:filterItem>
             <v-combobox
@@ -21,12 +21,19 @@
 
 <script>
     import DataTableHeaderFilter from "./DataTableHeaderFilter"
+    import { mapState } from "vuex"
 
 	export default {
 		name: "ComboboxDataTableFilter",
         components: {
 	        HeaderFilter: DataTableHeaderFilter
         },
+		computed: {
+			...mapState([ 'colorGrey' ]),
+			filterColorValue() {
+				return this.filterColor ? this.filterColor : this.colorGrey
+			}
+		},
 		props: {
 			filterLabel: {
 				type: String,

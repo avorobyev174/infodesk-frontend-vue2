@@ -85,10 +85,5 @@
         computed: {
 	        ...mapState([ 'colorGrey' ]),
         },
-        methods: {
-        	dialogBeforeClose() {
-		        this.$emit('reject')
-            }
-        }
     }
 </script>

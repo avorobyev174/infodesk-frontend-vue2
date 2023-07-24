@@ -32,14 +32,14 @@
                 icon="mdi-account"
                 isIcon
                 @click="redirectToProfilePage"
-                :color="colorDarkGrey"
+                :color="colorSuperGrey"
                 title="Профиль"
             />
             <button-with-tooltip
                 icon="mdi-logout"
                 isIcon
                 @click="logoutUser(true)"
-                :color="colorDarkGrey"
+                :color="colorSuperGrey"
                 title="Выход"
             />
         </v-app-bar>
@@ -56,7 +56,7 @@
 		computed: {
 			...mapGetters({ favoriteModuleColor: 'common/getFavoriteModuleColor' }),
 			...mapGetters([ 'getSideBarState' ]),
-			...mapState([ 'colorGreen', 'colorGold', 'colorDarkGrey' ]),
+			...mapState([ 'colorGreen', 'colorGold', 'colorDarkGrey', 'colorSuperGrey' ]),
 
 			isWelcomePage () {
 				return this.$route.name === 'Welcome'

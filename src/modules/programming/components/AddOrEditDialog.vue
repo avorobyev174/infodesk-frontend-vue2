@@ -129,7 +129,7 @@
     const DEFAULT_TYPE = 133
     const DEFAULT_SERIAL_NUMBER_LEN = 10
     const PHASE_1_TYPES = [ 132, 133, 143, 107, 138, 144, 111, 131, 113, 117 ]
-    const IP_ADDRESSES_TYPES = [ 139, 143, 105, 144, 140, 141, 142 ]
+    const IP_ADDRESSES_TYPES = [ 105, 139, 140, 141, 142, 143, 144, 146, 147 ]
     import {
 	    editedItem,
 	    defaultItem,

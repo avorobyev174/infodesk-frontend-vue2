@@ -97,7 +97,8 @@
 
     .credential-item {
         border-left: 5px solid #1976d2;
-        padding-left: 10px;
+        padding-left: 12px;
         height: 78px;
+        border-radius: 7px;
     }
 </style>

@@ -4,7 +4,7 @@
         absolute
         temporary
         right
-        width="450"
+        width="475"
         class="event-list"
     >
         <v-list-item class="pt-3" style="display:flex; gap: 12px">
@@ -17,12 +17,13 @@
         <v-divider></v-divider>
         <v-timeline align-top dense>
             <v-timeline-item
-                v-for="(log, i) in logs"
-                :key="i"
+                v-for="log in events"
+                :key="log.id"
                 :color="colorGrey"
+                large
             >
                 <template v-slot:icon>
-                    <v-avatar>
+                    <v-avatar size="42">
                         <v-img :src="getAvatarIcon(log.accepted_person)" v-if="isAvatarExist(log.accepted_person)"/>
                         <v-icon v-else>mdi-account</v-icon>
                     </v-avatar>
@@ -35,7 +36,7 @@
                 <p class="mb-0 event-owner" >
                     <span v-if="![ Operation.EDIT, Operation.REGISTRATION, Operation.REGISTRATION_WITHOUT_SERIAL_NUMBER ].includes(log.oper_type)">{{ getEmployeeTitleByStaffId(log.issuing_person) }} </span>
                     <span v-if="![ Operation.EDIT, Operation.REGISTRATION, Operation.REGISTRATION_WITHOUT_SERIAL_NUMBER ].includes(log.oper_type)">&#10132;</span>
-                     {{ getEmployeeTitleByStaffId(log.accepted_person) }}
+                    {{ getEmployeeTitleByStaffId(log.accepted_person) }}
                 </p>
                 <div class="d-flex">
                     <p class="event-text d-inline-block">{{ log.comment_field }}</p>
@@ -49,22 +50,27 @@
                         <v-icon>mdi-pencil-box-outline</v-icon>
                     </v-btn>
                 </div>
-                <div v-if="log.oper_type === Operation.REPAIR || log.oper_type === Operation.CHECK || log.oper_type === Operation.OBJECT ">
-                    <div v-for="(item, i) in parseUpdateCustomField(log.update_field)" :key="i" class="m-1">
-                        <v-chip v-if="!item.color" small tag="span" :color="colorGrey">{{ item.value }}</v-chip>
-                        <v-chip v-else-if="item.color === 1" small tag="span" :color="colorRed">{{ item.value }}</v-chip>
-                        <v-chip v-else-if="item.color === 2" small tag="span" :color="colorGreen">{{ item.value }}</v-chip>
-                        <v-chip v-else-if="item.color === 3" small tag="span" :color="colorOrange">{{ item.value }}</v-chip>
-                    </div>
-                </div>
-                <div v-else>
-                    <div v-for="(field, i) in parseUpdateField(log.update_field)" :key="i">
-                        <span style="font-size: 12px">{{ field.name }} </span>
-                        <v-chip small tag="span" :color="colorOrange">{{ field.oldValue }}</v-chip>
-                        <span> &#10132; </span>
-                        <v-chip small tag="span" :color="colorGreen">{{ field.newValue }}</v-chip>
-                    </div>
-                </div>
+               <div v-if="log.oper_type === Operation.REPAIR">
+                   <v-chip
+                       v-if="log.workStatus"
+                       class="text-pre p-1 pr-3 pl-3 mt-1 mb-1"
+                       style="height: fit-content; display: block; width: fit-content; font-size: 12px"
+                       :color="log.workStatus.status === 0 ? colorRed : colorGreen"
+                   >{{ log.workStatus.workStatusStr }}</v-chip>
+                   <v-chip
+                       v-if="log.spentItems"
+                       class="text-pre p-1 pr-3 pl-3"
+                       style="height: fit-content; font-size: 12px"
+                   >{{ log.spentItems }}</v-chip>
+               </div>
+               <div v-else>
+                   <div v-for="(field, i) in parseUpdateField(log.update_field)" :key="i">
+                       <span style="font-size: 12px">{{ field.name }} </span>
+                       <v-chip small tag="span" :color="colorOrange">{{ field.oldValue }}</v-chip>
+                       <span> &#10132; </span>
+                       <v-chip small tag="span" :color="colorGreen">{{ field.newValue }}</v-chip>
+                   </div>
+               </div>
             </v-timeline-item>
         </v-timeline>
         <dialog-with-data-slot
@@ -86,7 +92,7 @@
 <script>
 	import { mapActions, mapState, mapGetters } from 'vuex'
     import { Location, Operation } from "../const"
-	import { parseUpdateCustomField, parseUpdateField } from "../js/log-list-parse"
+	import { parseUpdateField } from "../js/event-list-parsing-utils"
     import DialogWithDataSlot from "../../utils-components/dialog/DialogWithDataSlot"
 
 	export default {
@@ -98,10 +104,12 @@
 			Location,
 			Operation,
 			eventListDrawerModel: false,
+			events: [],
             meterType: null,
             serialNumber: '',
 			comment: '',
 			selectedLog: null,
+			repairData: null,
 		}),
 		inject: [
 			'showNotificationSuccess',
@@ -111,20 +119,21 @@
 			'getOperationTitle',
 			'getLocationTitle',
 			'getEmployeeTitleByStaffId',
-			'getMeterTypeTitle'
+			'getMeterTypeTitle',
+            'showNotificationWarning'
 		],
         computed: {
 	        ...mapState([ 'colorGrey', 'colorRed', 'colorGreen', 'colorBlue', 'colorOrange', 'colorDarkGrey' ]),
 	        ...mapGetters({
 		        accounts: 'dictionary/getAccounts',
-		        logs: 'storage/getLogs',
 	        })
         },
 		methods: {
 			...mapActions('storage', [
-				'fetchLogs',
+				'fetchEvents',
+				'fetchMeterRepairData',
+				'editLogComment'
 			]),
-			parseUpdateCustomField,
 			parseUpdateField,
 
 			async open({ meter_type, guid, serial_number }) {
@@ -134,7 +143,7 @@
 					}
 					this.meterType = meter_type
 					this.serialNumber = serial_number
-					await this.fetchLogs(guid)
+					this.events = await this.fetchEvents(guid)
 					this.eventListDrawerModel = true
 				} catch (e) {
 					this.showNotificationRequestError(e)
@@ -151,7 +160,7 @@
 				try {
 					const { id } = this.selectedLog
 					if (!id) {
-						this.showNotificationWarning('Не найден id события')
+						return this.showNotificationWarning('Не найден id события')
                     }
 					await this.editLogComment({ comment: this.comment, logId: id })
 					this.selectedLog.comment_field = this.comment
@@ -206,6 +215,4 @@
         opacity: 0.8 !important;
         margin-bottom: 2px;
     }
-
-
 </style>

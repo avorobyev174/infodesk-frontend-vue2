@@ -10,14 +10,14 @@
 			this.setFavoriteModuleFavorite()
 		},
         computed: {
-	        ...mapState([ 'colorGold', 'colorDarkGrey' ]),
+	        ...mapState([ 'colorGold', 'colorSuperGrey' ]),
         },
 		methods: {
 			...mapMutations('common', [ 'setFavoriteModuleColor' ]),
 
             setFavoriteModuleFavorite() {
 	            if (this.module) {
-		            const color = $cookies.get('common_favorite_module') === `/${ this.module }` ? this.colorGold : this.colorDarkGrey
+		            const color = $cookies.get('common_favorite_module') === `/${ this.module }` ? this.colorGold : this.colorSuperGrey
 		            this.setFavoriteModuleColor(color)
 	            }
             }

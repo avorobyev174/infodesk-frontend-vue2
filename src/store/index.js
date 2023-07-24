@@ -34,6 +34,7 @@ export default new Vuex.Store({
         colorGreen: 'green lighten-1',
         colorOrange: 'orange lighten-1',
         colorGrey: 'grey lighten-1',
+        colorSuperGrey: 'rgba(0, 0, 0, 0.54)',
         colorDarkGrey: 'grey',
         colorGold: '#ecc700',
         serverUrl: process.env.NODE_ENV === "production" ? production : dev,

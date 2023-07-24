@@ -52,7 +52,6 @@
         methods: {
 	        ...mapActions('storage', [
 		        'fetchMeters',
-		        'fetchLogs',
 		        'getMeterTypesInRepair',
 	        ]),
         }

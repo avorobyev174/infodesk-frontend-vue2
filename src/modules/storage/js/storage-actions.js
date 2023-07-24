@@ -1,11 +1,11 @@
 const defaultStorageActions = [
-	{
-		id: 1,
-		title: 'Открыть список событий',
-		onClick: 'openEventList',
-		icon: 'mdi-list-box',
-		color: 'primary'
-	},
+	// {
+	// 	id: 1,
+	// 	title: 'Открыть список событий',
+	// 	onClick: 'openEventList',
+	// 	icon: 'mdi-list-box',
+	// 	color: 'primary'
+	// },
 	{
 		id: 2,
 		title: 'Редактировать',

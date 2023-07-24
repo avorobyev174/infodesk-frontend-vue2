@@ -7,7 +7,6 @@ export const storage = {
 		loading: false,
 		serverModule: 'meter-storage',
 		meterTypesInRepair: [],
-		logs: [],		
 		storageTypes: [
 			{ title: 'Склад', value: Location.STORAGE },
 			{ title: 'Склад (ВХ)', value: Location.STORAGE_TEMPORARY }
@@ -37,10 +36,6 @@ export const storage = {
 			return state.meters
 		},
 	
-		getLogs(state) {
-			return state.logs
-		},
-	
 		getStorageTypes(state) {
 			return state.storageTypes
 		},
@@ -60,10 +55,6 @@ export const storage = {
 		
 		setLoading(state, loading) {
 			state.loading = loading
-		},
-		
-		setLogs(state, logs) {
-			state.logs = logs
 		},
 		
 		setMeterTypesInRepair(state, meterTypesInRepair) {
@@ -104,17 +95,26 @@ export const storage = {
 			}
 		},
 		
-		async fetchLogs({ state, commit }, guid) {
+		async fetchEvents({ state, commit }, guid) {
 			try {
 				commit('setLoading', true)
 				const response = await get(
 					this.state.serverUrl + `/api/${ state.serverModule }/logs/${ guid }`,
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 					
-				commit('setLogs', response.data)
+				return  response.data
 			} finally {
 				commit('setLoading', false)
 			}
+		},
+		
+		async fetchMeterRepairData({ state }, logIds) {
+			const response = await post(
+				this.state.serverUrl + `/api/${ state.serverModule }/get-meter-repair-data`,
+				{ logIds },
+				{ headers: { 'authorization': $cookies.get('auth_token') } })
+			
+			return  response.data
 		},
 
 		async checkMeterInDB({ state }, { serialNumber, type }) {

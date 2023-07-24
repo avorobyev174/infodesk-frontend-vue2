@@ -151,10 +151,10 @@ export const dictionary = {
             state.owners = owners
             state.materialTypes = materialTypes
             state.storageEmployees = storageEmployees.map(({ name, staff_id, card }) => {
-                const [ secondName, firstName, lastName ] = name.trim().split(' ')
+                const [ secondName, firstName ] = name.trim().split(' ')
                 return {
                     staff_id,
-                    name: `${ secondName } ${ firstName.at(0) }. ${ lastName.at(0) }.`,
+                    name: `${ secondName } ${ firstName.at(0) }.`,
                     card
                 }
             })

@@ -1,13 +1,13 @@
 import { AssignmentStatus } from '../../../const'
 
 const defaultAssignmentActions = [
-	{
-		id: 1,
-		title: 'Открыть список событий',
-		onClick: 'openEventList',
-		icon: 'mdi-clipboard-text-search-outline',
-		color: 'primary'
-	},
+	// {
+	// 	id: 1,
+	// 	title: 'Открыть список событий',
+	// 	onClick: 'openEventList',
+	// 	icon: 'mdi-clipboard-text-search-outline',
+	// 	color: 'primary'
+	// },
 	{
 		id: 2,
 		title: 'Принять поручение',

@@ -204,7 +204,7 @@
 					if (!data.length) {
 						return this.showNotificationInfo('Информация отсутствует')
 					}
-					console.log({ dialogTitle, additionalTitle, headers, getReportDataFunction })
+					//console.log({ dialogTitle, additionalTitle, headers, getReportDataFunction })
 					DataResultReportDialog.open({ dialogTitle, additionalTitle, headers, data }, height, width)
 				} catch (e) {
 					this.showNotificationRequestError(e)

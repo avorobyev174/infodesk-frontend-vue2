@@ -97,7 +97,7 @@
 <script>
     import { mapActions, mapGetters, mapState } from "vuex"
     import AddMeterView from "./AddMeterView"
-    import {Location, Operation, OperationStatus } from "../const"
+    import { Location, Operation, OperationStatus } from "../const"
 
     export default {
         name: "AcceptOrIssueDialog",
@@ -233,7 +233,7 @@
                 } else {
 	                this.dialogOperations =
                         this.operations.filter(({ value }) =>
-                            ![ Operation.REGISTRATION_WITHOUT_SERIAL_NUMBER, Operation.REGISTRATION, Operation.EDIT, Operation.INSTALL ].includes(value))
+                            ![ Operation.REGISTRATION_WITHOUT_SERIAL_NUMBER, Operation.REGISTRATION, Operation.EDIT, Operation.OBJECT ].includes(value))
 	                if ([ 124911, 23745 ].includes(this.staffId)) {
 		                this.storageType = Location.STORAGE_TEMPORARY
 	                }

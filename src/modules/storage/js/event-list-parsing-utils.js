@@ -57,46 +57,10 @@ const parseUpdateField = (updateField, getMeterTypeTitle, getLVStateTitle) => {
 		
 		updateFields.push({ name , oldValue, newValue })
 	}
-	
+	console.log(updateFields)
 	return updateFields
-}
-
-const parseUpdateCustomField = (field, roles) => {
-	if (field == null) {
-		return ''
-	}
-	let updateMaterialsFields = []
-	
-	if (roles?.storage_module && roles.storage_module === 'keeper') {
-		updateMaterialsFields.push({ value:  '...' })
-		return updateMaterialsFields
-	}
-	
-	let repFields = field.split(';');
-	
-	for (let i = 0; i < repFields.length; i++) {
-		const item = repFields[i].trim()
-		if (item) {
-			if (item.includes('материалы'))
-				continue
-			if (item.includes('Статус')) {
-				if (item.includes('не работает')) {
-					updateMaterialsFields.push({ value: item, color: 1 })
-				} else {
-					updateMaterialsFields.push({ value: item, color: 2 })
-				}
-			} else if (item.includes('Дата')) {
-				updateMaterialsFields.push({ value: item, color: 3 })
-			} else {
-				updateMaterialsFields.push({ value: item })
-			}
-		}
-	}
-	
-	return updateMaterialsFields
 }
 
 export {
 	parseUpdateField,
-	parseUpdateCustomField
 }

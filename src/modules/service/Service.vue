@@ -20,6 +20,7 @@
             :items="assignments"
             :options.sync="options"
             :server-items-length="totalAssignmentsCount"
+            @click:row="initializeEventList"
         >
             <template v-slot:no-results>
                 <span>Нет данных...</span>
@@ -156,8 +157,8 @@
                 </div>
             </template>
         </v-data-table>
-        <event-list
-            ref="EventList"
+        <service-event-list
+            ref="ServiceEventList"
             :assignments="assignments"
         />
         <edit-contacts-dialog
@@ -182,7 +183,7 @@
         <action-menu
             ref="ActionMenu"
             :actions="assignmentActions"
-            @openEventList="$refs.EventList.open(selectedAssignment, currentAccountId)"
+            @openEventList="$refs.ServiceEventList.open(selectedAssignment, currentAccountId)"
             @acceptAssignment="assignmentAccept(selectedAssignment)"
             @editAssignmentContacts="$refs.EditContactsDialog.dialogOpen()"
             @declineAssignment="$refs.AssignmentDeclineDialog.dialogOpen()"
@@ -198,7 +199,7 @@
 
 <script>
     import ActionMenu from "../utils-components/menu/ActionMenu"
-    import EventList from "./components/EventList"
+    import ServiceEventList from "./components/ServiceEventList"
     import Menu from "../utils-components/menu/Menu"
     import ShowHideColumnsDialog from "../utils-components/show-hide-columns/ShowHideColumnsDialog"
     import ServiceUpdateLogsDialog from "./components/ServiceUpdateLogsDialog"
@@ -219,7 +220,7 @@
 	export default {
 		name: "Service",
         components: {
-	        EventList,
+	        ServiceEventList,
 			ActionMenu,
 	        ServiceMenu: Menu,
 	        ShowHideColumnsDialog,
@@ -253,6 +254,11 @@
 		methods: {
 			filterAssignmentActions,
 			saveAssignmentsByOwnerToExcelFile,
+
+			async initializeEventList(item, row) {
+				row.select(true)
+				this.$refs.ServiceEventList.open(item, this.currentAccountId)
+			},
 
 	        actionMenuOpen(e, { item }) {
 		        e.preventDefault()

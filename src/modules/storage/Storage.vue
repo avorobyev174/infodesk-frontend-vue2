@@ -19,6 +19,7 @@
             :items="meters"
             :options.sync="options"
             :server-items-length="totalMetersCount"
+            @click:row="initializeEventList"
         >
             <template v-slot:no-results>
                 <span>Нет данных...</span>
@@ -214,6 +215,11 @@
 			},
 		},
 		methods: {
+			async initializeEventList(item, row) {
+				row.select(true)
+                this.$refs.LogList.open(item)
+			},
+
 			actionMenuOpen(e, { item }) {
 				e.preventDefault()
 				this.selectedMeter = item

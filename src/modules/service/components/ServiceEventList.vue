@@ -4,29 +4,37 @@
         absolute
         temporary
         right
-        width="400"
+        width="475"
         class="event-list"
     >
-        <v-list-item class="pt-3">
-            <v-list-item-avatar>
-                <v-img :src="photoUrl" lazy-src="@/assets/no-user-image.png"></v-img>
-            </v-list-item-avatar>
-            <v-list-item-content>
-                <v-list-item-title>Исполнитель</v-list-item-title>
-                <v-list-item-subtitle>{{ owner }}</v-list-item-subtitle>
+        <v-list-item class="pt-3" style="display:flex; gap: 12px">
+            <v-icon large color="black"> mdi-meter-electric-outline</v-icon>
+            <v-list-item-content class="p-0">
+                <v-list-item-title class="pb-1 font-weight-medium">Тип: {{ getMeterTypeTitle(meterType) }}</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium">Серийный номер: {{ serialNumber }}</v-list-item-subtitle>
+                <v-list-item-subtitle class="font-weight-medium">Дата последнего опроса: {{ formatDate(lastDataDate) }}</v-list-item-subtitle>
             </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
-        <v-timeline
-            align-top
-            dense
-        >
+        <v-timeline align-top dense>
             <v-timeline-item
                 v-for="(event, i) in events"
-                :key="i"
+                :key="event.id"
                 :color="getAssignmentEventTypeColor(event.type)"
+                large
             >
-                <span class="mb-1 event-type">{{ getAssignmentEventTypeTitle(event.type) }}</span>
+                <template v-slot:icon>
+                    <v-avatar size="42">
+                        <v-img :src="getAvatarIcon(event.owner_id)" v-if="isAvatarExist(event.owner_id)"/>
+                        <v-icon v-else>{{ getTimelineIcon(event.type) }}</v-icon>
+                    </v-avatar>
+                </template>
+                <p class="mb-0 event-type">
+                    {{ getAssignmentEventTypeTitle(event.type) }}
+                </p>
+                <p class="mb-1 event-close-reason">
+                    {{ getAssignmentEventCloseReasonTitle(event.close_reason) }}
+                </p>
                 <v-btn
                     x-small
                     icon
@@ -37,9 +45,6 @@
                 >
                     <v-icon>mdi-close-box-outline</v-icon>
                 </v-btn>
-                <p class="mb-0 event-close-reason" v-if="event.close_reason">
-                    {{ getAssignmentEventCloseReasonTitle(event.close_reason) }}
-                </p>
                 <p class="mb-0 event-owner" v-if="event.owner_id">
                     {{ getAccountFullName(event.owner_id) }}
                 </p>
@@ -72,11 +77,10 @@
                     @click="$refs.AddOrEditAssignmentEventDialog.dialogOpen()"
                     v-bind="attrs"
                     v-on="on"
-                    dark
                     :color="colorGreen"
                     small
                 >
-                    <v-icon>mdi-plus</v-icon>
+                    <v-icon :color="colorSuperGrey">mdi-plus</v-icon>
                 </v-btn>
             </template>
             <span>Добавить событие</span>
@@ -90,11 +94,10 @@
                     @click="$refs.closeAssignmentDialog.dialogOpen()"
                     v-bind="attrs"
                     v-on="on"
-                    dark
                     :color="colorBlue"
                     small
                 >
-                    <v-icon>mdi-clipboard-check-outline</v-icon>
+                    <v-icon :color="colorSuperGrey">mdi-clipboard-check-outline</v-icon>
                 </v-btn>
             </template>
             <span>Закрыть поручение</span>
@@ -141,7 +144,7 @@
     import DialogWithDataSlotOnlyClose from "../../utils-components/dialog/DialogWithDataSlotOnlyClose"
 
 	export default {
-		name: 'EventList',
+		name: 'ServiceEventList',
         components: {
 	        DialogWithDataSlotOnlyClose,
 	        DialogCustom
@@ -156,12 +159,15 @@
             selectedActionEvent: null,
 			events: [],
 			lastEvent: null,
+			lastDataDate: '',
             owner: '',
             photoUrl: '',
 			closeReason: 1,
 			currentAccountId: 1,
             addOrEditDialogTitle: 'Добавить событие',
             addOrEditDialogButtonTitle: 'Добавить',
+			meterType: null,
+			serialNumber: '',
 		}),
         props: {
 		    assignments: {
@@ -179,9 +185,10 @@
             'getAccountFullName',
             'getAssignmentEventCloseReasonTitle',
             'getAssignmentEventTypeColor',
+            'getMeterTypeTitle',
         ],
         computed: {
-	        ...mapState([ 'colorGrey', 'colorRed', 'colorGreen', 'colorBlue' ]),
+	        ...mapState([ 'colorGrey', 'colorRed', 'colorGreen', 'colorBlue', 'colorSuperGrey' ]),
 	        ...mapGetters({
 		        accounts: 'dictionary/getAccounts',
 		        assignmentCloseReasonTypes: 'dictionary/getAssignmentCloseReasonTypes',
@@ -203,15 +210,15 @@
 			]),
 
 			async open(assignment, currentAccountId) {
-				this.owner = 'отсутствует'
-				this.photoUrl = this.$store.state.serverUrl + '/images/no-user-image.png'
 				this.selectedAssignment = assignment
 				this.currentAccountId = currentAccountId
-				const { id, owner_id, status } = assignment
+				const { id, owner_id, status, meter_type, meter_serial_number, last_data_date } = assignment
+				this.meterType = meter_type
+				this.serialNumber = meter_serial_number
+				this.lastDataDate = last_data_date
                 this.isButtonVisible =
                     ![ AssignmentStatus.CLOSED, AssignmentStatus.CLOSED_AUTO ].includes(status) && currentAccountId === owner_id
-				const account = this.accounts.find(({ id }) => owner_id === id)
-				this.owner = this.getAccountFullName(owner_id)
+
 				try {
 					this.events = await this.fetchAssignmentEvents(id)
                     this.lastEvent = this.events.at(0)
@@ -219,7 +226,7 @@
 	                    this.photoUrl = this.$store.state.serverUrl + `/images/${ account?.photo }`
                     } else {
 	                    this.owner = 'отсутствует'
-	                    this.photoUrl = this.$store.state.serverUrl + '/images/no-user-image.png'
+	                    this.photoUrl = ''
                     }
 					this.eventListDrawerModel = true
 				} catch (e) {
@@ -302,6 +309,35 @@
 					this.closeEditDescriptionDialog()
 				}
             },
+
+			getAvatarIcon(ownerId) {
+				const account = this.accounts.find(({ id }) => ownerId === id)
+				if (account) {
+					const { photo } = account
+					if (photo) {
+						return this.$store.state.serverUrl + `/images/${ photo }`
+					}
+				}
+			},
+
+			getTimelineIcon(eventType) {
+				if (eventType === AssignmentEventType.CLOSED || eventType === AssignmentEventType.CLOSED_AUTO) {
+					return 'mdi-clipboard-check-outline'
+				} else if (eventType === AssignmentEventType.SYSTEM_ACTION) {
+					return 'mdi-clipboard-pulse-outline'
+				} else {
+					return 'mdi-clipboard-plus-outline'
+				}
+			},
+
+			isAvatarExist(ownerId) {
+				const account = this.accounts.find(({ id }) => ownerId === id)
+				if (account) {
+					const { photo } = account
+					return photo
+				}
+				return false
+			},
 		}
 	}
 </script>
@@ -331,6 +367,7 @@
     .event-type {
         font-size: 14px;
         font-weight: 500;
+        text-decoration: underline;
     }
 
     .event-text {
@@ -346,4 +383,4 @@
     .event {
         width: 250px;
     }
-</style>mec2022
+</style>

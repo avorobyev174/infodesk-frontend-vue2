@@ -3,7 +3,7 @@
         class="m-3 px-4 pb-4 welcome-card"
     >
         <v-card-text class="slideRight" style="visibility: hidden;">
-            <p class="text-h6 text-secondary search-card-title">Добро пожаловать на внутренний сайт МЭК</p>
+            <p class="text-h6 text-secondary welcome-text">Добро пожаловать на внутренний сайт МЭК</p>
             <p class="search-card-info">для продолжения работы перейдите в интересующий вас модуль</p>
             <img :class="imgClass"/>
         </v-card-text>
@@ -45,6 +45,10 @@
         width: 650px;
         min-width: 350px;
         min-height: 190px;
+    }
+
+    .welcome-text {
+        color: rgba(0,0,0,0.87) !important;
     }
 
     .img-container {

@@ -89,7 +89,7 @@
 			'getEmployeeStaffIdByCard',
 			'getEmployeeTitleByCard',
 			'getMeters',
-            'formatDate'
+            'formatDateIfNotNull'
 		],
 		methods: {
 			...mapActions('storage', [
@@ -129,50 +129,61 @@
                 }
 				try {
 					const meterSerialNumber = this.editedItem.serial_number
-					const res = await this.deleteMeter({
+					const deletedMeter = await this.deleteMeter({
                         guid: this.editedItem.guid,
                         meter: this.editedItem,
                         editorStaffId: this.staffId
 					})
 
-					if (!res) {
-						this.showNotificationError(`Что то пошло не так при удалении счетчика ${ meterSerialNumber }`)
-					} else {
-						this.meters.splice(this.editedIndex, 1)
-						this.$refs.MeterDeleteDialog.dialogClose()
-						this.showNotificationSuccess(`Счетчик ${ meterSerialNumber } успешно удален`)
-					}
+                    this.meters.splice(this.editedIndex, 1)
+                    this.$refs.MeterDeleteDialog.dialogClose()
+                    this.showNotificationSuccess(`Счетчик ${ meterSerialNumber } успешно удален`)
                 } catch (e) {
 					this.showNotificationRequestError(e)
 				}
 			},
 
 			compareData(meter, newMeterData) {
-                let updateField = ''
+                const updateFields = {}
 
 				if (meter.meter_type !== newMeterData.type) {
-					updateField += `Type CurrentValue=${ newMeterData.type } OldValue=${ meter.meter_type };`
+					updateFields.meter_type = { title: 'Тип', old: meter.meter_type, new: newMeterData.type }
+					//updateFields += `Type CurrentValue=${ newMeterData.type } OldValue=${ meter.meter_type };`
 				}
 				if (meter.serial_number !== newMeterData.serialNumber) {
-					updateField += `SerialNumber CurrentValue=${ newMeterData.serialNumber } OldValue=${ meter.serial_number };`
+					updateFields.serial_number = { title: 'Серийный номер', old: meter.serial_number, new: newMeterData.serialNumber }
+					//updateFields += `SerialNumber CurrentValue=${ newMeterData.serialNumber } OldValue=${ meter.serial_number };`
 				}
 				if (meter.accuracy_class !== newMeterData.accuracyClass) {
-					updateField += `AccuracyClass CurrentValue=${ newMeterData.accuracyClass } OldValue=${ meter.accuracy_class };`
+					updateFields.accuracy_class = { title: 'Класс точности', old: meter.accuracy_class, new: newMeterData.accuracyClass }
+					//updateFields += `AccuracyClass CurrentValue=${ newMeterData.accuracyClass } OldValue=${ meter.accuracy_class };`
 				}
 				if (meter.passport_number !== newMeterData.passportNumber) {
-					updateField += `PassportNumber CurrentValue=${ newMeterData.passportNumber } OldValue=${ meter.passport_number };`
+					updateFields.passport_number = { title: 'Номер паспорта', old: meter.passport_number, new: newMeterData.passportNumber }
+					//updateFields += `PassportNumber CurrentValue=${ newMeterData.passportNumber } OldValue=${ meter.passport_number };`
 				}
 				if (meter.condition !== newMeterData.condition) {
-					updateField += `Condition CurrentValue=${ newMeterData.condition } OldValue=${ meter.condition };`
+					updateFields.condition = { title: 'Состояние', old: meter.condition, new: newMeterData.condition }
+					//updateFields += `Condition CurrentValue=${ newMeterData.condition } OldValue=${ meter.condition };`
 				}
-				if (meter.calibration_date !== newMeterData.calibration) {
-					updateField += `CalibrationDate CurrentValue=${ newMeterData.calibration } OldValue=${ this.formatDate(meter.calibration_date) };`
+				if (this.formatDateIfNotNull(meter.calibration_date) !== newMeterData.calibration) {
+					updateFields.calibration_date = {
+						title: 'Дата поверки',
+                        old: this.formatDateIfNotNull(meter.calibration_date),
+                        new: newMeterData.calibration
+					}
+					//updateFields += `CalibrationDate CurrentValue=${ newMeterData.calibration } OldValue=${ this.formatDate(meter.calibration_date) };`
 				}
 				if (meter.calibration_interval !== newMeterData.interval) {
-					updateField += `CalibrationInterval CurrentValue=${ newMeterData.interval } OldValue=${ meter.calibration_interval };`
+					updateFields.calibration_interval = { title: 'Межповерочный интервал', old: meter.calibration_interval, new: newMeterData.interval }
+					//updateFields += `CalibrationInterval CurrentValue=${ newMeterData.interval } OldValue=${ meter.calibration_interval };`
+				}
+				if (meter.property !== newMeterData.owner) {
+					updateFields.property = { title: 'Собственник', old: meter.property, new: newMeterData.owner }
+					//updateFields += `CalibrationInterval CurrentValue=${ newMeterData.interval } OldValue=${ meter.calibration_interval };`
 				}
 
-				return updateField
+				return updateFields
 			},
 
 			async checkDataAndUpdate(newMeterData) {
@@ -189,9 +200,8 @@
 				const meterData = this.$refs.addOrEditView.getData()
 				this.saveLoading = true
                 try {
-	                const updateField = await this.checkDataAndUpdate(meterData)
-
-	                if (!updateField) {
+	                const updateFields = await this.checkDataAndUpdate(meterData)
+	                if (!Object.keys(updateFields).length) {
 		                return this.showNotificationInfo('Ничего не отредактировано')
 	                }
 
@@ -199,21 +209,17 @@
 		                return this.showNotificationWarning('Операция невозможна, ваш номер сотрудника не определен')
 	                }
 
-	                const res = await this.editMeter({
+	                const updatedMeter = await this.editMeter({
 		                ...meterData,
 		                editorStaffId: this.staffId,
 		                guid: this.editedItem.guid,
-		                updateField
+		                updateFields
 	                })
 
-	                if (!res) {
-		                this.showNotificationError('Что то пошло не так при редактировании')
-	                } else {
-	                	const editedMeter = this.meters.find((meter) => meter.guid === res.guid)
-                        Object.assign(editedMeter, res)
-		                this.showNotificationSuccess('Редактирование выполнено успешно')
-		                this.close()
-	                }
+                    const oldMeter = this.meters.find(({ guid }) => guid === updatedMeter.guid)
+                    Object.assign(oldMeter, updatedMeter)
+                    this.showNotificationSuccess('Редактирование выполнено успешно')
+                    this.close()
                 } catch (e) {
 	                this.showNotificationRequestError(e)
                 } finally {

@@ -71,6 +71,10 @@
 				return `${ day }.${ month }.${ year }`
 			},
 
+			formatDateIfNotNull(dateToFormat, withTime) {
+				return dateToFormat ? this.formatDate(dateToFormat, withTime) : null
+			},
+
 			formatDateIso(dateToFormat, withTime) {
 				if (!dateToFormat) {
 					return 'отсутствует'

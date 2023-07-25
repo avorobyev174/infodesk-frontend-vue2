@@ -12,6 +12,7 @@
 			return {
 				formatDate: this.formatDate,
 				formatDateIso: this.formatDateIso,
+				formatDateIfNotNull: this.formatDateIfNotNull,
 				getEmployeeTitleByStaffId: this.getEmployeeTitleByStaffId,
 				getMeterTypeTitle: this.getMeterTypeTitle,
 				getMaterialTypeTitle: this.getMaterialTypeTitle,

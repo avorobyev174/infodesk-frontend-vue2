@@ -30,8 +30,11 @@
                 </template>
                 <span v-if="log.oper_type !== Operation.EDIT" class="mb-1 event-type" style="text-decoration: underline">{{ getLocationTitle(log.new_location) }}</span>
                 <span v-else class="mb-1 event-type" style="text-decoration: underline">{{ getOperationTitle(log.oper_type) }}</span>
-                <p class="mb-2 event-date">
+                <p class="mb-0 event-date">
                     {{ formatDate(log.datetime, true) }}
+                </p>
+                <p style="font-size: 8px; font-style: italic; font-weight: bold" class="mb-2">
+                    {{ log.id }}
                 </p>
                 <p class="mb-0 event-owner" >
                     <span v-if="![ Operation.EDIT, Operation.REGISTRATION, Operation.REGISTRATION_WITHOUT_SERIAL_NUMBER ].includes(log.oper_type)">{{ getEmployeeTitleByStaffId(log.issuing_person) }} </span>
@@ -39,7 +42,7 @@
                     {{ getEmployeeTitleByStaffId(log.accepted_person) }}
                 </p>
                 <div class="d-flex">
-                    <p class="event-text d-inline-block">{{ log.comment_field }}</p>
+                    <p class="event-text d-inline-block mb-0">{{ log.comment_field }}</p>
                     <v-btn
                         x-small
                         icon
@@ -63,13 +66,11 @@
                        style="height: fit-content; font-size: 12px"
                    >{{ log.spentItems }}</v-chip>
                </div>
-               <div v-else>
-                   <div v-for="(field, i) in parseUpdateField(log.update_field)" :key="i">
-                       <span style="font-size: 12px">{{ field.name }} </span>
-                       <v-chip small tag="span" :color="colorOrange">{{ field.oldValue }}</v-chip>
-                       <span> &#10132; </span>
-                       <v-chip small tag="span" :color="colorGreen">{{ field.newValue }}</v-chip>
-                   </div>
+               <div v-else-if="log.update_field_new">
+                   <v-chip
+                       class="text-pre p-1 pr-3 pl-3 mt-1 mb-1"
+                       style="height: fit-content; display: block; width: fit-content; font-size: 12px"
+                   >{{ parseEditField(log.update_field_new) }}</v-chip>
                </div>
             </v-timeline-item>
         </v-timeline>
@@ -92,7 +93,6 @@
 <script>
 	import { mapActions, mapState, mapGetters } from 'vuex'
     import { Location, Operation } from "../const"
-	import { parseUpdateField } from "../js/event-list-parsing-utils"
     import DialogWithDataSlot from "../../utils-components/dialog/DialogWithDataSlot"
 
 	export default {
@@ -113,6 +113,7 @@
 		}),
 		inject: [
 			'showNotificationSuccess',
+			'showNotificationError',
 			'showNotificationRequestError',
 			'formatDate',
 			'getLVStateTitle',
@@ -120,7 +121,10 @@
 			'getLocationTitle',
 			'getEmployeeTitleByStaffId',
 			'getMeterTypeTitle',
-            'showNotificationWarning'
+            'showNotificationWarning',
+            'getAccuracyClassTitle',
+            'getConditionTitle',
+            'getOwnerTitle',
 		],
         computed: {
 	        ...mapState([ 'colorGrey', 'colorRed', 'colorGreen', 'colorBlue', 'colorOrange', 'colorDarkGrey' ]),
@@ -134,8 +138,6 @@
 				'fetchMeterRepairData',
 				'editLogComment'
 			]),
-			parseUpdateField,
-
 			async open({ meter_type, guid, serial_number }) {
 				try {
 					if (!guid) {
@@ -189,7 +191,35 @@
 	                return photo
                 }
 	            return false
-            }
+            },
+
+			parseEditField(updateField) {
+				try {
+					const editFields = JSON.parse(updateField)
+					return Object.entries(editFields).map(([ key, value ]) => {
+						switch (key) {
+							case 'meter_type': return { ...value, old: this.getMeterTypeTitle(value.old), new: this.getMeterTypeTitle(value.new) }
+							case 'accuracy_class': return { ...value, old: this.getAccuracyClassTitle(value.old), new: this.getAccuracyClassTitle(value.new) }
+							case 'condition': return { ...value, old: this.getConditionTitle(+value.old), new: this.getConditionTitle(+value.new) }
+							case 'property': return { ...value, old: this.getOwnerTitle(value.old), new: this.getOwnerTitle(value.new) }
+							case 'calibration_date': return {
+								...value,
+                                old: value.old ? value.old : 'отсутствует',
+                                new: value.new ? value.new : 'отсутствует',
+							}
+							case 'passport_number': return {
+								...value,
+                                old: +value.old ? value.old : 'отсутствует',
+								new: +value.new ? value.new : 'отсутствует',
+							}
+							case 'serial_number': return { ...value, old: +value.old ? value.old: 'отсутствует' }
+						}
+						return value
+					}).map((field) => `${ field.title }: ${ field.old } ⇾ ${ field.new }`).join('\n')
+				} catch (e) {
+					this.showNotificationError('Ошибка при парсинге лога редактирования')
+				}
+			},
 		}
 	}
 </script>

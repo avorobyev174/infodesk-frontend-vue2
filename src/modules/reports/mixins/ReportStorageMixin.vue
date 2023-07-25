@@ -85,32 +85,17 @@
 
 				    const response = await this.getMeterReport({ type, serialNumber })
 				    const data = response.map((row) => {
-                        let updateField = ''
-                        if ([ 1, 2, 10 ].includes(row.oper_type)) {
-	                        const updFields = this.parseUpdateCustomField(row.update_field)
-                            if (updFields.length) {
-	                            updateField = updFields.map((field) => field.value).join(' ')
-                            }
-                        } else {
-	                        const updFields = this.parseUpdateField(row.update_field)
-	                        if (updFields.length) {
-		                        updateField = updFields.map((field) => {
-		                        	return `${ field.name }: ${ field.oldValue } ➔ ${ field.newValue }`
-                                }).join(' ')
-	                        }
-                        }
 					    return {
                         	...row,
 						    oper_type: this.getOperationTitle(row.oper_type),
 						    issuing_person: this.getEmployeeTitleByStaffId(row.issuing_person),
 						    accepted_person: this.getEmployeeTitleByStaffId(row.accepted_person),
-						    update_field: updateField
                         }
 				    })
 
 				    this.$refs.DataResultReportDialog.open(
 				    	{
-                            headers: [ 'Дата', 'Операция', 'Отдающий', 'Принимающий', 'Комментарий', 'Доп. информация' ],
+                            headers: [ 'Дата', 'Операция', 'Отдающий', 'Принимающий', 'Комментарий' ],
                             dialogTitle: title,
                             data
                         },

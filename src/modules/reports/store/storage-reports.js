@@ -123,6 +123,15 @@ export const storageReports = {
         
             return response.data
         },
+        
+        async getGroupByTypeAndEmpStorageReport({ state, commit }, reportData) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ this.state.reports.serverModule }/get-group-by-type-and-emp-count-report`,
+                reportData,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
     },
     namespaced: true,
 }

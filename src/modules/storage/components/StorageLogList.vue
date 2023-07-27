@@ -4,7 +4,7 @@
         absolute
         temporary
         right
-        width="475"
+        width="400"
         class="event-list"
     >
         <v-list-item class="pt-3" style="display:flex; gap: 12px">

@@ -2,7 +2,7 @@
 	import { mapActions, mapGetters, mapState } from "vuex"
 	import headers from "../js/programming-table-headers"
 	import menuActions from "../js/meters-menu"
-	import { defaultMeterActions } from '../js/meters-actions'
+	import { defaultMeterActions, filterActions } from '../js/meters-actions'
 
 	export default {
 		name: "ProgrammingMixin",
@@ -23,12 +23,15 @@
 				module: this.module,
 				getMeters: this.getMeters,
 				getAccountFullName: this.getAccountFullName,
+				getProgrammingLogTypeTitle: this.getProgrammingLogTypeTitle,
+				updateMeterData: this.updateMeterData,
 			}
 		},
 		computed: {
 			...mapGetters({
 				meters: 'programming/getMeters',
 				isLogin: 'getIsLogin',
+				currentAccountId: 'getAccountId',
 			}),
 			...mapState('programming', [ 'loading' ]),
 			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue' ]),
@@ -47,14 +50,14 @@
 			...mapActions('programming', [
 				'fetchMeters',
 				'fetchAllMeters',
-				'fetchBrokenMeters',
                 'addOrRemovePyramidLoad',
 				'deleteMeter',
+				'removeSimCardData',
 			]),
 			...mapActions('repair', [
 				'setProgrammingValue'
 			]),
-
+			filterActions,
 			async meterDelete() {
 				this.$refs.MeterDeleteDialog.dialogClose()
 				try {
@@ -100,6 +103,21 @@
 					this.showNotificationRequestError(e)
 				}
 			},
+
+            async simCardDataRemove() {
+	            try {
+		            const updatedMeter = await this.removeSimCardData(this.selectedMeter)
+                    this.updateMeterData(updatedMeter, 'Информация успешно обновлена')
+	            } catch (e) {
+		            this.showNotificationRequestError(e)
+	            }
+            },
+
+            updateMeterData(updatedMeter, messageSuccess) {
+	            const meter = this.meters.find(({ id }) => id ===  updatedMeter.id)
+	            Object.assign(meter, updatedMeter)
+	            this.showNotificationSuccess(messageSuccess)
+            }
 		}
 	}
 </script>

@@ -6,6 +6,7 @@ export default [
 	{ title: 'Получить данные из Ростелекома', onClick: 'updateFromRTC', icon: 'mdi-database-import', color: 'primary' },
 	{ title: 'Получить данные из СТЭКа', onClick: 'actualizeFromStek', icon: 'mdi-database-import', color: 'primary' },
 	{ title: 'Показать списанные', onClick: 'showBrokenMeters', icon: 'mdi-database-eye', color: 'primary' },
+	{ title: 'Показать удаленные', onClick: 'showDeletedMeters', icon: 'mdi-database-remove', color: 'primary' },
 	{ title: 'Загрузить данные в Пирамиду', onClick: 'saveExcelDataToPyramid', icon: 'mdi-file-upload', color: 'rgba(102, 187, 106)' },
 	{ title: 'Обновить данные из СТЭКа', onClick: 'saveExcelRefreshDataToPyramid', icon: 'mdi-database-refresh', color: 'rgba(102, 187, 106)' },
 	{ title: 'Видимость колонок', onClick: 'showHideColumns', icon: 'mdi-eye', color: 'primary' },

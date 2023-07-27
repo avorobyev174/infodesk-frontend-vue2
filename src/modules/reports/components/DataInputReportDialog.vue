@@ -70,8 +70,19 @@
         </template>
         <template v-slot:fields v-else>
             <v-combobox
+                :items="types"
+                item-text="title"
+                item-value="value"
+                label="Тип"
+                v-model="type"
+                :rules="requiredRules"
+                outlined
+                v-if="[ Report.STORAGE_BY_OWNER_AND_TYPE ].includes(id)"
+            >
+            </v-combobox>
+            <v-combobox
                 :items="locations"
-                item-text="text"
+                item-text="title"
                 item-value="value"
                 label="Местонахождение"
                 v-model="location"
@@ -84,7 +95,7 @@
                 :items="serviceEmployees"
                 item-text="title"
                 item-value="value"
-                label="Сотрудник"
+                label="Сотрудник УИТ"
                 v-model="serviceEmployee"
                 :rules="requiredRules"
                 outlined
@@ -94,7 +105,7 @@
             <v-combobox
                 :items="employees"
                 item-text="name"
-                item-value="staffId"
+                item-value="staff_id"
                 label="Сотрудник"
                 v-model="employee"
                 :rules="requiredRules"
@@ -103,6 +114,7 @@
                 	Report.STORAGE_IN_OUT_BY_LOCATION,
                     Report.STORAGE_LOGS_BY_OWNER,
                     Report.STORAGE_IN_OUT_BY_OWNER,
+                    Report.STORAGE_BY_OWNER_AND_TYPE,
                 ].includes(id)"
             >
             </v-combobox>
@@ -249,7 +261,7 @@
 		            case Report.STORAGE_LOGS_BY_OWNER:
 		            case Report.STORAGE_IN_OUT_BY_OWNER:
 			            reportInputData = {
-				            empStaffId: this.employee.staffId,
+				            empStaffId: this.employee.staff_id,
 				            startDate: this.startDate,
 				            endDate: this.endDate
 			            }; break
@@ -269,6 +281,14 @@
 		            case Report.PYRAMID_LOADED_BY_CUSTOMER_ADDRESS: reportInputData = {
 			            sort: this.sortItems.find(({ value }) => value === this.sort)
 		            }; break
+		            case Report.STORAGE_BY_OWNER_AND_TYPE:
+		            	reportInputData = {
+		            		type: this.type.value,
+				            empStaffId: this.employee.staff_id,
+				            startDate: this.startDate,
+				            endDate: this.endDate
+		            	};
+			            break
 	            }
 
                 return this.$emit('submit', {

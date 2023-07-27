@@ -26,6 +26,7 @@
                 isLogin: 'getIsLogin',
 				storageEmployeesModified: 'dictionary/getStorageEmployeesModified',
 				parseOptions: 'dictionary/getParseOptions',
+				programmingLogTypes: 'dictionary/getProgrammingLogTypes',
             })
 		},
         inject: [ 'showNotificationRequestErrorWithCustomText' ],
@@ -174,6 +175,11 @@
 			getLVStateTitle(lvState) {
 				const state = this.lvStates.find(({ value }) => lvState === value)
 				return state ? state.title : lvState
+			},
+
+			getProgrammingLogTypeTitle(type) {
+				const state = this.programmingLogTypes.find(({ value }) => type === value)
+				return state ? state.title : type
 			},
 
 			getOperationTitle(operation) {

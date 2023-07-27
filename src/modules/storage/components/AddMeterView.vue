@@ -23,6 +23,7 @@
                 :search-input.sync="serialNumber"
                 outlined
                 :disabled="formSubmit"
+                :loading="serialNumberLoading"
             >
             </v-combobox>
             <v-text-field
@@ -60,7 +61,12 @@
                 <v-btn @click="addAllMetersByTypeOnClick" :disabled="formSubmit" v-show="isRepair">
                     <v-icon :color="colorGreen" large>mdi-playlist-plus</v-icon>
                 </v-btn>
-                <v-btn @click="addAllAvailableMetersOnClick" :disabled="formSubmit" v-show="isRepair">
+                <v-btn
+                    @click="addAllAvailableMetersOnClick"
+                    :disabled="formSubmit"
+                    v-show="isRepair"
+                    :loading="allAvailableMetersLoading"
+                >
                     <v-icon :color="colorGreen" v-if="isAddAll" large>mdi-playlist-star</v-icon>
                     <v-icon :color="colorRed" v-else large>mdi-playlist-remove</v-icon>
                 </v-btn>
@@ -131,6 +137,8 @@
         data: () => ({
 	        OperationStatus,
 	        loading: false,
+	        serialNumberLoading: false,
+	        allAvailableMetersLoading: false,
 	        headers: [
 		        {
 			        text: 'Тип',
@@ -394,11 +402,10 @@
 						         ${ this.isRepair ? 'или не находится в ремонте' : '' }`)
 				        }
 
-                        const { meter_location, guid, lastLog } = checkedMeter
+                        const { meter_location, guid, isSetWorkStatus } = checkedMeter
 
 				        if (this.newLocation === Location.STORAGE && meter_location === Location.REPAIR) {
-					        const { update_field } = lastLog
-					        if (!this.checkIsMeterFromRepairValid(update_field)) {
+					        if (!isSetWorkStatus) {
 						        return this.showNotificationWarning(
 							        `Счетчик ${ this.getMeterTypeTitle(meterType) } c серийным номером ${ this.serialNumber }
 		                            без статуса работоспособности после ремонта`)
@@ -423,10 +430,10 @@
 
 	        async addAllAvailableMetersOnClick() {
 	        	if (this.isAddAll) {
+	        		this.allAvailableMetersLoading = true
 			        const availableMeters = await this.getAllAvailableMetersFromRepair()
-			        for (const { meter_type, serial_number, guid, updateField } of availableMeters) {
-			        	const isValid = this.checkIfUpdateFieldIsValidForButtonAll(updateField)
-			        	if (!this.meters.find((meter) => meter.guid === guid) && isValid) {
+			        for (const { meter_type, serial_number, guid, isSetWorkStatus } of availableMeters) {
+			        	if (!this.meters.find((meter) => meter.guid === guid) && !isSetWorkStatus) {
                             this.meters.push({
                                 type: meter_type,
                                 serialNumber: serial_number,
@@ -436,6 +443,7 @@
                         }
 			        }
 			        this.$emit('onMeterCountUpdate', this.meters.length)
+			        this.allAvailableMetersLoading = false
 		        } else {
 			        this.$emit('onMeterCountUpdate', '')
 			        this.$emit('metersClear')
@@ -445,18 +453,20 @@
 
             async meterTypeOnChange() {
 	        	if (this.isRepair) {
+	        		this.serialNumberLoading = true
 			        this.availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.value)
                     this.availableByTypeSerials = this.availableByTypeMeters
-                        .filter((availableMeter) => this.checkIfUpdateFieldIsValid(availableMeter))
-                        .map((availableMeter) => availableMeter.serial_number)
+                        .filter(this.checkMeterValid).map(({ serial_number }) => serial_number)
+			        console.log(this.availableByTypeSerials)
                     this.$emit('meterTypeChanged', this.type.value)
+			        this.serialNumberLoading = false
                 }
             },
 
 	        async addAllMetersByTypeOnClick() {
-                for (const { meter_type, serial_number, guid, updateField } of this.availableByTypeMeters) {
-	                const isValid = this.checkIfUpdateFieldIsValidForButtonAll(updateField)
-			        if (!this.meters.find((meter) => meter.guid === guid) && isValid) {
+		        console.log(this.availableByTypeMeters)
+                for (const { meter_type, serial_number, guid, isSetWorkStatus } of this.availableByTypeMeters) {
+			        if (!this.meters.find((meter) => meter.guid === guid) && !isSetWorkStatus) {
                         this.meters.push({
                             type: meter_type,
                             serialNumber: serial_number,
@@ -469,26 +479,16 @@
 		        this.$emit('onMeterCountUpdate', this.meters.length)
             },
 
-            checkIfUpdateFieldIsValid(availableMeter) {
-	        	if (availableMeter.updateField) {
-			        if (this.currentTab === 'materialInsertTab') {
-				        return !(availableMeter.updateField.includes('Используемые материалы:') ||
-                            !availableMeter.updateField.includes('Статус ремонта:'))
-			        } else if (this.currentTab === 'meterWorkabilityTab') {
-				        return availableMeter.updateField.includes('Используемые материалы:') &&
-                            !availableMeter.updateField.includes('Статус ремонта:')
+            checkMeterValid(meter) {
+	        	const { isSetMaterials, isSetWorkStatus } = meter
+	        	if (isSetMaterials || isSetMaterials) {
+			        switch (this.currentTab) {
+				        case 'materialInsertTab': return !isSetMaterials || !isSetWorkStatus
+				        case 'meterWorkabilityTab': return isSetMaterials && !isSetWorkStatus
 			        }
                 }
                 return this.currentTab === 'materialInsertTab'
             },
-
-	        checkIfUpdateFieldIsValidForButtonAll(updateField) {
-		        return updateField ? !updateField.includes('Статус ремонта:')	: true
-	        },
-
-	        checkIsMeterFromRepairValid(updateField) {
-                return updateField ? updateField.split(';').some((field) => field.includes('Статус ремонта:')) : false
-            }
         },
 	}
 </script>

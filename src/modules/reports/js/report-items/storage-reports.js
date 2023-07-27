@@ -130,4 +130,14 @@ export const storageReports = [
 		show: false,
 		open: true,
 	},
+	{
+		id: 21,
+		name: 'Движение приборов учета за период по типу и сотруднику (сгруппированный)',
+		download: false,
+		description: 'Информация по логам приборов учета сгруппированым по типу, сотруднику и дате за выбранный период',
+		executeFunction: 'dataInputReportDialogOpen',
+		loading: false,
+		show: false,
+		open: true,
+	},
 ]

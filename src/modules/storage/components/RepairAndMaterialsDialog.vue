@@ -161,7 +161,7 @@
             isWorkable: true,
         }),
 		computed: {
-			...mapState([ 'colorGreen', 'colorGrey', 'colorRed', 'colorOrange' ]),
+			...mapState([ 'colorGreen', 'colorGrey' ]),
 			...mapGetters({ staffId: 'getStaffId', }),
 		},
 		inject: [
@@ -224,26 +224,15 @@
 		            return this.showNotificationWarning('Для выполнения операции заполните таблицу материалов')
 	            }
 
-	            let updateStr = 'Используемые материалы:;'
-	            this.repairMaterials.forEach((material) => {
-		            updateStr += `${ this.getMaterialTypeTitle(material.materialType) } ${ material.count }шт.;`
-	            })
-
 	            try {
 		            this.formSubmit = true
                     this.$refs.addMeterTable.setLoading(true)
-                    const result = await this.insertMeterStorageMaterials({
+                    await this.insertMeterStorageMaterials({
                         meters: this.repairMeters,
                         materials : this.repairMaterials,
-                        updateStr
                     })
-                    if (result?.success) {
-                        this.showNotificationSuccess('Операция выполнена успешно')
-                        this.resultColorMaterials = this.colorGreen
-                    } else {
-	                    this.formSubmit = false
-                        this.showNotificationError('Что то пошло не так при внесении материалов')
-                    }
+                    this.showNotificationSuccess('Внесение материалов выполнено успешно')
+                    this.resultColorMaterials = this.colorGreen
 		            await this.getMeters()
 	            } catch (e) {
 		            this.showNotificationRequestError(e)
@@ -260,13 +249,8 @@
 	            try {
 		            this.formSubmit = true
 		            this.$refs.addMaterialTableStorage.setLoading(true)
-                    const result = await this.insertMaterialToStorage(this.storageMaterials)
-                    if (result?.success) {
-                        this.showNotificationSuccess('Операция выполнена успешно', this.colorGreen)
-                    } else {
-                        this.formSubmit = false
-                        this.showNotificationError('Что то пошло не так при внесении материалов на склад')
-                    }
+		            await this.insertMaterialToStorage(this.storageMaterials)
+                    this.showNotificationSuccess('Внесение материалов выполнено успешно')
 	            } catch (e) {
 		            this.showNotificationRequestError(e)
 		            this.formSubmit = false
@@ -287,19 +271,13 @@
 	            try {
 		            this.formSubmit = true
 		            this.$refs.addMeterTableWorkability.setLoading(true)
-		            const result = await this.insertMeterWorkStatus({
+		            await this.insertMeterWorkStatus({
 			            meters: this.repairWorkMeters,
 			            isWorkable : this.isWorkable,
 			            comment : this.comment,
-			            updateStr
 		            })
-		            if (result?.success) {
-			            this.showNotificationSuccess(`Операция выполнена успешно`)
-			            this.resultColorWorkability = this.colorGreen
-		            } else {
-			            this.formSubmit = false
-			            this.showNotificationError('Что то пошло не так при внесении материалов')
-		            }
+                    this.showNotificationSuccess('Установка признака работоспособности выполнена успешно')
+                    this.resultColorWorkability = this.colorGreen
 		            await this.getMeters()
 	            } catch (e) {
 		            this.showNotificationRequestError(e)

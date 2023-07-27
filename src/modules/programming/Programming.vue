@@ -20,6 +20,7 @@
             :items="meters"
             :options.sync="options"
             :server-items-length="totalMetersCount"
+            @click:row="initializeEventList"
         >
             <template v-slot:no-results>
                 <span>Нет данных...</span>
@@ -37,7 +38,8 @@
                         @updateFromRTC="$refs.UpdateDataFromRTCDialog.open()"
                         @actualizeFromStek="$refs.UpdateDataFromSTEKDialog.open()"
                         @showHideColumns="$refs.ShowHideColumnsDialog.dialogOpen()"
-                        @showBrokenMeters="$refs.BrokenMetersDialog.open()"
+                        @showBrokenMeters="$refs.MeterTableInfo.open()"
+                        @showDeletedMeters="$refs.MeterTableInfo.open(true)"
                         @saveExcelDataToPyramid="$refs.SaveDataToExcelDialog.open()"
                         @saveExcelRefreshDataToPyramid="$refs.RefreshDataFromSTEKDialog.open()"
                     />
@@ -216,8 +218,8 @@
             :meters="meters"
             ref="MarkBrokenDialog"
         />
-        <broken-meters-dialog
-            ref="BrokenMetersDialog"
+        <meter-table-info
+            ref="MeterTableInfo"
         />
         <dialog-custom
             ref="MeterRemovePyramidLoadValueDialog"
@@ -239,19 +241,23 @@
         />
         <action-menu
             ref="ActionMenu"
-            :actions="defaultMeterActions"
+            :actions="actions"
             @edit="$refs.AddOrEditDialog.edit(selectedMeter)"
             @delete="$refs.MeterDeleteDialog.dialogOpen()"
             @markBroken="$refs.MarkBrokenDialog.open(selectedMeter)"
             @removePyramidLoadValue="$refs.MeterRemovePyramidLoadValueDialog.dialogOpen()"
             @addPyramidLoadValue="$refs.MeterAddPyramidLoadValueDialog.dialogOpen()"
             @actualizeDataFromStek="$refs.UpdateDataFromSTEKDialog.updateSingleData(selectedMeter)"
+            @removeSimCardData="simCardDataRemove(selectedMeter)"
         />
         <dialog-custom
             ref="MeterDeleteDialog"
             :max-width="600"
             title="Вы уверены что хотите удалить это счетчик?"
             @submit="meterDelete"
+        />
+        <programming-log-list
+            ref="LogList"
         />
     </v-card>
 </template>
@@ -265,7 +271,7 @@ import UpdateDataFromRTCDialog from "./components/UpdateDataFromRTCDialog"
 import Menu from "../utils-components/menu/Menu"
 import ShowHideColumnsDialog from "../utils-components/show-hide-columns/ShowHideColumnsDialog"
 import RefreshDataFromSTEKDialog from "./components/RefreshDataFromSTEKDialog"
-import BrokenMetersDialog from "./components/BrokenMetersDialog"
+import MeterTableInfo from "./components/MeterInfoTable"
 import FavoriteModuleMixin from "../mixins/FavoriteModuleMixin";
 import ColumnVisibilityMixin from "../mixins/ColumnVisibilityMixin"
 import DictionaryMixin from "../mixins/DictionaryMixin"
@@ -274,6 +280,7 @@ import ProgrammingFilterMixin from "./mixins/ProgrammingFilterMixin"
 import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
 import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
 import DialogCustom from "../utils-components/dialog/DialogCustom"
+import ProgrammingLogList from "./components/ProgrammingLogList"
 
 export default {
     name: "Programming",
@@ -288,15 +295,16 @@ export default {
 	    UpdateDataFromRTCDialog,
 	    ProgrammingMenu: Menu,
         ShowHideColumnsDialog,
-        BrokenMetersDialog,
+	    MeterTableInfo,
 	    ComboboxFilter: ComboboxDataTableFilter,
 	    InputFilter: InputDataTableFilter,
+	    ProgrammingLogList
     },
     data: () => ({
 	    module: 'programming',
 	    totalMetersCount: 0,
 	    selectedMeter: {},
-	    meterActions: [],
+	    actions: [],
 	    options: {},
     }),
     inject: [
@@ -318,9 +326,15 @@ export default {
 	},
     mixins: [ ProgrammingMixin, ProgrammingFilterMixin, DictionaryMixin, FavoriteModuleMixin, ColumnVisibilityMixin ],
     methods: {
+	    async initializeEventList(item, row) {
+		    row.select(true)
+		    this.$refs.LogList.open(item)
+	    },
+
 	    actionMenuOpen(e, { item }) {
 		    e.preventDefault()
 		    this.selectedMeter = item
+		    this.actions = this.filterActions(item, this.currentAccountId)
 		    this.$refs.ActionMenu.open(e.clientX, e.clientY)
 	    },
 

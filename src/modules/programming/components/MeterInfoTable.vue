@@ -7,7 +7,7 @@
     >
         <v-card>
             <v-card-title>
-                <span class="m-auto text-h5 text-break text-center py-3">Списанные счетчики</span>
+                <span class="m-auto text-h5 text-break text-center py-3">{{ tableTitle }}</span>
             </v-card-title>
             <v-card-text>
             <v-data-table
@@ -15,6 +15,7 @@
                 :items="meters"
                 :items-per-page="10"
                 class="elevation-1"
+                item-key="serial_number"
                 :search="search"
                 :footer-props="{
                     showFirstLastPage: true,
@@ -23,13 +24,14 @@
                 }"
                 loading-text="Идет загрузка счетчиков..."
                 fixed-header
+                :loading="loading"
             >
                 <template v-slot:top>
                     <v-toolbar flat height="75px">
                         <v-text-field
                             v-model="search"
                             append-icon="mdi-magnify"
-                            label="Поиск по серийному номеру"
+                            label="Поиск"
                             hide-details
                             clearable
                             class="searchTextInput"
@@ -49,14 +51,14 @@
                 <template v-slot:item.acc_id="{ item }">
                     {{ getAccountFullName(item.acc_id) }}
                 </template>
-                <template v-slot:item.data.type="{ item }">
-                    {{ getMeterTypeTitle(item.data.type) }}
+                <template v-slot:item.type="{ item }">
+                    {{ getMeterTypeTitle(item.type) }}
                 </template>
             </v-data-table>
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="dialogClose">Закрыть</v-btn>
+                <v-btn color="primary" text @click="dialogClose">Закрыть</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -67,19 +69,21 @@
     import DialogMixin from "../../mixins/DialogMixin"
 
     export default {
-        name: "BrokenMetersDialog",
+        name: "MeterTableInfo",
         data: () => ({
 	        search: '',
             titles: [
 	            { text: 'Дата', value: 'created', sortable: true, align: 'center' },
+	            // { text: 'Тип', value: 'type', sortable: true, align: 'center' },
+	            { text: 'Серийный номер', value: 'serial_number', sortable: false, align: 'center' },
 	            { text: 'Сотрудник', value: 'acc_id', sortable: true, align: 'center' },
+	            { text: 'ICC', value: 'icc', align: 'center', sortable: false },
+	            { text: 'Номер сим карты', value: 'phone', sortable: false, align: 'center' },
 	            { text: 'Комментарий', value: 'comment', sortable: false, align: 'center' },
-	            { text: 'Тип', value: 'data.type', sortable: true, align: 'center' },
-	            { text: 'Серийный номер', value: 'data.serial_number', sortable: false, align: 'center' },
-	            { text: 'ICC', value: 'data.icc', align: 'center', sortable: false },
-	            { text: 'Номер телефона', value: 'data.phone', sortable: false, align: 'center' },
             ],
             meters: [],
+	        showDeleted: false,
+	        loading: false
         }),
         mixins: [ DialogMixin ],
         inject: [
@@ -89,20 +93,43 @@
             'formatDate',
             'getAccountFullName',
         ],
+        computed: {
+        	tableTitle() {
+        		return this.showDeleted ? 'Удаленные счетчики' : 'Списанные счетчики'
+            }
+        },
         methods: {
-            ...mapActions('programming', [ 'fetchBrokenMeters' ]),
+            ...mapActions('programming', [ 'fetchBrokenMeters', 'fetchDeletedMeters' ]),
 
-            async open() {
+            async open(showDeleted) {
+            	this.loading = true
                 try {
-                    const brokenMeters = await this.fetchBrokenMeters()
-	                this.meters = brokenMeters.map((meter) => ({ ...meter, data: JSON.parse(meter.data) }))
+                	this.showDeleted = showDeleted
+                    let meters = []
+                	if (showDeleted) {
+		                meters = await this.fetchDeletedMeters()
+                        this.meters = meters.map(( state_before, author_acc_id, created ) => ({
+	                        ...JSON.parse(state_before),
+	                        acc_id: author_acc_id,
+	                        created
+                        }))
+                    } else {
+		                meters = await this.fetchBrokenMeters()
+		                this.meters = meters.map(({ acc_id, created, data}) => ({
+			                ...JSON.parse(data),
+			                acc_id,
+			                created
+		                }))
+                    }
                     if (this.meters.length) {
                         this.dialogOpen()
                     } else {
-                        this.showNotificationWarning('Не найдено списанных счетчиков')
+                        this.showNotificationWarning('Данных не найдено')
                     }
                 } catch (e) {
                     this.showNotificationRequestError(e)
+                } finally {
+	                this.loading = false
                 }
             },
         }

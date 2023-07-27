@@ -23,6 +23,7 @@ export const dictionary = {
         smsStatus: [],
         storageEmployeesModified: [],
         parseOptions: [],
+        programmingLogTypes: [],
     }),
 
     getters: {
@@ -109,6 +110,10 @@ export const dictionary = {
         getParseOptions(state) {
             return state.parseOptions
         },
+    
+        getProgrammingLogTypes(state) {
+            return state.programmingLogTypes
+        },
     },
 
     mutations: {
@@ -131,7 +136,8 @@ export const dictionary = {
                 storageEmployees,
                 phases,
                 smsStatus,
-                options
+                options,
+                programmingLogTypes,
             } = dictionaries
     
             state.assignmentEventTypes = assignmentEventTypes
@@ -150,6 +156,7 @@ export const dictionary = {
             state.lvStates = lvStates
             state.owners = owners
             state.materialTypes = materialTypes
+            state.programmingLogTypes = programmingLogTypes
             state.storageEmployees = storageEmployees.map(({ name, staff_id, card }) => {
                 const [ secondName, firstName ] = name.trim().split(' ')
                 return {

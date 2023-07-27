@@ -179,6 +179,7 @@
             'showNotificationError',
             'showNotificationRequestError',
             'getMeters',
+            'updateMeterData',
         ],
 	    computed: {
             ...mapGetters({
@@ -306,22 +307,26 @@
             async save() {
 	            this.editedItem.parent_id = this.isChild ? this.editedItem.parent_id : ''
 	            this.editedItem.icc = this.isChild ? '' : this.editedItem.icc
-                try {
-	                if (this.editedIndex > -1) {
-		                const [ editedMeter ] = await this.editMeter(this.editedItem)
-		                this.$refs.DataDialog.dialogClose()
-                        const oldMeter = this.meters.find(({ id }) => editedMeter.id === id)
-		                Object.assign(oldMeter, editedMeter)
-		                this.showNotificationSuccess(`Счетчик ${ editedMeter.serial_number } успешно отредактирован`)
-	                }
-	                else {
-	                	const [ addedMeter ] = await this.addMeter(this.editedItem)
-		                this.$refs.DataDialog.dialogClose()
-		                await this.getMeters()
-		                this.showNotificationSuccess(`Счетчик ${ addedMeter.serial_number } успешно добавлен`)
-	                }
-                } catch (e) {
-	                this.showNotificationRequestError(e)
+                if (this.editedIndex > -1) {
+                    try {
+	                    this.$refs.DataDialog.setLoading(true)
+                        const [ editedMeter ] = await this.editMeter(this.editedItem)
+                        this.updateMeterData(editedMeter, `Счетчик ${ editedMeter.serial_number } успешно отредактирован`)
+                        this.$refs.DataDialog.dialogClose()
+                    } catch (e) {
+                    	this.$refs.DataDialog.setLoading(false)
+                        this.showNotificationRequestError(e)
+                    }
+                } else {
+                    try {
+                        const [ addedMeter ] = await this.addMeter(this.editedItem)
+                        await this.getMeters()
+                        this.showNotificationSuccess(`Счетчик ${ addedMeter.serial_number } успешно добавлен`)
+                    } catch (e) {
+                        this.showNotificationRequestError(e)
+                    } finally {
+                        this.$refs.DataDialog.dialogClose()
+                    }
                 }
             },
 

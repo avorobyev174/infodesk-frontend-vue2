@@ -202,10 +202,10 @@ export const storage = {
 			return response.data
 		},
 		
-		async insertMeterStorageMaterials({ state }, { meters, materials, updateStr }) {
+		async insertMeterStorageMaterials({ state }, { meters, materials }) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ state.serverModule }/insert-meter-materials`,
-				{ meters, materials, updateStr },
+				{ meters, materials },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data
@@ -220,10 +220,10 @@ export const storage = {
 			return response.data
 		},
 		
-		async insertMeterWorkStatus({ state }, { meters, isWorkable, comment, updateStr }) {
+		async insertMeterWorkStatus({ state }, { meters, isWorkable, comment }) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ state.serverModule }/insert-meter-work-status`,
-				{ meters, isWorkable, comment, updateStr },
+				{ meters, isWorkable, comment },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data

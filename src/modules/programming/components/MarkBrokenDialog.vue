@@ -61,10 +61,11 @@
         },
         inject: [
         	'getMeterTypeTitle',
-            'showNotificationRequestError'
+            'showNotificationRequestError',
+            'updateMeterData'
         ],
         methods: {
-            ...mapActions('programming', [ 'markMeterBroken' ]),
+            ...mapActions('programming', [ 'setMeterBroken' ]),
             open(item) {
                 this.item = item
                 this.serialNumber = item.serial_number
@@ -77,29 +78,13 @@
             },
 
             async marked() {
-	            this.$refs.DataDialog.dialogClose()
             	try {
-		            const meterData = await this.markMeterBroken({ meter: this.item, reason: this.reason, comment: this.comment })
-		            const [ markedMeter ] = meterData
-
-		            const updatedMainMeter = this.meters.find(({ id }) => markedMeter.id === id)
-
-		            markedMeter.address = 'СНЯТ'
-		            markedMeter.sms_id = null
-		            markedMeter.sms_status = 1
-		            markedMeter.customer = null
-		            markedMeter.customer_address = null
-		            markedMeter.customer_phone = null
-		            markedMeter.customer_type = null
-		            markedMeter.customer_email = null
-		            markedMeter.in_pyramid = 0
-		            markedMeter.loaded = null
-		            markedMeter.personal_account = null
-
-		            Object.assign(updatedMainMeter, markedMeter)
-		            this.showNotificationSuccess(`Счетчик ${ updatedMainMeter.serial_number } успешно списан`)
+		            const markedMeter = await this.setMeterBroken({ meter: this.item, comment: this.comment })
+                    this.updateMeterData(markedMeter, `Счетчик ${ markedMeter.serial_number } успешно списан`)
                 } catch (e) {
 		            this.showNotificationRequestError(e)
+	            } finally {
+		            this.$refs.DataDialog.dialogClose()
 	            }
             }
         }

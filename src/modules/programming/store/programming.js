@@ -65,6 +65,19 @@ export const programming = {
             }
         },
     
+        async fetchEvents({ state, commit }, id) {
+            try {
+                commit('setLoading', true)
+                const response = await get(
+                    this.state.serverUrl + `/api/${ state.serverModule }/logs/${ id }`,
+                    { headers: { 'authorization': $cookies.get('auth_token') } })
+            
+                return  response.data
+            } finally {
+                commit('setLoading', false)
+            }
+        },
+    
         async addMeter({ state, commit }, { serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway }) {
             try {
                 commit('setLoading', true)
@@ -104,30 +117,24 @@ export const programming = {
             }
         },
 
-        async editMeter({ state, commit }, { id, serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway }) {
-            try {
-                commit('setLoading', true)
-                
-                const response = await axios.put(
-                    this.state.serverUrl + `/api/${ state.serverModule }/meters/` + id,
-                    {
-                        serialNumber: serial_number,
-                        type: type,
-                        icc:  String(icc), //из за большого числа 20 знаков
-                        phase: phase,
-                        port: port,
-                        address: address,
-                        contact: contact,
-                        ipAddress: ip_address,
-                        parentId: parent_id,
-                        gateway
-                    },
-                    { headers: { 'authorization': $cookies.get('auth_token') } })
-                console.log(response.data)
-                return response.data
-            } finally {
-                commit('setLoading', false)
-            }
+        async editMeter({ state }, { id, serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway }) {
+            const response = await axios.put(
+                this.state.serverUrl + `/api/${ state.serverModule }/meters/` + id,
+                {
+                    serialNumber: serial_number,
+                    type: type,
+                    icc:  String(icc), //из за большого числа 20 знаков
+                    phase: phase,
+                    port: port,
+                    address: address,
+                    contact: contact,
+                    ipAddress: ip_address,
+                    parentId: parent_id,
+                    gateway
+                },
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+            console.log(response.data)
+            return response.data
         },
     
         async updateDataFromRTC({ state, commit }) {
@@ -237,30 +244,32 @@ export const programming = {
             return response.data
         },
 
-        async markMeterBroken({ state, commit }, { meter, reason, comment }) {
+        async setMeterBroken({ state }, { meter, comment }) {
             const response = await axios.post(
-                this.state.serverUrl + `/api/${ state.serverModule }/mark-meter-broken/${ meter.id }`,
+                this.state.serverUrl + `/api/${ state.serverModule }/set-meter-broken/${ meter.id }`,
                 {
-                    data: JSON.stringify(meter),
-                    comment: comment,
-                    reason: reason
+                    meter,
+                    comment,
                 },
                 { headers: { 'authorization': $cookies.get('auth_token') }})
 
             return response.data
         },
 
-        async fetchBrokenMeters({ state, commit }) {
-            try {
-                commit('setLoading', true)
-                const response = await axios.get(
-                    this.state.serverUrl + `/api/${ state.serverModule }/get-broken-meters`,
-                    { headers: { 'authorization': $cookies.get('auth_token') } })
+        async fetchBrokenMeters({ state }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${ state.serverModule }/get-broken-meters`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
 
-                return response.data
-            } finally {
-                commit('setLoading', false)
-            }
+            return response.data
+        },
+    
+        async fetchDeletedMeters({ state }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${ state.serverModule }/get-deleted-meters`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
         },
       
         async addOrRemovePyramidLoad({ state, commit }, { meters, isAdd }) {
@@ -276,6 +285,15 @@ export const programming = {
             const response = await axios.get(
                 this.state.serverUrl + `/api/${ state.serverModule }/get-parent-mirc04-meters`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
+    
+        async removeSimCardData({ state, commit }, meter) {
+            const response = await axios.post(
+                this.state.serverUrl + `/api/${ state.serverModule }/remove-sim-data`,
+                { meter },
+                { headers: { 'authorization': $cookies.get('auth_token') }})
         
             return response.data
         },

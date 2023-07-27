@@ -1,8 +1,8 @@
 <template>
     <v-card class="m-3 px-4 pb-6" max-width="900px">
         <v-card-text class="pb-0">
-            <p class="text-h6 text-secondary search-card-title">Отчеты по комплексам</p>
-            <p class="search-card-info">списки содержат отчеты по комплексам с описанием данных</p>
+            <p class="text-h6 text-secondary search-card-title repair-text mb-0">Отчеты по комплексам</p>
+            <p class="repair-sub-text">списки содержат отчеты по комплексам с описанием данных</p>
         </v-card-text>
         <v-treeview
             open-all
@@ -193,6 +193,7 @@
 					case Report.ASSIGNMENT_GROUP_BY_STATUS: return this.showAssignmentGroupByStatusReport(reportItem)
 					case Report.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER: return this.showAssignmentGroupByStatusAndOwnerReport(reportItem)
 					case Report.ASSIGNMENT_EVENTS_GROUP_BY_CLOSE_REASON: return this.showAssignmentEventsGroupByCloseReasonReport(reportItem)
+					case Report.STORAGE_BY_OWNER_AND_TYPE: return this.showGroupByTypeAndEmpStorageReport(reportItem)
 				}
 			},
 
@@ -265,5 +266,13 @@
 
     .v-treeview-node__content {
         align-items: baseline !important;
+    }
+
+    .repair-text {
+        color: rgba(0,0,0,0.87) !important;
+    }
+
+    .repair-sub-text {
+        font-size: 11px;
     }
 </style>

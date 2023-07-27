@@ -3,6 +3,7 @@
 </template>
 <script>
     import { mapActions } from "vuex"
+    import {formatDate} from "../../Utils";
 
     export default {
         name: 'ReportStorageMixin',
@@ -26,6 +27,7 @@
 			        'getSpentByYearReport',
 			        'getMaterialSpentByMonthReport',
                     'getMetersLastLogsReport',
+                    'getGroupByTypeAndEmpStorageReport',
 		        ]),
 
 	        async showLocationStorageReport(item) {
@@ -478,6 +480,37 @@
 					    },
 					    600,
 					    800
+				    )
+			    } catch (e) {
+				    this.showNotificationRequestError(e)
+			    } finally {
+				    this.$refs.DataInputReportDialog.close()
+			    }
+		    },
+
+		    async showGroupByTypeAndEmpStorageReport({ type, startDate, endDate, empStaffId, title }) {
+			    try {
+				    const reportData = await this.getGroupByTypeAndEmpStorageReport({ type, startDate, endDate, empStaffId })
+				    if (!reportData.length) {
+					    return this.showNotificationInfo('Информация отсутствует')
+				    }
+				    const data = reportData.map(({ date, type, count, operationType, issuingPerson, acceptedPerson }) => [
+					    date,
+					    this.getMeterTypeTitle(type),
+					    count,
+					    this.getOperationTitle(operationType),
+					    this.getEmployeeTitleByStaffId(issuingPerson),
+					    this.getEmployeeTitleByStaffId(acceptedPerson)
+				    ])
+
+				    this.$refs.DataResultReportDialog.open(
+					    {
+						    headers: [ 'Дата', 'Тип', 'Количество', 'Тип операции', 'Отдающий', 'Принимающий' ],
+						    dialogTitle: title,
+						    data
+					    },
+					    600,
+					    1000
 				    )
 			    } catch (e) {
 				    this.showNotificationRequestError(e)

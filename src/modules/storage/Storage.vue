@@ -94,8 +94,8 @@
             </template>
             <template v-slot:item.serial_number="{ item }">
                 <v-chip
-                    v-if="item.repairColor"
-                    :color="item.repairColor === 1 ? colorOrange : colorGreen">
+                    v-if="item.isSetWorkStatus || item.isSetMaterials"
+                    :color="item.isSetWorkStatus ? colorGreen : item.isSetMaterials ? colorOrange : '' ">
                     {{ item.serial_number }}
                 </v-chip>
                 <span v-else>
@@ -158,7 +158,6 @@
 
 <script>
     import { filterActions } from "./js/storage-actions"
-    import LogTable from "./LogTable"
 	import MainMenu from "./components/MainMenu"
     import AcceptOrIssueDialog from "./components/AcceptOrIssueDialog"
     import ActionMenu from "../utils-components/menu/ActionMenu"
@@ -182,7 +181,6 @@
 			StorageLogList,
 			RegisterDialog,
 			MainMenu,
-			LogTable,
             AcceptOrIssueDialog,
 			ShowHideColumnsDialog,
 			ActionColumn,

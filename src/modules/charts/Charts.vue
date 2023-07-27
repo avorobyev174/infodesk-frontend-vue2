@@ -194,6 +194,20 @@
 		    return { series, labels }
 	    },
 
+	    async getMeterInPyramidChartSeries() {
+		    try {
+			    const data = await this.getMeterInPyramidChartData()
+			    const { series, seriesTotal } = this.getDataSeries(data)
+
+			    this.addInPyramidSeries =  [
+				    { name: 'Добавлено за день', data: series },
+				    { name: 'Всего добавлено', data: seriesTotal },
+			    ]
+		    } catch (e) {
+			    this.showNotificationRequestError(e)
+		    }
+	    },
+
         async getMeterRegistrationChartSeries() {
             try {
                 const data = await this.getMeterRegistrationChartData()
@@ -203,21 +217,7 @@
                     { name: 'Зарегистрировано за день', data: series },
                     { name: 'Всего зарегистрировано', data: seriesTotal }
                 ]
-	            this.$refs.pieTypesChart.updateOptions(this.programmingTypesOptions)
-            } catch (e) {
-                this.showNotificationRequestError(e)
-            }
-        },
-
-        async getMeterInPyramidChartSeries() {
-            try {
-                const data = await this.getMeterInPyramidChartData()
-	            const { series, seriesTotal } = this.getDataSeries(data)
-
-                this.addInPyramidSeries =  [
-                    { name: 'Добавлено за день', data: series },
-                    { name: 'Всего добавлено', data: seriesTotal },
-                ]
+	            this.$refs.pieTypesChart?.updateOptions(this.programmingTypesOptions)
             } catch (e) {
                 this.showNotificationRequestError(e)
             }
@@ -228,7 +228,7 @@
                 const data = await this.getMeterRegistrationTypesChartData()
                 const { series, labels } = this.getDataChartSeries(data)
                 this.typeSeries = series
-                this.$refs.pieTypesChart.updateOptions({ labels: labels })
+                this.$refs.pieTypesChart?.updateOptions({ labels: labels })
             } catch (e) {
                 this.showNotificationRequestError(e)
             }
@@ -291,9 +291,8 @@
                 const data = await this.getMeterRegistrationNotInPyramidTypeChartData()
 	            const { series, labels } = this.getDataChartSeries(data)
 	            this.notInPyramidTypeSeries = series
-                this.$refs.pieNotInPyramidTypeChart.updateOptions({ labels })
+                this.$refs.pieNotInPyramidTypeChart?.updateOptions({ labels })
             } catch (e) {
-	            console.log(e)
                 this.showNotificationRequestError(e)
             }
         },
@@ -305,7 +304,7 @@
                 let labels = [ 'Не загружено', 'Загружено']
                 data.forEach(({ count }) => series.push(+count))
                 this.inPyramidCountSeries = series
-                this.$refs.pieInPyramidCountChart.updateOptions({ labels })
+                this.$refs.pieInPyramidCountChart?.updateOptions({ labels })
             } catch (e) {
                 this.showNotificationRequestError(e)
             }
@@ -316,7 +315,7 @@
                 const { withDataCount, totalCount } = await this.getMeterRegistrationActiveInPyramidChartData()
                 const labels = [ 'Есть показания', 'Нет показаний' ]
                 this.activeInPyramidCountSeries = [ withDataCount, totalCount - withDataCount ]
-                this.$refs.pieActiveInPyramidCountChart.updateOptions({ labels })
+                this.$refs.pieActiveInPyramidCountChart?.updateOptions({ labels })
             } catch (e) {
                 this.showNotificationRequestError(e)
             }

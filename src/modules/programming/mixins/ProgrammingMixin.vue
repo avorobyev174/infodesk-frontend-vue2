@@ -3,6 +3,7 @@
 	import headers from "../js/programming-table-headers"
 	import menuActions from "../js/meters-menu"
 	import { defaultMeterActions, filterActions } from '../js/meters-actions'
+	import { ProgrammingState } from "../../../const"
 
 	export default {
 		name: "ProgrammingMixin",
@@ -96,9 +97,8 @@
 			async setIsProgrammed() {
 				this.$refs.MeterProgrammingDialog.dialogClose()
 				try {
-					await this.setProgrammingValue({ id: this.selectedMeter.id, value: 2 })
-					await this.getMeters()
-					this.showNotificationSuccess('Информация успешно обновлена')
+					const updatedMeter = await this.setProgrammingValue({ id: this.selectedMeter.id, value: ProgrammingState.LOADED })
+                    this.updateMeterData(updatedMeter, 'Информация успешно обновлена')
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				}

@@ -3,7 +3,6 @@
         <v-data-table
             :loading="loading"
             @contextmenu:row="actionMenuOpen"
-            sort-by="id"
             height="85vh"
             class="elevation-1"
             single-select
@@ -38,6 +37,17 @@
                     @input="acceptFilters"
                 />
             </template>
+            <template v-slot:header.prog_value="{ header }">
+                {{ header.text }}
+                <combobox-filter
+                    filterLabel="Перепрограммирование"
+                    v-model="filterByProgValue"
+                    :filter-value="filterByProgValue"
+                    :filterItems="programmingValues"
+                    :filter-color="filterByProgValueColor"
+                    @input="acceptFilters"
+                />
+            </template>
             <template v-slot:header.serial_number="{ header }">
                 {{ header.text }}
                 <input-filter
@@ -54,6 +64,9 @@
             </template>
             <template v-slot:item.ip_address="{ item }">
                 {{ getIpAddressTitle(item.ip_address) }}
+            </template>
+            <template v-slot:item.calibration_date="{ item }">
+                {{ formatDate(item.calibration_date) }}
             </template>
             <template v-slot:item.prog_value="{ item }">
                 <v-icon v-if="item.prog_value === 0" size="25" class="ma-2" :color="colorGrey">
@@ -91,6 +104,7 @@
     import ActionMenu from "../utils-components/menu/ActionMenu"
     import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTableFilter"
     import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
+    import { ProgrammingState } from "../../const"
 
 	export default {
 		name: "Repair",
@@ -108,13 +122,14 @@
 			module: 'repair',
 			options: {},
 			headers: [
-				{ text: 'ID', sortable: false, align: 'center', value: 'id' },
+				{ text: 'ID', sortable: true, align: 'center', value: 'id' },
 				{ text: 'Тип', value: 'type', sortable: true, align: 'center' },
 				{ text: 'Серийный номер', value: 'serial_number', sortable: false, align: 'center' },
-				{ text: 'IP адрес', value: 'ip_address', sortable: false, align: 'center' },
-				{ text: 'Порт', value: 'port', sortable: false, align: 'center' },
+				{ text: 'Дата поверки', value: 'calibration_date', sortable: true, align: 'center' },
+				{ text: 'IP адрес', value: 'ip_address', sortable: true, align: 'center' },
+				{ text: 'Порт', value: 'port', sortable: true, align: 'center' },
 				{ text: 'Связной', value: 'contact', sortable: false, align: 'center' },
-				{ text: 'Настройка данных', value: 'prog_value', sortable: true, align: 'center' },
+				{ text: 'Перепрограммирование', value: 'prog_value', sortable: true, align: 'center' },
 			],
 		}),
 		mixins: [ DictionaryMixin, FavoriteModuleMixin, RepairFilterMixin ],
@@ -126,6 +141,7 @@
 			...mapGetters({
 				meters: 'repair/getMeters',
                 isLogin: 'getIsLogin',
+				programmingValues: 'repair/getProgrammingValues',
 			}),
 			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue']),
 			...mapState('repair', [ 'loading', ])
@@ -174,13 +190,18 @@
             async setProgrammingOption() {
 	            this.$refs.ProgrammingValueDialog.dialogClose()
                 try {
-	                await this.setProgrammingValue({ id: this.selectedMeter.id, value: 1 })
-	                await this.getMeters()
-	                this.showNotificationSuccess('Настройка данных успешна обновлена')
+	                const updatedMeter = await this.setProgrammingValue({ id: this.selectedMeter.id, value: ProgrammingState.PROGRAMMED })
+	                this.updateMeterData(updatedMeter, 'Информация успешно обновлена')
                 } catch (e) {
 	                this.showNotificationRequestError(e)
                 }
             },
+
+			updateMeterData(updatedMeter, messageSuccess) {
+				const meter = this.meters.find(({ id }) => id ===  updatedMeter.id)
+				Object.assign(meter, updatedMeter)
+				this.showNotificationSuccess(messageSuccess)
+			}
 		}
 	}
 </script>

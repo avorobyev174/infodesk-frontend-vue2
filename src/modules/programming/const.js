@@ -10,6 +10,7 @@ const ProgrammingLogType = {
 	STACK_UPDATE: 9,
 	REPROGRAMMING: 10,
 	SIM_CARD_DATA_DELETED: 11,
+	PYRAMID_RELOADED: 12,
 }
 export {
 	ProgrammingLogType

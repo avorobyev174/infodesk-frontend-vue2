@@ -4,11 +4,20 @@ export const repair = {
 	state: () => ({
 		meters: [],
 		loading: false,
-		serverModule: 'repair'
+		serverModule: 'repair',
+		programmingValues: [
+			{ title: 'Не перепрограммировано', value: 0 },
+			{ title: 'Перепрограммировано', value: 1 },
+			{ title: 'Загружено', value: 2 },
+		],
 	}),
 	getters: {
 		getMeters(state) {
 			return state.meters
+		},
+		
+		getProgrammingValues(state) {
+			return state.programmingValues
 		},
 	},
 	mutations: {
@@ -68,7 +77,7 @@ export const repair = {
 			try {
 				commit('setLoading', true)
 				const response = await post(
-					this.state.serverUrl + `/api/${ state.serverModule }/set-programming-value`,
+					this.state.serverUrl + `/api/${ state.serverModule }/set-programming-value/`,
 					{ id, value },
 					{ headers: { 'authorization': $cookies.get('auth_token') } })
 					

@@ -99,7 +99,10 @@
             }
         },
         methods: {
-            ...mapActions('programming', [ 'fetchBrokenMeters', 'fetchDeletedMeters' ]),
+            ...mapActions('programming', [
+            	'fetchBrokenMeters',
+                'fetchDeletedMeters'
+            ]),
 
             async open(showDeleted) {
             	this.loading = true
@@ -108,14 +111,14 @@
                     let meters = []
                 	if (showDeleted) {
 		                meters = await this.fetchDeletedMeters()
-                        this.meters = meters.map(( state_before, author_acc_id, created ) => ({
+                        this.meters = meters.map(({ state_before, author_acc_id, created }) => ({
 	                        ...JSON.parse(state_before),
 	                        acc_id: author_acc_id,
 	                        created
                         }))
                     } else {
 		                meters = await this.fetchBrokenMeters()
-		                this.meters = meters.map(({ acc_id, created, data}) => ({
+		                this.meters = meters.map(({ acc_id, created, data }) => ({
 			                ...JSON.parse(data),
 			                acc_id,
 			                created

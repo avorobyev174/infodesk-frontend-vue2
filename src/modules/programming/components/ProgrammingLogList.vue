@@ -71,8 +71,6 @@
             serialNumber: '',
 		}),
 		inject: [
-			'showNotificationSuccess',
-			'showNotificationError',
 			'showNotificationRequestError',
 			'formatDate',
 			'getMeterTypeTitle',
@@ -84,7 +82,7 @@
             'getSmsTitleByStatus',
 		],
         computed: {
-	        ...mapState([ 'colorGrey', 'colorRed', 'colorGreen', 'colorBlue', 'colorOrange', 'colorDarkGrey' ]),
+	        ...mapState([ 'colorGrey' ]),
 	        ...mapGetters({
 		        accounts: 'dictionary/getAccounts',
 	        })
@@ -150,7 +148,8 @@
 						case 'phase': return `Фазность: ${ oldVal ? this.getPhaseTitle(oldVal) : 'отсутствует'  } ⇾ ${ newVal ? this.getPhaseTitle(newVal) : 'отсутствует'  }`
 						case 'ip_address': return `IP адрес: ${ oldVal ? this.getIpAddressTitle(oldVal) : 'отсутствует' } ⇾ ${ newVal ? this.getIpAddressTitle(newVal) : 'отсутствует' }`
 						case 'status': return `Статус сим карты: ${ oldVal ? this.getSimStatusTitle(oldVal) : 'отсутствует' } ⇾ ${ newVal ? this.getSimStatusTitle(newVal) : 'отсутствует' }`
-						case 'sms_status': return `Статус смс: ${ oldVal ? this.getSmsTitleByStatus(oldVal) : 'отсутствует' } ⇾ ${ newVal ? this.getSmsTitleByStatus(newVal) : 'отсутствует' }`
+						//case 'sms_status': return `Статус смс: ${ oldVal ? this.getSmsTitleByStatus(oldVal) : 'отсутствует' } ⇾ ${ newVal ? this.getSmsTitleByStatus(newVal) : 'отсутствует' }`
+						case 'sms_status': return ''
                         default: return `${ this.getFieldName(name) }: ${ oldVal ? oldVal : 'отсутствует' } ⇾ ${ newVal ? newVal : 'отсутствует' }`
 					}
                 }).join('\n')

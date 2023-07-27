@@ -31,10 +31,17 @@ const Difference = {
 	NOT_EXIST: 3,
 }
 
+const ProgrammingState = {
+	NOT_PROGRAMMED: 0,
+	PROGRAMMED: 1,
+	LOADED: 2,
+}
+
 export {
 	AssignmentEventType,
 	NOT_AUTHORIZATED_ERROR,
 	MapViewType,
 	AssignmentStatus,
-	Difference
+	Difference,
+	ProgrammingState
 }

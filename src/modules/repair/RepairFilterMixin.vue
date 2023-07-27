@@ -8,6 +8,8 @@
 			filteredAssignments: [],
 			filterByMeterTypeColor: '',
 			filterBySerialNumberColor: '',
+			filterByProgValueColor: '',
+			filterByProgValue: [],
 			filterByMeterType: [],
 			filterBySerialNumber: '',
 			filters: {},
@@ -19,6 +21,9 @@
 			},
 			filterBySerialNumber(val) {
 				this.filterBySerialNumberColor = this.getFilterIconColor(val)
+			},
+			filterByProgValue(val) {
+				this.filterByProgValueColor = this.getFilterIconColor(val)
 			},
 		},
 		methods: {
@@ -53,6 +58,7 @@
 
 	        resetFilters() {
 		        this.filterByMeterType = []
+		        this.filterByProgValue = []
 		        this.filterBySerialNumber = ''
 	        },
 
@@ -60,6 +66,7 @@
 		        this.filters = {
 			        meterTypes: this.filterByMeterType.map(({ value }) => value),
 			        serialNumber: this.filterBySerialNumber,
+			        progValues: this.filterByProgValue.map(({ value }) => value),
 		        }
 	        },
 

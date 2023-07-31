@@ -34,7 +34,7 @@
                             label="Поиск"
                             hide-details
                             clearable
-                            class="searchTextInput"
+                            class="search-text-input"
                         />
                         <v-spacer/>
                     </v-toolbar>
@@ -140,5 +140,7 @@
 </script>
 
 <style scoped>
-
+    .search-text-input {
+        max-width: 350px;
+    }
 </style>

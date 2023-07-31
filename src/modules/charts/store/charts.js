@@ -28,6 +28,14 @@ export const charts = {
 
             return response.data
         },
+    
+        async getMeterRegistrationManufacturesChartData({ state }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${state.serverModule }/meter-registration-manufactures-chart`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
 
         async getMeterRegistrationBuildingsChartData({ state }) {
             const response = await axios.get(
@@ -66,6 +74,14 @@ export const charts = {
                 this.state.serverUrl + `/api/${ state.serverModule }/meter-active-in-pyramid-chart`,
                 { headers: { 'authorization': $cookies.get('auth_token') } })
 
+            return response.data
+        },
+    
+        async getMeterStorageAfterProgrammingAndInstallChartData({ state }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${ state.serverModule }/meter-storage-programming-and-install-count`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
             return response.data
         },
     },

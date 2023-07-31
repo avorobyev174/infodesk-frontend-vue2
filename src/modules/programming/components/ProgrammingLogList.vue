@@ -4,7 +4,7 @@
         absolute
         temporary
         right
-        width="500"
+        width="450"
         class="event-list"
     >
         <v-list-item class="pt-3" style="display:flex; gap: 12px">
@@ -134,7 +134,7 @@
 				const diff = []
                 const fields = Object.keys(before)
                 for (const field of fields) {
-                	if (before[field] !== after[field]) {
+                	if (before[field] !== after[field] && !(before[field] === null && after[field] === '')) {
 		                diff.push({ name: field, oldVal: before[field], newVal: after[field] })
                     }
                 }

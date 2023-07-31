@@ -20,7 +20,6 @@
             :items="meters"
             :options.sync="options"
             :server-items-length="totalMetersCount"
-            @click:row="initializeEventList"
         >
             <template v-slot:no-results>
                 <span>Нет данных...</span>
@@ -249,6 +248,7 @@
             @addPyramidLoadValue="$refs.MeterAddPyramidLoadValueDialog.dialogOpen()"
             @actualizeDataFromStek="$refs.UpdateDataFromSTEKDialog.updateSingleData(selectedMeter)"
             @removeSimCardData="simCardDataRemove(selectedMeter)"
+            @openEventList="$refs.LogList.open(selectedMeter)"
         />
         <dialog-custom
             ref="MeterDeleteDialog"
@@ -326,11 +326,6 @@ export default {
 	},
     mixins: [ ProgrammingMixin, ProgrammingFilterMixin, DictionaryMixin, FavoriteModuleMixin, ColumnVisibilityMixin ],
     methods: {
-	    async initializeEventList(item, row) {
-		    row.select(true)
-		    this.$refs.LogList.open(item)
-	    },
-
 	    actionMenuOpen(e, { item }) {
 		    e.preventDefault()
 		    this.selectedMeter = item

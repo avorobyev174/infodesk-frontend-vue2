@@ -33,7 +33,7 @@
                             :disabled="formSubmit"
                         />
                         <v-select
-                            v-show="currentOperation === Operation.STORE"
+                            v-show="currentOperation === Operation.STORAGE"
                             v-model="storageType"
                             :items="storageTypes"
                             item-text="title"
@@ -127,7 +127,7 @@
 		        v => v && !String(v).match('[^0-9]') || 'Должны присутствовать только цифры'
 	        ],
             moveMeters:  [],
-	        currentOperation: Operation.STORE,
+	        currentOperation: Operation.STORAGE,
 	        newLocation: Location.STORAGE,
             isRouter: false
         }),
@@ -158,7 +158,7 @@
 	        currentOperation(operation) {
 		        this.newLocation = operation
 		        switch (operation) {
-			        case Operation.STORE: this.newLocation = this.storageType; break
+			        case Operation.STORAGE: this.newLocation = this.storageType; break
 			        case Operation.CUSTOMER: this.newLocation = Location.CUSTOMER_WINDOW; break
 			        case Operation.PROGRAMMING: this.newLocation = Location.PROGRAMMING; break
 		        }
@@ -166,7 +166,7 @@
 		        this.resetValidation()
             },
 		    storageType(val) {
-	        	if (this.currentOperation === Operation.STORE) {
+	        	if (this.currentOperation === Operation.STORAGE) {
 			        this.newLocation = val
 		        }
             },
@@ -181,7 +181,7 @@
 
             changeDefaultPerson(currentOperation) {
 	        	if (!this.isRouter) {
-			        if (currentOperation !== Operation.STORE) {
+			        if (currentOperation !== Operation.STORAGE) {
 				        this.acceptedPerson = ''
 				        this.acceptedPersonLabel = 'Принимающий сотрудник'
 				        this.issuingPerson = this.getEmployeeCardByStaffId(this.staffId)
@@ -249,7 +249,7 @@
 
 	        clear() {
 	        	this.meterCount = ''
-		        this.currentOperation = this.isRouter ? Operation.REPAIR : Operation.STORE
+		        this.currentOperation = this.isRouter ? Operation.REPAIR : Operation.STORAGE
 		        this.newLocation = this.isRouter ? Location.REPAIR : Location.STORAGE
 		        this.storageType = 0
 		        this.issuingPerson = ''

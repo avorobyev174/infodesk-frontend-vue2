@@ -320,12 +320,12 @@
                 } else {
                     try {
                         const [ addedMeter ] = await this.addMeter(this.editedItem)
-                        await this.getMeters()
                         this.showNotificationSuccess(`Счетчик ${ addedMeter.serial_number } успешно добавлен`)
                     } catch (e) {
                         this.showNotificationRequestError(e)
                     } finally {
                         this.$refs.DataDialog.dialogClose()
+	                    await this.getMeters()
                     }
                 }
             },

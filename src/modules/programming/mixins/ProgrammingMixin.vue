@@ -62,7 +62,6 @@
 			async meterDelete() {
 				this.$refs.MeterDeleteDialog.dialogClose()
 				try {
-					console.log(this.selectedMeter.id)
 					const { id } = await this.deleteMeter(this.selectedMeter.id)
 					if (this.selectedMeter.id === id) {
 						this.showNotificationSuccess(`Счетчик ${ this.selectedMeter.serial_number } успешно удален`)
@@ -86,9 +85,8 @@
                     ? this.$refs.MeterAddPyramidLoadValueDialog.dialogClose()
                     : this.$refs.MeterRemovePyramidLoadValueDialog.dialogClose()
 				try {
-					await this.addOrRemovePyramidLoad({ meter: this.selectedMeter, isAdd })
-					await this.getMeters()
-					this.showNotificationSuccess('Информация успешно обновлена')
+					const updatedMeter = await this.addOrRemovePyramidLoad({ meter: this.selectedMeter, isAdd })
+					this.updateMeterData(updatedMeter, 'Информация успешно обновлена')
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				}

@@ -1,5 +1,12 @@
 const defaultMeterActions = [
 	{
+		id: 8,
+		title: 'Открыть список событий',
+		onClick: 'openEventList',
+		icon: 'mdi-format-list-bulleted',
+		color: 'primary'
+	},
+	{
 		id: 1,
 		title: 'Изменить',
 		onClick: 'edit',

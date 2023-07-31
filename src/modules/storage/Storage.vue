@@ -163,7 +163,6 @@
     import ActionMenu from "../utils-components/menu/ActionMenu"
 	import RegisterDialog from "./components/RegisterDialog"
 	import ShowHideColumnsDialog from "../utils-components/show-hide-columns/ShowHideColumnsDialog"
-    import ActionColumn from "../utils-components/ActionColumn"
     import EditDialog from "./components/EditDialog"
     import StorageMixin from "./mixins/StorageMixin"
     import RepairAndMaterialsDialog from "./components/RepairAndMaterialsDialog"
@@ -183,7 +182,6 @@
 			MainMenu,
             AcceptOrIssueDialog,
 			ShowHideColumnsDialog,
-			ActionColumn,
 			EditDialog,
 			RepairAndMaterialsDialog,
 			ComboboxFilter: ComboboxDataTableFilter,

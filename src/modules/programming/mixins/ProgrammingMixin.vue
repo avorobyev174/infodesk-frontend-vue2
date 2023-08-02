@@ -63,10 +63,7 @@
 				this.$refs.MeterDeleteDialog.dialogClose()
 				try {
 					const { id } = await this.deleteMeter(this.selectedMeter.id)
-					if (this.selectedMeter.id === id) {
-						this.showNotificationSuccess(`Счетчик ${ this.selectedMeter.serial_number } успешно удален`)
-						await this.getMeters()
-					}
+                    this.deleteMeterData(id, `Счетчик ${ this.selectedMeter.serial_number } успешно удален`)
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				}
@@ -112,10 +109,17 @@
             },
 
             updateMeterData(updatedMeter, messageSuccess) {
-	            const meter = this.meters.find(({ id }) => id ===  updatedMeter.id)
+	            const meter = this.meters.find(({ id }) => id === updatedMeter.id)
 	            Object.assign(meter, updatedMeter)
 	            this.showNotificationSuccess(messageSuccess)
-            }
+            },
+
+			deleteMeterData(deletedMeterId, messageSuccess) {
+				const meter = this.meters.find(({ id }) => id === deletedMeterId)
+                const index = this.meters.indexOf(meter)
+				this.meters.splice(index, 1)
+				this.showNotificationSuccess(messageSuccess)
+			}
 		}
 	}
 </script>

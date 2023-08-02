@@ -130,6 +130,7 @@
     const DEFAULT_SERIAL_NUMBER_LEN = 10
     const PHASE_1_TYPES = [ 132, 133, 143, 107, 138, 144, 111, 131, 113, 117 ]
     const IP_ADDRESSES_TYPES = [ 105, 139, 140, 141, 142, 143, 144, 146, 147 ]
+    const MIRTEK_TYPES = [ 111, 119, 120 ]
     import {
 	    editedItem,
 	    defaultItem,
@@ -246,7 +247,7 @@
 		            }
 	            }
 	            this.isChildMirC04 = [ 140 ].includes(type)
-	            this.hasGateway = [ 111, 119, 120 ].includes(type)
+	            this.hasGateway = MIRTEK_TYPES.includes(type)
             },
 
 	        meterParentChanged(parentId) {
@@ -269,7 +270,7 @@
 	            this.editedIndex = -1
 	            this.isChild = false
 	            this.isChildMirC04 = [ 140 ].includes(this.editedItem.type)
-	            this.hasGateway = [ 111 ].includes(this.editedItem.type)
+	            this.hasGateway = MIRTEK_TYPES.includes(this.editedItem.type)
 
 	            this.meterTypeChanged(this.editedItem.type)
 	            this.meterSortedTypes = this.meterTypes.sort(this.meterTypeSort)
@@ -287,7 +288,7 @@
 	            this.meterSortedTypes = this.meterTypes.sort(this.meterTypeSort)
 
 	            this.isChildMirC04 = [ 140 ].includes(this.editedItem.type)
-	            this.hasGateway = [ 111 ].includes(this.editedItem.type)
+	            this.hasGateway = MIRTEK_TYPES.includes(this.editedItem.type)
 
 	            this.isChild = !!this.editedItem.parent_id
 	            this.$refs.DataDialog.dialogOpen()

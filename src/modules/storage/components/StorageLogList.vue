@@ -57,19 +57,19 @@
                    <v-chip
                        v-if="log.workStatus"
                        class="text-pre p-1 pr-3 pl-3 mt-1 mb-1"
-                       style="height: fit-content; display: block; width: fit-content; font-size: 12px"
+                       style="height: fit-content; display: block; width: fit-content; font-size: 12px; margin-left: -9px;"
                        :color="log.workStatus.status === 0 ? colorRed : colorGreen"
                    >{{ log.workStatus.workStatusStr }}</v-chip>
                    <v-chip
                        v-if="log.spentItems"
                        class="text-pre p-1 pr-3 pl-3"
-                       style="height: fit-content; font-size: 12px"
+                       style="height: fit-content; font-size: 12px; margin-left: -9px;"
                    >{{ log.spentItems }}</v-chip>
                </div>
                <div v-else-if="log.update_field_new">
                    <v-chip
                        class="text-pre p-1 pr-3 pl-3 mt-1 mb-1"
-                       style="height: fit-content; display: block; width: fit-content; font-size: 12px"
+                       style="height: fit-content; display: block; width: fit-content; font-size: 12px; margin-left: -9px;"
                    >{{ parseEditField(log.update_field_new) }}</v-chip>
                </div>
             </v-timeline-item>

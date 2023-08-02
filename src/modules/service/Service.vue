@@ -130,6 +130,9 @@
             <template v-slot:item.owner_id="{ item }">
                 {{ item.owner_id ? getAccountFullName(item.owner_id) : 'отсутствует' }}
             </template>
+            <template v-slot:item.work_in_date="{ item }">
+                {{ formatDate(item.work_in_date) }}
+            </template>
             <template v-slot:item.lastEvents="{ item }">
                 <div v-if="item.status !== AssignmentStatus.RE_REGISTERED" class="last-event">
                     <span

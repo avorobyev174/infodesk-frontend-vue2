@@ -59,7 +59,7 @@
 	                    this.$refs.UpdateDialog.dialogOpen()
                         await this.getMeters()
                     } else {
-	                    this.showNotificationInfo('В Ростелекома не найдено подходящих счетчиков для обновления')
+	                    this.showNotificationInfo('В Ростелекома не найдено подходящих счетчиков для обновления данных')
                     }
                 } catch (e) {
                     this.showNotificationRequestError(e)

@@ -84,6 +84,14 @@ export const charts = {
         
             return response.data
         },
+    
+        async getMeterStorageAfterProgrammingTypeCountChartData({ state }) {
+            const response = await axios.get(
+                this.state.serverUrl + `/api/${ state.serverModule }/meter-storage-after-programming-type-count`,
+                { headers: { 'authorization': $cookies.get('auth_token') } })
+        
+            return response.data
+        },
     },
     namespaced: true
 }

@@ -17,6 +17,7 @@ export const getReportItemsKeeper = () => [
 			getReportObjectById(Report.STORAGE_IN_OUT_BY_OWNER, storageReports),
 			getReportObjectById(Report.STORAGE_GROUP_BY_OWNER_AND_TYPE, storageReports),
 			getReportObjectById(Report.STORAGE_LAST_LOGS, storageReports),
+			getReportObjectById(Report.STORAGE_BY_OWNER_AND_TYPE, storageReports),
 		],
 	},
 ]

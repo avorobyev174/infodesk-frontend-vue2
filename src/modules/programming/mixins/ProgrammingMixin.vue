@@ -104,14 +104,19 @@
 		            const updatedMeter = await this.removeSimCardData(this.selectedMeter)
                     this.updateMeterData(updatedMeter, 'Информация успешно обновлена')
 	            } catch (e) {
+		            console.log(e)
 		            this.showNotificationRequestError(e)
 	            }
             },
 
             updateMeterData(updatedMeter, messageSuccess) {
 	            const meter = this.meters.find(({ id }) => id === updatedMeter.id)
-	            Object.assign(meter, updatedMeter)
-	            this.showNotificationSuccess(messageSuccess)
+                if (meter) {
+	                Object.assign(meter, updatedMeter)
+	                this.showNotificationSuccess(messageSuccess)
+                } else {
+	                this.showNotificationWarning('Объект обновления не найден')
+                }
             },
 
 			deleteMeterData(deletedMeterId, messageSuccess) {

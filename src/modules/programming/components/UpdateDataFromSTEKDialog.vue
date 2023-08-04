@@ -81,7 +81,7 @@
                         this.$refs.UpdateDialog.dialogOpen()
                         await this.getMeters()
                     } else {
-                        this.showNotificationInfo('В СТЕКе не найдено подходящих счетчиков для обновления')
+                        this.showNotificationInfo('В СТЕК не найдено подходящих счетчиков для обновления данных')
                     }
                 } catch (e) {
                     this.showNotificationRequestError(e)

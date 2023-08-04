@@ -77,7 +77,7 @@ const filterActions = ({ in_pyramid, phone, personal_account }, currentAccountId
 		if (in_pyramid === 0 && [ 6 ].includes(action.id)) {
 			return { ...action, disabled: true }
 		}
-		if (personal_account && [ 7 ].includes(action.id)) {
+		if (!phone && [ 7 ].includes(action.id)) {
 			return { ...action, disabled: true }
 		}
 		if (currentAccountId !== 1 && [ 2 ].includes(action.id)) {

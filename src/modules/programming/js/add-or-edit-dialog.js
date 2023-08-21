@@ -98,6 +98,8 @@ function getContactBySerialNumber(serialNumber, meterType) {
 		case 114:
 		case 115:
 		case 122:
+		case 149:
+		case 150:
 			contact = 16;
 			break
 		case 111:

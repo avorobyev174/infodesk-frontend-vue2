@@ -40,6 +40,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             case 134:
             case 136:
             case 137:
+            case 148:
                 type = 'Приборы с поддержкой протокола СПОДЭС - Меркурий 204 (СПОДЭС)';
                 password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
@@ -69,6 +70,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 144:
+            case 147:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
                 password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
@@ -98,6 +100,12 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
                 password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
+            case 149:
+            case 150:
+                type = 'Приборы с поддержкой протокола СПОДЭС - СЕ307 (СПОДЭС)';
+                password = '1234567812345678';
+                user = 'Высокий уровень доступа (HLS)';
+                break
             case 117:
                 type = 'Приборы с поддержкой протокола СПОДЭС - РТМ-01D(B) (СПОДЭС)';
                 password = '0107032222222222';
@@ -108,6 +116,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
                 password = '010703';
                 user = 'На запись';
         }
+        //150 последний
 
         meter.customer_type === 'ФЛ'
             ? pyramidIndividualArray.push([meter.customer, meter.customer.email, meter.customer_phone, meter.personal_account])

@@ -198,7 +198,7 @@
 					const editFields = JSON.parse(updateField)
 					return Object.entries(editFields).map(([ key, value ]) => {
 						switch (key) {
-							case 'meter_type': return { ...value, old: this.getMeterTypeTitle(value.old), new: this.getMeterTypeTitle(value.new) }
+							case 'meter_type': return { ...value, old: this.getMeterTypeTitle(+value.old), new: this.getMeterTypeTitle(+value.new) }
 							case 'accuracy_class': return { ...value, old: this.getAccuracyClassTitle(value.old), new: this.getAccuracyClassTitle(value.new) }
 							case 'condition': return { ...value, old: this.getConditionTitle(+value.old), new: this.getConditionTitle(+value.new) }
 							case 'property': return { ...value, old: this.getOwnerTitle(value.old), new: this.getOwnerTitle(value.new) }

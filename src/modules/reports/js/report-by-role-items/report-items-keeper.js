@@ -1,6 +1,7 @@
 import { Report } from "../../const"
 import { getReportObjectById } from "../../utils"
 import { storageReports } from "../report-items/storage-reports"
+import {programmingReports} from "../report-items/programming-reports";
 
 export const getReportItemsKeeper = () => [
 	{
@@ -19,5 +20,9 @@ export const getReportItemsKeeper = () => [
 			getReportObjectById(Report.STORAGE_LAST_LOGS, storageReports),
 			getReportObjectById(Report.STORAGE_BY_OWNER_AND_TYPE, storageReports),
 		],
+	},
+	{
+		name: 'Программирование',
+		children: [ ...programmingReports ],
 	},
 ]

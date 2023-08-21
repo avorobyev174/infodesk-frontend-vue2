@@ -1,7 +1,7 @@
 <template>
     <div>
         <h5 class="mx-auto text-sm-h6 text-wrap text-center mt-2" style="max-width: 900px">
-            Количество счетчиков выданных на программирование, монтаж и обратно принятых на склад с монтажа за одень день
+            Количество счетчиков выданных на программирование, монтаж и обратно принятых на склад с монтажа за один день
         </h5>
         <div>
             <apex-chart ref="CountChart" type="bar" height="750" :options="programmingChartOptions" :series="programmingChartSeries"></apex-chart>
@@ -10,7 +10,7 @@
             Количество запрограммированных счетчиков на складе готовых к выдаче на монтаж сгруппированных по типу в конце дня
         </h5>
         <div id="chart">
-            <apex-chart ref="TypesCountChart" type="bar" height="750" :options="chartOptions" :series="afterProgrammingTypesCountChartSeries"></apex-chart>
+            <apex-chart ref="TypesCountChart" type="bar" height="150" :options="chartOptions" :series="afterProgrammingTypesCountChartSeries"></apex-chart>
         </div>
     </div>
 </template>
@@ -32,7 +32,7 @@
 			chartOptions: {
 				chart: {
 					type: 'bar',
-					height: 350,
+					height: 150,
 				},
 				stroke: {
 					width: 1,
@@ -47,13 +47,7 @@
 					}
 				},
 				xaxis: {
-					categories: [
-						'Online advertising',
-						'Sales Training',
-						'Print advertising',
-						'Catalogs',
-						'Meetings'
-					],
+					categories: [],
 					labels: {
 						formatter: (val) => {
 							return val + " шт."
@@ -63,7 +57,6 @@
 				fill: {
 					opacity: 1,
 				},
-				colors: [ '#80c7fd', '#008FFB', '#80f1cb', '#00E396' ],
 				legend: {
 					position: 'top',
 					horizontalAlign: 'left'
@@ -102,19 +95,22 @@
                     const installAfterStorageSeries = []
                     const storageAfterInstallSeries = []
                     const afterProgrammingReadyToInstallSeries = []
+                    const afterInstallReadyToInstallSeries = []
 
 					for (const date in data) {
 						const {
 							storageAfterProgramming,
                             storageAfterInstall,
                             installAfterStorage,
-                            afterProgrammingReadyToInstall
+                            afterProgrammingReadyToInstall,
+							afterInstallReadyToInstall
 						} = data[ date ]
 
 						storageAfterProgrammingSeries.push(storageAfterProgramming ? storageAfterProgramming : 0)
 						installAfterStorageSeries.push(installAfterStorage ? installAfterStorage : 0)
 						storageAfterInstallSeries.push(storageAfterInstall ? storageAfterInstall : 0)
-						afterProgrammingReadyToInstallSeries.push(afterProgrammingReadyToInstall ? afterProgrammingReadyToInstall : 0)
+                        afterProgrammingReadyToInstallSeries.push(afterProgrammingReadyToInstall ? afterProgrammingReadyToInstall : 0)
+                        afterInstallReadyToInstallSeries.push(afterInstallReadyToInstall ? afterInstallReadyToInstall : 0)
                     }
 
                     const categories = Object.keys(data).map((date) => formatDate(date))
@@ -123,7 +119,8 @@
                         { name: 'Принято на склад после программирования', data: storageAfterProgrammingSeries },
 						{ name: 'Выдано на монтаж', data: installAfterStorageSeries },
 						{ name: 'Принято на склад после монтажа', data: storageAfterInstallSeries },
-						{ name: 'Готовые к выдаче на конец дня', data: afterProgrammingReadyToInstallSeries },
+						{ name: 'Готовые к выдаче на конец дня(запрограммированы)', data: afterProgrammingReadyToInstallSeries },
+						{ name: 'Готовые к выдаче на конец дня(после неудачного монтажа)', data: afterInstallReadyToInstallSeries },
 					]
 
 					this.programmingChartOptions.xaxis.categories = categories
@@ -149,8 +146,9 @@
 	                    return { name: this.getMeterTypeTitle(type), data: typeDateCount }
                     })
 
-					console.log(this.afterProgrammingTypesCountChartSeries)
+					//console.log(this.afterProgrammingTypesCountChartSeries)
 					this.chartOptions.xaxis.categories = categories
+					this.chartOptions.chart.height = this.afterProgrammingTypesCountChartSeries.length * 150
 					this.$refs.TypesCountChart?.updateOptions(this.chartOptions)
 				} catch (e) {
 					this.showNotificationRequestError(e)

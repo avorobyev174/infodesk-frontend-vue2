@@ -9,6 +9,7 @@ const Location = {
 	STORAGE_TEMPORARY: 7,
 	CUSTOMER_WINDOW: 8,
 	PROGRAMMING: 9,
+	OBJECT: 10,
 }
 
 const Operation = {

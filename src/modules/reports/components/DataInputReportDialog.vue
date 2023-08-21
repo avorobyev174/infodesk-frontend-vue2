@@ -77,9 +77,21 @@
                 v-model="type"
                 :rules="requiredRules"
                 outlined
+                clearable
                 v-if="[ Report.STORAGE_BY_OWNER_AND_TYPE ].includes(id)"
             >
             </v-combobox>
+            <v-select
+                v-model="oper_type"
+                label="Операция"
+                :items="operations"
+                :rules="requiredRules"
+                item-text="title"
+                item-value="value"
+                v-if="[ Report.STORAGE_BY_OWNER_AND_TYPE ].includes(id)"
+                outlined
+            >
+            </v-select>
             <v-combobox
                 :items="locations"
                 item-text="title"
@@ -167,6 +179,7 @@
 			serviceEmployee : null,
             serialNumber: '',
             loading: false,
+            oper_type: null,
 			id: 0,
 			title: '',
             startDate: '',
@@ -223,6 +236,7 @@
 	            this.location = null
 	            this.type = null
                 this.serialNumber = ''
+                this.oper_type = null
             },
 
             setLoading(loading) {
@@ -285,6 +299,7 @@
 		            	reportInputData = {
 		            		type: this.type.value,
 				            empStaffId: this.employee.staff_id,
+				            operType: this.oper_type,
 				            startDate: this.startDate,
 				            endDate: this.endDate
 		            	};

@@ -488,9 +488,9 @@
 			    }
 		    },
 
-		    async showGroupByTypeAndEmpStorageReport({ type, startDate, endDate, empStaffId, title }) {
+		    async showGroupByTypeAndEmpStorageReport({ type, startDate, endDate, operType, empStaffId, title }) {
 			    try {
-				    const reportData = await this.getGroupByTypeAndEmpStorageReport({ type, startDate, endDate, empStaffId })
+				    const reportData = await this.getGroupByTypeAndEmpStorageReport({ type, startDate, endDate, empStaffId, operType })
 				    if (!reportData.length) {
 					    return this.showNotificationInfo('Информация отсутствует')
 				    }

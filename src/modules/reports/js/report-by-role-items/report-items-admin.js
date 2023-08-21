@@ -19,7 +19,7 @@ export const ReportItemsAdmin = [
 	},
 	{
 		name: 'Программирование',
-		children: [...programmingReports ],
+		children: [ ...programmingReports ],
 	},
 	{
 		name: 'Склад',

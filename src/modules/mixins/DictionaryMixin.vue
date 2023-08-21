@@ -203,8 +203,14 @@
 			},
 
 			getEmployeeTitleByStaffId(staffId) {
-				if (staffId === 0) {
+				if (staffId === 0 || staffId === 999998) {
 					return 'отсутствует'
+				}
+				if (staffId === 999999) {
+					return 'Завод'
+                }
+				if (staffId === 999997) {
+					return 'Потребитель'
 				}
 				const emp = this.storageEmployees.find(({ staff_id }) => staffId === staff_id)
 				return emp ? emp.name : staffId

@@ -96,6 +96,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             case 114:
             case 115:
             case 122:
+            case 151:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ308 (СПОДЭС)';
                 password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';

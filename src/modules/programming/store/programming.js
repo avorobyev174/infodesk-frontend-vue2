@@ -272,10 +272,10 @@ export const programming = {
             return response.data
         },
       
-        async addOrRemovePyramidLoad({ state, commit }, { meters, isAdd }) {
+        async addOrRemovePyramidLoad({ state, commit }, { meter, isAdd }) {
             const response = await axios.post(
                 this.state.serverUrl + `/api/${ state.serverModule }/add-or-remove-meter-pyramid-value`,
-                { meters, isAdd },
+                { meter, isAdd },
                 { headers: { 'authorization': $cookies.get('auth_token') }})
 
             return response.data

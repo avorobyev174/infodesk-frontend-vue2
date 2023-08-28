@@ -120,7 +120,7 @@
 						{ name: 'Выдано на монтаж', data: installAfterStorageSeries },
 						{ name: 'Принято на склад после монтажа', data: storageAfterInstallSeries },
 						{ name: 'Готовые к выдаче на конец дня(запрограммированы)', data: afterProgrammingReadyToInstallSeries },
-						{ name: 'Готовые к выдаче на конец дня(после неудачного монтажа)', data: afterInstallReadyToInstallSeries },
+						{ name: 'Готовые к выдаче на конец дня(возвращенны после монтажа)', data: afterInstallReadyToInstallSeries },
 					]
 
 					this.programmingChartOptions.xaxis.categories = categories
@@ -148,7 +148,8 @@
 
 					//console.log(this.afterProgrammingTypesCountChartSeries)
 					this.chartOptions.xaxis.categories = categories
-					this.chartOptions.chart.height = this.afterProgrammingTypesCountChartSeries.length * 150
+					this.chartOptions.chart.height = categories.length * 350
+					console.log(this.chartOptions.chart.height)
 					this.$refs.TypesCountChart?.updateOptions(this.chartOptions)
 				} catch (e) {
 					this.showNotificationRequestError(e)

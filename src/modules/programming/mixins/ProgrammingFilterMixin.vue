@@ -18,6 +18,7 @@
 			filterBySerialNumberColor: '',
 			filterBySimColor: '',
 			filterByPersonalAccountColor: '',
+			filterByDateCreatedColor: '',
 			filterByIpAddress: [],
 			filterByPort: '',
 			filterByPersonalAccount: '',
@@ -26,6 +27,7 @@
 			filterBySerialNumber: '',
 			filterBySim: '',
 			filterByICC: '',
+			filterByDateCreated: '',
 			filters: {},
 			programmingAddresses: [],
 		}),
@@ -54,11 +56,19 @@
 			filterByPersonalAccount(val) {
 				this.filterByPersonalAccountColor = this.getFilterIconColor(val)
 			},
+			filterByDateCreated(val) {
+				this.filterByDateCreatedColor = this.getFilterIconColor(val)
+			},
 		},
 		methods: {
 			...mapActions('programming', [
 				'metersFilter',
 			]),
+
+			acceptDateCreatedFilter(createdFilter) {
+				this.filterByDateCreated = createdFilter
+				this.acceptFilters()
+			},
 
 			acceptSerialNumberFilter(serialNumberFilter) {
 				this.filterBySerialNumber = serialNumberFilter
@@ -114,6 +124,7 @@
 		        this.filterByMeterType = []
 		        this.filterBySerialNumber = ''
 		        this.filterBySim = ''
+		        this.filterByDateCreated = ''
 	        },
 
 	        checkAllFilters() {
@@ -126,12 +137,11 @@
 			        serialNumber: this.filterBySerialNumber,
 			        sim: this.filterBySim,
 			        personalAccount: this.filterByPersonalAccount,
+                    created: this.filterByDateCreated
 		        }
 	        },
 
 	        createFiltersValues(allAMeters) {
-		        // this.serviceEmployees = createServiceEmployeeArray(allAssignments, this.getAccountFullName)
-		        // this.serviceBuildings = createBuildingArray(allAssignments)
 		        this.programmingAddresses = createProgrammingAddressesArray(allAMeters)
 	        },
 

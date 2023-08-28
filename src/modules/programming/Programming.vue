@@ -65,6 +65,16 @@
                     @accept="acceptSerialNumberFilter"
                 />
             </template>
+            <template v-slot:header.created="{ header }">
+                {{ header.text }}
+                <date-filter
+                    filterLabel="Дата создания"
+                    v-model="filterByDateCreated"
+                    :filter-value="filterByDateCreated"
+                    :filter-color="filterByDateCreatedColor"
+                    @accept="acceptDateCreatedFilter"
+                />
+            </template>
             <template v-slot:header.personal_account="{ header }">
                 {{ header.text }}
                 <input-filter
@@ -281,6 +291,7 @@ import ComboboxDataTableFilter from "../utils-components/filter/ComboboxDataTabl
 import InputDataTableFilter from "../utils-components/filter/InputDataTableFilter"
 import DialogCustom from "../utils-components/dialog/DialogCustom"
 import ProgrammingLogList from "./components/ProgrammingLogList"
+import DateDataTableFilter from "../utils-components/filter/DateDataTableFilter";
 
 export default {
     name: "Programming",
@@ -298,6 +309,7 @@ export default {
 	    MeterTableInfo,
 	    ComboboxFilter: ComboboxDataTableFilter,
 	    InputFilter: InputDataTableFilter,
+        DateFilter: DateDataTableFilter,
 	    ProgrammingLogList
     },
     data: () => ({

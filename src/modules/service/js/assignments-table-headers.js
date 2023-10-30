@@ -104,6 +104,12 @@ export default [
 		align: 'center',
 	},
 	{
+		text: 'Тип потребителя',
+		value: 'customer_type',
+		sortable: true,
+		align: 'center',
+	},
+	{
 		text: 'Адрес',
 		value: 'customer_address',
 		sortable: true,

@@ -263,7 +263,7 @@
         <dialog-custom
             ref="MeterDeleteDialog"
             :max-width="600"
-            title="Вы уверены что хотите удалить это счетчик?"
+            title="Вы уверены что хотите удалить этот счетчик?"
             @submit="meterDelete"
         />
         <programming-log-list

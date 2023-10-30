@@ -12,23 +12,28 @@
 		data: () => ({
 			filteredAssignments: [],
 			filterByOwnerColor: '',
+			filterByCustomerTypeColor: '',
 			filterByStatusColor: '',
 			filterByBuildingColor: '',
 			filterByAddressColor: '',
 			filterByMeterTypeColor: '',
 			filterBySerialNumberColor: '',
+			filterByCloseReasonColor: '',
 			filterByOwner: [],
 			filterByStatus: [],
 			filterByBuilding: [],
 			filterByAddress: [],
 			filterByMeterType: [],
+			filterByCloseReason: [],
 			filterBySerialNumber: '',
+			filterByCustomerType: [],
 			filters: {},
 			serviceEmployees: [],
 			serviceStatuses: [],
 			serviceBuildings: [],
 			serviceAddresses: [],
 			serviceMeterTypes: [],
+			serviceCloseReasons: [],
 		}),
 		watch: {
 			filterByOwner(val) {
@@ -48,6 +53,12 @@
 			},
 			filterBySerialNumber(val) {
 				this.filterBySerialNumberColor = this.getFilterIconColor(val)
+			},
+			filterByCloseReason(val) {
+				this.filterByCloseReasonColor = this.getFilterIconColor(val)
+			},
+			filterByCustomerType(val) {
+				this.filterByCustomerTypeColor = this.getFilterIconColor(val)
 			},
 		},
 		methods: {
@@ -86,6 +97,8 @@
 		        this.filterByBuilding = []
 		        this.filterByAddress = []
 		        this.filterByMeterType = []
+		        this.filterByCloseReason = []
+		        this.filterByCustomerType = []
 		        this.filterBySerialNumber = ''
 	        },
 
@@ -94,8 +107,10 @@
 			        statuses: this.filterByStatus.map(({ value }) => value),
 			        owners: this.filterByOwner.map(({ value }) => value),
 			        buildings: this.filterByBuilding,
+			        closeReasons: this.filterByCloseReason.map(({ id }) => id),
 			        addresses: this.filterByAddress,
 			        meterTypes: this.filterByMeterType.map(({ value }) => value),
+			        customerTypes: this.filterByCustomerType.map(({ value }) => value),
 			        serialNumber: this.filterBySerialNumber,
 		        }
 	        },

@@ -18,6 +18,7 @@ import { map } from "@/modules/map/store/map"
 import { serviceReports } from "@/modules/reports/store/service-reports"
 import { storageReports } from "@/modules/reports/store/storage-reports"
 import { dictionary } from "@/store/dictionary"
+import { objects } from "@/modules/objects/store/objects"
 
 import router from '../router/index.js'
 
@@ -143,5 +144,6 @@ export default new Vuex.Store({
         service,
         map,
         dictionary,
+        objects,
     }
 })

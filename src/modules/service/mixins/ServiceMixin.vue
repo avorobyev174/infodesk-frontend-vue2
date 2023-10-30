@@ -15,11 +15,12 @@
 		computed: {
 			...mapGetters({
 				assignments: 'service/getAssignments',
+				assignmentCloseReasonTypes: 'dictionary/getAssignmentCloseReasonTypes',
 				currentAccountId: 'getAccountId',
 				isLogin: 'getIsLogin',
 			}),
 			...mapState('service', [ 'loading' ]),
-			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue', 'colorGold' ]),
+			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue', 'colorGold', 'colorOrange' ]),
 		},
 		inject: [
 			'showNotificationSuccess',
@@ -52,6 +53,7 @@
 				'acceptOrDeclineAssignment',
 				'declineAssignment',
 				'getAssignmentsAndEventsInWorkByUser',
+				'markAssignmentProblem',
 			]),
 
 			getAssignmentStatusColor(status) {

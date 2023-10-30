@@ -100,7 +100,7 @@
                 v-model="location"
                 :rules="requiredRules"
                 outlined
-                v-if="[ Report.STORAGE_LOGS_BY_LOCATION, Report.STORAGE_COUNT_BY_LOCATION, Report.STORAGE_GROUP_BY_OWNER_AND_TYPE ].includes(id)"
+                v-if="[ Report.STORAGE_LOGS_BY_LOCATION, Report.STORAGE_COUNT_BY_LOCATION, Report.STORAGE_GROUP_BY_LOC ].includes(id)"
             >
             </v-combobox>
             <v-combobox
@@ -137,6 +137,8 @@
                 :rules="requiredRules"
                 clearable
                 outlined
+                @change="checkPeriod"
+                v-if="![ Report.STORAGE_GROUP_BY_LOC ].includes(id)"
             >
             </v-text-field>
             <v-text-field
@@ -146,6 +148,8 @@
                 :rules="requiredRules"
                 clearable
                 outlined
+                @change="checkPeriod"
+                v-if="![ Report.STORAGE_GROUP_BY_LOC ].includes(id)"
             >
             </v-text-field>
         </template>
@@ -158,6 +162,7 @@
 	import DictionaryMixin from "../../mixins/DictionaryMixin"
 	import { Report } from "../const"
     import { createCustomerAddressesArray, createServiceEmployeeArray } from '../../service/js/assignments-filter-values'
+    import { formatDateToISO } from "../../Utils"
 
 	export default {
 		name: "DataInputReportDialog",
@@ -199,7 +204,7 @@
 			],
         }),
 		mixins: [ DictionaryMixin ],
-		inject: [ 'showNotificationRequestError' ],
+		inject: [ 'showNotificationRequestError', 'showNotificationWarning' ],
 		computed: {
 			...mapGetters({
 				types: 'dictionary/getMeterTypes',
@@ -248,6 +253,21 @@
 	            this.$refs.DataInputDialog.dialogClose()
             },
 
+	        checkPeriod() {
+				if (!this.endDate && !this.startDate) {
+					return
+                }
+		        const dataPeriod = this.id === Report.STORAGE_BY_INSTALL_DATA ? 31 : 91
+		        const eDate = new Date(this.endDate)
+		        const sDate = new Date(this.startDate)
+		        const checkDate = new Date()
+		        checkDate.setDate(eDate.getDate() - dataPeriod)
+		        if (sDate < checkDate) {
+			        this.showNotificationWarning(`Разрешенный период данных ${ dataPeriod - 1 } дней`)
+			        this.startDate = formatDateToISO(checkDate)
+		        }
+            },
+
 	        submit() {
             	let reportInputData = {}
             	switch (this.id) {
@@ -262,15 +282,16 @@
 		            case Report.SPENT_MATERIALS:
 		            case Report.ASSIGNMENT_GROUP_BY_STATUS:
 		            	reportInputData = {	startDate: this.startDate, endDate: this.endDate };
-		            	break
-		            case Report.STORAGE_LOGS_BY_LOCATION:
+		            	break;
 		            case Report.STORAGE_COUNT_BY_LOCATION:
-		            case Report.STORAGE_GROUP_BY_OWNER_AND_TYPE:
-                        reportInputData = {
-                            location: this.location.value,
-                            startDate: this.startDate,
-                            endDate: this.endDate
-                        }; break
+			            reportInputData = {
+				            location: this.location.value,
+				            startDate: this.startDate,
+				            endDate: this.endDate
+			            }; break
+		            case Report.STORAGE_LOGS_BY_LOCATION:
+		            case Report.STORAGE_GROUP_BY_LOC:
+                        reportInputData = { location: this.location.value }; break
 		            case Report.STORAGE_IN_OUT_BY_LOCATION:
 		            case Report.STORAGE_LOGS_BY_OWNER:
 		            case Report.STORAGE_IN_OUT_BY_OWNER:
@@ -304,6 +325,11 @@
 				            endDate: this.endDate
 		            	};
 			            break
+		            case Report.STORAGE_BY_INSTALL_DATA:
+			            reportInputData = {
+				            startDate: this.startDate,
+				            endDate: this.endDate
+			            }; break
 	            }
 
                 return this.$emit('submit', {

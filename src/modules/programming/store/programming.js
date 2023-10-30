@@ -78,7 +78,7 @@ export const programming = {
             }
         },
     
-        async addMeter({ state, commit }, { serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway }) {
+        async addMeter({ state, commit }, { serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway, password }) {
             try {
                 commit('setLoading', true)
                 
@@ -94,7 +94,8 @@ export const programming = {
                         contact,
                         ipAddress: ip_address,
                         parentId: parent_id,
-                        gateway
+                        gateway,
+                        password,
                     },
                     { headers: { 'authorization': $cookies.get('auth_token') } })
 
@@ -117,7 +118,7 @@ export const programming = {
             }
         },
 
-        async editMeter({ state }, { id, serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway }) {
+        async editMeter({ state }, { id, serial_number, type, phase, icc, port, address, contact, ip_address, parent_id, gateway, password }) {
             const response = await axios.put(
                 this.state.serverUrl + `/api/${ state.serverModule }/meters/` + id,
                 {
@@ -130,10 +131,11 @@ export const programming = {
                     contact: contact,
                     ipAddress: ip_address,
                     parentId: parent_id,
-                    gateway
+                    gateway,
+                    password
                 },
                 { headers: { 'authorization': $cookies.get('auth_token') } })
-            console.log(response.data)
+          
             return response.data
         },
     

@@ -16,7 +16,6 @@
                     v-model="formValid"
                     lazy-validation
                     @submit.prevent="submit"
-                    :height="height"
                 >
                     <slot name="fields"/>
                 </v-form>

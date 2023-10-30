@@ -182,7 +182,7 @@
 					case Report.STORAGE_COUNT_BY_LOCATION: return this.showLocationLogsByPeriodStorageReport(reportItem)
 					case Report.STORAGE_LOGS_BY_OWNER: return this.showEmpLogsByPeriodStorageReport(reportItem)
 					case Report.STORAGE_IN_OUT_BY_OWNER: return this.showEmpGroupLogsByPeriodStorageReport(reportItem)
-					case Report.STORAGE_GROUP_BY_OWNER_AND_TYPE: return this.showCurrentCountByLocationStorageReport(reportItem)
+					case Report.STORAGE_GROUP_BY_LOC: return this.showCurrentCountByLocationStorageReport(reportItem)
 					case Report.REPAIR_AND_MATERIALS: return this.showRepairAndMaterialStorageReport(reportItem)
 					case Report.SPENT_MATERIALS: return this.showSpentMaterialsByMonthStorageReport(reportItem)
 					case Report.STORAGE_LAST_LOGS: return this.showLastLogsStorageReport(reportItem)
@@ -194,6 +194,7 @@
 					case Report.ASSIGNMENT_GROUP_BY_STATUS_AND_OWNER: return this.showAssignmentGroupByStatusAndOwnerReport(reportItem)
 					case Report.ASSIGNMENT_EVENTS_GROUP_BY_CLOSE_REASON: return this.showAssignmentEventsGroupByCloseReasonReport(reportItem)
 					case Report.STORAGE_BY_OWNER_AND_TYPE: return this.showGroupByTypeAndEmpStorageReport(reportItem)
+					case Report.STORAGE_BY_INSTALL_DATA: return this.showLastInstallDataByPeriodStorageReport(reportItem)
 				}
 			},
 

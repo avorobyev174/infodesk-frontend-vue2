@@ -57,6 +57,7 @@
 				{ title: 'Карта', icon: 'mdi-map', url: '/map', name: 'map' },
 				{ title: 'Утилиты', icon: 'mdi-cog-outline', url: '/test-utils', name: 'test-utils' },
 				{ title: 'Управление', icon: 'mdi-shield-crown-outline', url: '/admin', name: 'admin' },
+				{ title: 'Объекты', icon: 'mdi-alpha-o-circle-outline', url: '/objects', name: 'objects' },
 			],
 			activeModules: [],
 			drawer: true,
@@ -87,7 +88,6 @@
 		            this.$router.push('/')
 	            }
             }
-
             if (staffId) {
                 this.$store.commit('setStaffId', staffId)
             }

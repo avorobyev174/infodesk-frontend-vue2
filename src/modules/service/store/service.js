@@ -223,6 +223,21 @@ export const service = {
 			}
 		},
 		
+		async markAssignmentProblem({ state, commit }, { assignmentId, isProblem }) {
+			try {
+				commit('setLoading', true)
+				const response = await post(
+					this.state.serverUrl + `/api/${ state.serverModule }/mark-assignment-problem/${ assignmentId }`,
+					{ isProblem },
+					{ headers: { 'authorization': $cookies.get('auth_token') } })
+				
+				const [ assignment ] = response.data
+				return assignment
+			} finally {
+				commit('setLoading', false)
+			}
+		},
+		
 	},
 	namespaced: true
 }

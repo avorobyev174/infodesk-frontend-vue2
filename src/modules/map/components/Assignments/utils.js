@@ -3,6 +3,7 @@ import { spliceCustomerAddress } from "../../../service/js/assignments-filter-va
 const colorBlue = 'rgba(66, 165, 245)'
 const colorGreen = 'rgba(102, 187, 106)'
 const colorGrey = 'rgba(125, 125, 125)'
+const colorOrange = 'rgba(253, 126, 20)'
 
 const getMarkerColor = (apartments) => {
 	let color = colorGrey
@@ -11,6 +12,9 @@ const getMarkerColor = (apartments) => {
 	}
 	if (apartments.every((apartment) => [ AssignmentStatus.CLOSED, AssignmentStatus.CLOSED_AUTO ].includes(apartment.status))) {
 		color = colorGreen
+	}
+	if (apartments.some((apartment) => apartment.is_problem)) {
+		color = colorOrange
 	}
 	return color
 }
@@ -24,13 +28,15 @@ const isShowAccept = (status, owner_id, currentAccountId) => {
 	return status === AssignmentStatus.IN_WORK && currentAccountId === owner_id
 }
 
-const createApartment = ({ address, owner_id, status, id, created, meter_serial_number }, currentAccountId) => ({
+const createApartment = ({ address, owner_id, status, id, created, meter_serial_number, last_data_date, is_problem }, currentAccountId) => ({
 	address,
 	owner_id,
 	status,
 	id,
 	created,
 	meter_serial_number,
+	last_data_date,
+	is_problem,
 	isShowAcceptButton: isShowDecline(status, owner_id, currentAccountId),
 	isShowDeclineButton: isShowAccept(status, owner_id, currentAccountId)
 })
@@ -38,7 +44,7 @@ const createApartment = ({ address, owner_id, status, id, created, meter_serial_
 const groupAssignmentsByBuilding = (filteredAssignments, currentAccountId) => {
 	return filteredAssignments
 		//добавляем поле с домом addressSpliced
-		.map(({ id, lat, lng, customer_address, owner_id, status, created, meter_serial_number }) => ({
+		.map(({ id, lat, lng, customer_address, owner_id, status, created, meter_serial_number, last_data_date, is_problem }) => ({
 			addressSpliced: customer_address ? spliceCustomerAddress(customer_address, true, true) : 'неизвестно',
 			address: customer_address ? spliceCustomerAddress(customer_address, true, false) : 'неизвестно',
 			position: { lat, lng },
@@ -46,7 +52,9 @@ const groupAssignmentsByBuilding = (filteredAssignments, currentAccountId) => {
 			status,
 			id,
 			created,
-			meter_serial_number
+			meter_serial_number,
+			last_data_date,
+			is_problem
 		}))
 		//группировка по дому
 		.reduce((assignments, currentAssignment) => {

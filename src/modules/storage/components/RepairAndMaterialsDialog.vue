@@ -162,7 +162,10 @@
         }),
 		computed: {
 			...mapState([ 'colorGreen', 'colorGrey' ]),
-			...mapGetters({ staffId: 'getStaffId', }),
+			...mapGetters({
+                staffId: 'getStaffId',
+				typesInRepair: 'storage/getMeterRepairTypes',
+            }),
 		},
 		inject: [
 			'showNotificationSuccess',
@@ -193,7 +196,11 @@
 			},
 
 			open() {
-				this.dialogModel = true
+				if (!this.typesInRepair.length) {
+					this.showNotificationWarning('Не найдено счетчиков в ремонте')
+                } else {
+					this.dialogModel = true
+                }
 			},
 
 			close() {

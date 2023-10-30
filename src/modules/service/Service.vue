@@ -96,6 +96,28 @@
                     @input="acceptFilters"
                 />
             </template>
+            <template v-slot:header.lastEvents="{ header }">
+                {{ header.text }}
+                <combobox-filter
+                    filterLabel="Причина закрытия"
+                    v-model="filterByCloseReason"
+                    :filter-value="filterByCloseReason"
+                    :filterItems="assignmentCloseReasonTypes"
+                    :filter-color="filterByCloseReasonColor"
+                    @input="acceptFilters"
+                />
+            </template>
+            <template v-slot:header.customer_type="{ header }">
+                {{ header.text }}
+                <combobox-filter
+                    filterLabel="Тип потребителя"
+                    v-model="filterByCustomerType"
+                    :filter-value="filterByCustomerType"
+                    :filterItems="customerTypes"
+                    :filter-color="filterByCustomerTypeColor"
+                    @input="acceptFilters"
+                />
+            </template>
             <template v-slot:header.meter_serial_number="{ header }">
                 {{ header.text }}
                 <input-filter
@@ -112,6 +134,12 @@
                     <v-icon v-if="item.old_last_data_date">mdi-clipboard-pulse-outline</v-icon>
                 </v-chip>
             </template>
+            <template v-slot:item.meter_serial_number="{ item }" >
+                <v-chip :color="colorOrange" v-if="item.is_problem === 1">
+                    {{ item.meter_serial_number }}
+                </v-chip>
+                <span v-else>{{ item.meter_serial_number }}</span>
+            </template>}
             <template v-slot:item.meter_ip_address="{ item }" >
                 {{ getIpAddressTitle(item.meter_ip_address) }}
             </template>}
@@ -129,6 +157,9 @@
             </template>
             <template v-slot:item.owner_id="{ item }">
                 {{ item.owner_id ? getAccountFullName(item.owner_id) : 'отсутствует' }}
+            </template>
+            <template v-slot:item.customer_type="{ item }">
+                {{ item.customer_type ? item.customer_type : 'отсутствует' }}
             </template>
             <template v-slot:item.work_in_date="{ item }">
                 {{ formatDate(item.work_in_date) }}
@@ -190,6 +221,7 @@
             @acceptAssignment="assignmentAccept(selectedAssignment)"
             @editAssignmentContacts="$refs.EditContactsDialog.dialogOpen()"
             @declineAssignment="$refs.AssignmentDeclineDialog.dialogOpen()"
+            @markProblem="markProblem"
         />
         <dialog-custom
             ref="AssignmentDeclineDialog"
@@ -242,6 +274,11 @@
 	        defaultAssignmentActions,
 	        options: {},
 	        AssignmentStatus,
+            customerTypes: [
+                { title: 'ФЛ', value: 'ФЛ' },
+                { title: 'ЮЛ', value: 'ЮЛ' },
+                { title: 'отсутствует', value: null },
+            ]
         }),
 		mixins: [ DictionaryMixin, ColumnVisibilityMixin, FavoriteModuleMixin, ServiceMixin, ServiceFilterMixin ],
         watch: {
@@ -327,6 +364,19 @@
 						this.getAccountFullName,
 					)
                 } catch (e) {
+					this.showNotificationRequestError(e)
+				}
+            },
+
+			async markProblem() {
+				try {
+					const updatedAssignment = await this.markAssignmentProblem({
+                        assignmentId: this.selectedAssignment.id,
+                        isProblem: this.selectedAssignment.is_problem === 0 ? 1: 0
+					})
+					this.updateAssignment(updatedAssignment)
+					this.showNotificationSuccess('Поручение отредактировано')
+				} catch (e) {
 					this.showNotificationRequestError(e)
 				}
             }

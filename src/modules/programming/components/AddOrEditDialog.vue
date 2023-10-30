@@ -96,6 +96,14 @@
                     label="IP адрес"
                     required
                 />
+                <v-combobox
+                    v-if="MIR_TYPES.includes(editedItem.type)"
+                    v-model="editedItem.password"
+                    label="Пароль"
+                    :items="mirTypePasswords"
+                    disable-lookup
+                    auto-select-first
+                />
                 <v-text-field
                     ref="gatewayInput"
                     v-model.number="editedItem.gateway"
@@ -128,9 +136,22 @@
     import DialogWithDataSlot from "../../utils-components/dialog/DialogWithDataSlot"
     const DEFAULT_TYPE = 133
     const DEFAULT_SERIAL_NUMBER_LEN = 10
-    const PHASE_1_TYPES = [ 132, 133, 143, 107, 138, 144, 111, 131, 113, 117 ]
-    const IP_ADDRESSES_TYPES = [ 105, 139, 140, 141, 142, 143, 144, 146, 147 ]
-    const MIRTEK_TYPES = [ 111, 119, 120 ]
+    const PHASE_1_TYPES = [ 107, 111, 113, 117, 131, 132, 133, 138, 143, 144, 147 ]
+    const IP_ADDRESSES_TYPES = [ 105, 139, 140, 141, 142, 143, 144, 146, 147, 152, 153 ]
+    const MIRTEK_TYPES = [ 111, 119, 120, 154 ]
+    const MIR_TYPES = [
+	    105,
+    	139,
+	    140,
+	    141,
+	    142,
+        143,
+        144,
+        146,
+        147,
+        152,
+        153,
+    ]
     import {
 	    editedItem,
 	    defaultItem,
@@ -167,7 +188,9 @@
 	        isChild: false,
 	        isChildMirC04: false,
             parentMirC04GZB1Items: [],
-            hasGateway: false
+            hasGateway: false,
+            mirTypePasswords: [ '00000000', '12348765' ],
+	        MIR_TYPES
         }),
 	    props: {
             meters: {
@@ -235,7 +258,7 @@
             meterTypeChanged(type) {
 	            if (this.editedIndex === -1) {
 		            PHASE_1_TYPES.includes(type) ? this.editedItem.phase = 1 : this.editedItem.phase = 3
-		            IP_ADDRESSES_TYPES.includes(type) ? this.editedItem.ip_address = 5 : this.editedItem.ip_address = 1
+		            IP_ADDRESSES_TYPES.includes(type) ? this.editedItem.ip_address = 6 : this.editedItem.ip_address = 1
                     if ([ 107 ].includes(type)) {
                         this.editedItem.phase = 1
                         this.editedItem.ip_address = 1
@@ -246,6 +269,7 @@
 			            this.editedItem.ip_address = 3
 		            }
 	            }
+
 	            this.isChildMirC04 = [ 140 ].includes(type)
 	            this.hasGateway = MIRTEK_TYPES.includes(type)
             },
@@ -299,9 +323,11 @@
             },
 
             close() {
-                const type = this.editedItem.type
+                const { type, address, password }= this.editedItem
 	            this.editedItem = Object.assign({}, this.defaultItem)
 	            this.editedItem.type = type
+	            this.editedItem.address = address
+	            this.editedItem.password = password
 	            this.editedIndex = -1
             },
 

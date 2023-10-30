@@ -185,16 +185,19 @@
             async actualizeDataFromSTEK() {
                 try {
                     if (!this.successRefresh) {
-	                    const metersReadyToRefresh = this.refreshMeters.filter(({ readyToRefresh }) => readyToRefresh).map((meterData) => {
-		                    const { id, oldData, newData, difference } = meterData
-		                    const refreshMeterData = newData ? newData : this.emptyMeter
-		                    return { id, oldData, ...refreshMeterData, difference }
-	                    })
+	                    const metersReadyToRefresh = this.refreshMeters
+                            .filter(({ readyToRefresh }) => readyToRefresh)
+                            .map((meterData) => {
+                                const { id, oldData, newData, difference, mRid, installDate } = meterData
+                                const refreshMeterData = newData ? newData : this.emptyMeter
+                                return { id, oldData, ...refreshMeterData, difference, mRid, installDate }
+                            })
 	                    this.loading = true
 	                    this.successfullyRefreshedMeters = await this.saveRefreshedMetersDataFromSTEK(metersReadyToRefresh)
+
                         for (const successfullyRefreshedMeter of this.successfullyRefreshedMeters) {
                         	const refreshMeter = this.refreshMeters.find(({ id }) => successfullyRefreshedMeter.id === id)
-	                        refreshMeter ? refreshMeter.refreshStatus = 'да': refreshMeter.refreshStatus = 'ошибка'
+	                        refreshMeter?.refreshStatus ? refreshMeter.refreshStatus = 'да': refreshMeter.refreshStatus = 'ошибка'
                         }
 	                    this.loading = false
 	                    this.successRefresh = true

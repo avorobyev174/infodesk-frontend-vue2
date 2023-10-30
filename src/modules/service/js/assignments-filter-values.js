@@ -1,3 +1,5 @@
+import {AssignmentStatus} from "../../../const";
+
 const createServiceEmployeeArray = (assignments, getAccountFullNameFunction) => {
 	const employeesAccIdSet = new Set(assignments.map(({ owner_id }) => owner_id).sort((a, b) => a - b))
 	
@@ -60,8 +62,13 @@ const createMeterTypesArray = (assignments, getMeterTypeTitle) => {
 
 const getFilteredAssignments = (assignments, filters) => {
 	return assignments
-		.filter((assignment) => filters.owners.length ? filters.owners.includes(assignment.owner_id) : true)
 		.filter((assignment) => filters.statuses.length ? filters.statuses.includes(assignment.status) : true)
+		.filter((assignment) => {
+			if (filters.owners.length) {
+				return assignment.status === AssignmentStatus.REGISTERED ? true : filters.owners.includes(assignment.owner_id)
+			}
+			return true
+		})
 		.filter((assignment) => filters.buildings.length ? filters.buildings.some((building) => assignment.customer_address?.includes(building)) : true)
 		.filter((assignment) => filters.addresses.length ? filters.addresses.includes(assignment.meter_address) : true)
 }

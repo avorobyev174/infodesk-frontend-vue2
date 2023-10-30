@@ -8,19 +8,21 @@ const editedItem = {
 	contact: null,
 	ip_address: 1,
 	parent_id: null,
-	gateway: ''
+	gateway: '',
+	password: '00000000',
 }
 const defaultItem = {
 	serialNumber: '',
-		type: 1,
-		phase: 1,
-		icc: '',
-		address: 'МЭК',
-		port: null,
-		contact: null,
-		ip_address: 1,
-		parent_id: null,
-		gateway: ''
+	type: 1,
+	phase: 1,
+	icc: '',
+	address: 'МЭК',
+	port: null,
+	contact: null,
+	ip_address: 1,
+	parent_id: null,
+	gateway: '',
+	password: '00000000',
 }
 const serialNumberRules = [
 	v => !!v || 'Обязательно к заполнению',
@@ -77,13 +79,17 @@ function getContactBySerialNumber(serialNumber, meterType) {
 			}
 			break
 		//МИР
-		case 139:
-		case 143:
 		case 105:
-		case 144:
+		case 139:
 		case 140:
 		case 141:
 		case 142:
+		case 143:
+		case 144:
+		case 146:
+		case 147:
+		case 152:
+		case 153:
 			contact = serialNumber.substr(-4)
 			if (contact.length < 4) {
 				contact = contact.padStart(5, '1000')

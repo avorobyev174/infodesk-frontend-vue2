@@ -1,0 +1,80 @@
+export default [
+	{
+		text: 'Номер',
+		align: 'center',
+		value: 'nomer',
+		sortable: true,
+	},
+	{
+		text: 'Оператор',
+		value: 'operator',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'ICC',
+		value: 'icc_id',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'PIN',
+		value: 'pin',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'Тариф',
+		align: 'center',
+		value: 'tariff',
+		sortable: false,
+	},
+	{
+		text: 'PUK1',
+		align: 'center',
+		value: 'puk1',
+		sortable: false,
+	},
+	{
+		text: 'PUK2',
+		value: 'puk2',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'Опции',
+		value: 'options',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'Use',
+		value: 'use',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'Txt',
+		value: 'txt',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'ID',
+		value: 'id',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'Статус',
+		value: 'status',
+		align: 'center',
+		sortable: false,
+	},
+	{
+		text: 'IP',
+		value: 'ip',
+		align: 'center',
+		sortable: false,
+	},
+]

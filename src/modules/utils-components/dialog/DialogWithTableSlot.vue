@@ -48,7 +48,7 @@
                 <v-btn
                     color="blue darken-1"
                     text
-                    @click="dialogClose"
+                    @click="$emit('reject')"
                 >
                     {{ rejectButtonTitle }}
                 </v-btn>

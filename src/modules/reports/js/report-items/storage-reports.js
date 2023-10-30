@@ -140,4 +140,14 @@ export const storageReports = [
 		show: false,
 		open: true,
 	},
+	{
+		id: 22,
+		name: 'Отчёт по установленным ОСУ ПУ за период по монтажу',
+		download: false,
+		description: 'Информация по логам приборов учета выданным за выбранный период на монтаж',
+		executeFunction: 'dataInputReportDialogOpen',
+		loading: false,
+		show: false,
+		open: true,
+	},
 ]

@@ -14,6 +14,7 @@ import Admin from "../modules/Admin"
 import Storage from "../modules/storage/Storage"
 import Repair from "../modules/repair/Repair"
 import Service from "../modules/service/Service"
+import Objects from "../modules/objects/Objects"
 
 Vue.use(VueRouter)
 
@@ -82,6 +83,11 @@ const routes = [
         path: '/service',
         name: 'Service',
         component: Service
+    },
+    {
+        path: '/objects',
+        name: 'Objects',
+        component: Objects
     },
     {
         path: '/*',

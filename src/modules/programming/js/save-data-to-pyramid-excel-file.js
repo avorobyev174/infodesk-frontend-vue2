@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx/xlsx.mjs'
 import { formatDate } from "../../Utils"
-const ACCURACY_CLASSES_TYPES = [ 107, 116, 113, 114, 115, 139, 143, 105, 144, 140, 141, 142, 111, 117, 119, 120 ]
+const ACCURACY_CLASSES_TYPES = [ 107, 116, 113, 114, 115, 139, 143, 105, 144, 140, 141, 142, 111, 117, 119, 120, 154 ]
 export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
     let pyramidMeterArray = []
     let pyramidIndividualArray = []
@@ -25,7 +25,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
         const accuracyClass = ACCURACY_CLASSES_TYPES.includes(meter.type) ? '' : '1'
         let user = ''
         let type = ''
-        let password = ''
+        const password = meter.password
         switch (meter.type) {
             case 126:
             case 128:
@@ -33,7 +33,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             case 131:
             case 145:
                 type = 'Приборы с поддержкой протокола СПОДЭС - Меркурий 234 (СПОДЭС)';
-                password = '0107032222222222';
+                //password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
                 break;
             case 133:
@@ -42,7 +42,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             case 137:
             case 148:
                 type = 'Приборы с поддержкой протокола СПОДЭС - Меркурий 204 (СПОДЭС)';
-                password = '0107032222222222';
+                //password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
                 break;
             case 139:
@@ -50,47 +50,50 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             case 141:
             case 142:
             case 146:
+            case 152:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-04 (СПОДЭС)';
-                password = '00000000';
+                //password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 143:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
-                password = '00000000';
+                //password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 105:
+            case 153:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-07 (СПОДЭС)';
-                password = '00000000';
+                //password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 107:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ207 (СПОДЭС)';
-                password = '1234567812345678';
+                //password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 144:
             case 147:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-05 (СПОДЭС)';
-                password = '00000000';
+                //password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 111:
                 type = 'МИРТЕК - МИРТЕК-212-РУ';
-                password = '2843068834';
+                //password = '2843068834';
                 break
             case 119:
             case 120:
+            case 154:
                 type = 'МИРТЕК - МИРТЕК-232-РУ';
-                password = '2843068834';
+                //password = '2843068834';
                 break
             case 116:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ303 (СПОДЭС)';
-                password = '010703';
+                //password = '010703';
                 break
             case 113:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ208 (СПОДЭС)';
-                password = '1234567812345678';
+                //password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 114:
@@ -98,30 +101,30 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             case 122:
             case 151:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ308 (СПОДЭС)';
-                password = '1234567812345678';
+                //password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 149:
             case 150:
                 type = 'Приборы с поддержкой протокола СПОДЭС - СЕ307 (СПОДЭС)';
-                password = '1234567812345678';
+                //password = '1234567812345678';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             case 117:
                 type = 'Приборы с поддержкой протокола СПОДЭС - РТМ-01D(B) (СПОДЭС)';
-                password = '0107032222222222';
+                //password = '0107032222222222';
                 user = 'Высокий уровень доступа (HLS)';
                 break
             default:
                 type = 'Инкотекс - Меркурий 234';
-                password = '010703';
+                //password = '010703';
                 user = 'На запись';
         }
-        //150 последний
+        //153 последний
 
         meter.customer_type === 'ФЛ'
-            ? pyramidIndividualArray.push([meter.customer, meter.customer.email, meter.customer_phone, meter.personal_account])
-            : pyramidBusinessArray.push([meter.customer, meter.customer_address, meter.customer.email, meter.customer_phone, meter.personal_account])
+            ? pyramidIndividualArray.push([ meter.customer, meter.customer.email, meter.customer_phone, meter.personal_account ])
+            : pyramidBusinessArray.push([ meter.customer, meter.customer_address, meter.customer.email, meter.customer_phone, meter.personal_account ])
 
         pyramidMeterArray.push([
             i,

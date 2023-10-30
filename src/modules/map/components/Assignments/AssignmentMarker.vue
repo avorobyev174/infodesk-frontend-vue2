@@ -37,11 +37,13 @@
                     isShowAcceptButton,
                     isShowDeclineButton,
                     created,
-                    meter_serial_number
+                    meter_serial_number,
+                    last_data_date,
+                    is_problem
                 }, index) in marker.apartments"
                 :key="index"
                 class="marker"
-                :style="`background-color: ${ getAssignmentStatusColor(status) }`"
+                :style="`background-color: ${ getAssignmentStatusColor(status, is_problem) }`"
             >
                 <div>
                     <span class="maker-info">{{ `Адрес: ${ address }` }}</span>
@@ -49,6 +51,7 @@
                     <span class="maker-info">{{ `Исполнитель: ${ getAccountFullName(owner_id) }` }}</span>
                     <span class="maker-info">{{ `Статус: ${ getAssignmentStatusTitle(status) }` }}</span>
                     <span class="maker-info">{{ `Дата регистрации: ${ formatDate(created) }` }}</span>
+                    <span class="maker-info">{{ `Дата последнего опроса: ${ formatDate(last_data_date) }` }}</span>
                 </div>
                 <div style="display:flex; gap: 5px">
                     <button-with-tooltip
@@ -117,7 +120,10 @@
 		        'acceptOrDeclineAssignment',
 	        ]),
 
-	        getAssignmentStatusColor(status) {
+	        getAssignmentStatusColor(status, isProblem) {
+	        	if (isProblem) {
+	        		return 'rgba(253, 126, 20, 0.8)'
+                }
 		        switch (status) {
 			        case AssignmentStatus.REGISTERED:
 			        case AssignmentStatus.RE_REGISTERED: return 'rgba(189, 189, 189, 0.8)'

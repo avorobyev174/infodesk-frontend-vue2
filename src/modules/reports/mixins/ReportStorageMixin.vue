@@ -28,6 +28,7 @@
 			        'getMaterialSpentByMonthReport',
                     'getMetersLastLogsReport',
                     'getGroupByTypeAndEmpStorageReport',
+                    'getInstallDataByPeriodStorageReport',
 		        ]),
 
 	        async showLocationStorageReport(item) {
@@ -317,25 +318,25 @@
 			    }
 		    },
 
-		    async showCurrentCountByLocationStorageReport({ startDate, endDate, location, title }) {
+		    async showCurrentCountByLocationStorageReport({ location, title }) {
 			    try {
-				    const response = await this.getCurrentCountByLocationReport({ startDate, endDate, location })
+				    const response = await this.getCurrentCountByLocationReport({ location })
 				    if (!response.length) {
 					    return this.showNotificationInfo('Информация за этот период отсутствует')
 				    }
 
 				    const data = response.map((row) => ({
-					    ...row,
+                        ...row,
 					    type: this.getMeterTypeTitle(row.type),
 					    issuingPerson: this.getEmployeeTitleByStaffId(row.issuingPerson),
-					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson)
+					    acceptedPerson: this.getEmployeeTitleByStaffId(row.acceptedPerson),
 				    }))
 
 				    this.$refs.DataResultReportDialog.open(
 					    {
-						    headers: [ 'Тип ПУ', 'Серийный номер', 'Дата прихода', 'Отдающий', 'Принимающий', 'Комментарий' ],
+						    headers: [ 'Тип ПУ', 'Серийный номер', 'Дата операции', 'Отдающий', 'Принимающий', 'Комментарий' ],
 						    dialogTitle: title,
-						    additionalTitle: `${ this.getLocationTitle(location) } ${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    additionalTitle: `${ this.getLocationTitle(location) }`,
 						    data
 					    },
 					    600,
@@ -517,7 +518,58 @@
 			    } finally {
 				    this.$refs.DataInputReportDialog.close()
 			    }
-		    }
+		    },
+
+		    async showLastInstallDataByPeriodStorageReport({ startDate, endDate, title }) {
+			    try {
+				    const meters = await this.getInstallDataByPeriodStorageReport({ startDate, endDate })
+				    this.$refs.DataInputReportDialog.close()
+
+				    if (!meters.length) {
+					    return this.showNotificationInfo('Информация за этот период отсутствует')
+				    }
+
+				    let data = []
+				    for (const meter of meters) {
+					    let record = []
+					    record.push(this.getMeterTypeTitle(meter.type))
+					    record.push(meter.serialNumber)
+					    record.push(this.formatDate(meter.installData, true))
+					    record.push(this.getEmployeeTitleByStaffId(meter.issuingPerson))
+                        record.push(this.getEmployeeTitleByStaffId(meter.acceptedPerson))
+					    record.push(this.formatDate(meter.lastOperationData))
+					    record.push(this.getOperationTitle(meter.lastOperation))
+					    record.push(this.getLocationTitle(meter.location))
+					    record.push(meter.address)
+					    record.push(meter.comment)
+					    data.push(record)
+				    }
+
+				    this.$refs.DataResultReportDialog.open(
+					    {
+						    headers: [
+                                'Тип ПУ',
+                                'Серийный номер',
+							    'Дата выдачи в монтаж',
+                                'Отдающий',
+                                'Принимающий',
+							    'Дата последней операции',
+							    'Последняя операция',
+                                'Текущее местоположение',
+                                'Адрес',
+                                'Комментарий'
+                            ],
+						    dialogTitle: title,
+						    additionalTitle:  `${ this.formatDate(startDate) } - ${ this.formatDate(endDate) }`,
+						    data
+					    },
+					    500,
+					    1500
+				    )
+			    } catch (e) {
+				    this.showNotificationRequestError(e)
+			    }
+		    },
         }
     }
 </script>

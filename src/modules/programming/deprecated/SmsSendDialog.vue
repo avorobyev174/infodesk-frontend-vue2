@@ -9,6 +9,7 @@
             reject-button-title="Закрыть"
             is-only-close
             :count="updatedMeters.length"
+            @reject="$refs.UpdateDialog.dialogClose()"
         >
             <template v-slot:table-data>
                 <tr v-for="meter in groupMetersForRegistration" :key="meter.icc">

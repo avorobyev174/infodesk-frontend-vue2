@@ -28,6 +28,17 @@ function formatDate(dateToFormat, withTime) {
 	return `${ day }.${ month }.${ year }`
 }
 
+function formatDateToISO(datetime) {
+	const date = new Date(datetime)
+	const year = date.getFullYear()
+	let month = date.getMonth() + 1
+	let day = date.getDate()
+	if (month < 10) month = '0' + month
+	if (day < 10) day = '0' + day
+	
+	return `${ year }-${ month }-${ day }`
+}
+
 function saveDataToExcelFile(dataArray, sheetName, colsWidthArray, fileName) {
 	const workBook = XLSX.utils.book_new()
 	workBook.SheetNames.push(sheetName)
@@ -113,5 +124,6 @@ export {
 	createCustomerAddressesArray,
 	createBuildingArray,
 	spliceCustomerAddress,
-	createEmployeeArray
+	createEmployeeArray,
+	formatDateToISO
 }

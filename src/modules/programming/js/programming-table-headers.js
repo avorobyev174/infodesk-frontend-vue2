@@ -40,6 +40,12 @@ export default [
 		sortable: true,
 		align: 'center',
 	},
+	{
+		text: 'Пароль',
+		value: 'password',
+		sortable: false,
+		align: 'center',
+	},
 	{ text: 'Порт', value: 'port', align: 'center' },
 	{ text: 'ICC', value: 'icc', sortable: false, align: 'center' },
 	{ text: 'IMEI', value: 'imei', sortable: false, align: 'center' },

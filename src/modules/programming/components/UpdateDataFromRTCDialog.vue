@@ -6,6 +6,7 @@
         :table-headers="tableHeaders"
         reject-button-title="Закрыть"
         is-only-close
+        @reject="$refs.UpdateDialog.dialogClose()"
         :count="updatedMeters.length"
     >
         <template v-slot:table-data>

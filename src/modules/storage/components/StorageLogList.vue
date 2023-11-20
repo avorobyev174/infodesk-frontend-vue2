@@ -33,6 +33,9 @@
                 <p class="mb-0 event-date">
                     {{ formatDate(log.datetime, true) }}
                 </p>
+                <p v-if="log.install_date" class="mb-0 event-date">
+                    {{ `Дата установки: ${ formatDate(log.install_date) }` }}
+                </p>
                 <p style="font-size: 8px; font-style: italic; font-weight: bold" class="mb-2">
                     {{ log.id }}
                 </p>

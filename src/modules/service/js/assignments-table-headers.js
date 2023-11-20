@@ -7,6 +7,12 @@ export default [
 		width: '80px',
 	},
 	{
+		text: 'Пирамида',
+		value: 'in_pyramid',
+		sortable: true,
+		align: 'center',
+	},
+	{
 		text: 'Дата регистрации',
 		value: 'created',
 		sortable: true,

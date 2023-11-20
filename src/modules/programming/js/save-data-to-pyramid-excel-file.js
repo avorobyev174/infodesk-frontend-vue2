@@ -17,7 +17,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
             apartment = address.substring(apartmentIndex + 3, address.length)
             address = address.substr(0, apartmentIndex - 2)
         }
-        address = address.replaceAll('.',' ')
+        address = 'Челябинская обл, ' + address.replaceAll('.',' ')
         const date = new Date(meter.created)
         const yesterdayDate = new Date(date.setDate(date.getDate() - 1))
         const installDate = `${ formatDate(date) }`
@@ -62,6 +62,7 @@ export default function saveDataToPyramidExcelFile(meters, getIpAddressTitle) {
                 break
             case 105:
             case 153:
+            case 155:
                 type = 'Приборы с поддержкой протокола СПОДЭС - МИР С-07 (СПОДЭС)';
                 //password = '00000000';
                 user = 'Высокий уровень доступа (HLS)';

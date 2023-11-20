@@ -29,12 +29,7 @@
         computed: {
 	        ...mapGetters({ isLogin: 'getIsLogin' }),
 			imgClass() {
-				const imgNumber = Math.floor(Math.random() * 3);
-				switch (imgNumber) {
-					case 0: return 'img-container img1'
-					case 1: return 'img-container img2'
-					case 2: return 'img-container img3'
-                }
+	        	return `img-container img${ Math.floor(1 + Math.random() * 3) }`
             }
         },
 	}

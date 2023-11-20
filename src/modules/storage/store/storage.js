@@ -214,7 +214,7 @@ export const storage = {
 		async insertMaterialToStorage({ state }, materials) {
 			const response = await post(
 				this.state.serverUrl + `/api/${ state.serverModule }/insert-material-to-storage`,
-				materials,
+				{ materials },
 				{ headers: { 'authorization': $cookies.get('auth_token') } })
 			
 			return response.data

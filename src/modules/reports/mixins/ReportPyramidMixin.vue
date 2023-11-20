@@ -108,10 +108,10 @@
 	        },
 
 	        prepareNotInPyramidReportData(data) {
-		        return data.map(({ serial_number, name, address, phone, created, inStorage }) => {
+		        return data.map(({ serial_number, type_name, address, phone, created, inStorage }) => {
 			        return [
 				        serial_number,
-				        name,
+				        type_name,
 				        address,
 				        phone,
 				        this.formatDate(created),

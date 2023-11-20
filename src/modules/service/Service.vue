@@ -31,6 +31,13 @@
             <template v-slot:top>
                 <v-toolbar flat height="70px">
                     <v-spacer/>
+                    <div style="margin-right: 10px">
+                        <button-with-tooltip
+                            :title="filterTooltipOn"
+                            :icon="filterOn"
+                            @click="filterOnClick"
+                        ></button-with-tooltip>
+                    </div>
                     <service-menu
                         :menuActions="menuActions"
                         @refreshAssignments="getAssignments"
@@ -65,7 +72,7 @@
             </template>
             <template v-slot:header.meter_type="{ header }">
                 {{ header.text }}
-                <combobox-filter
+                <combobox-data-table-filter-with-select-all
                     filterLabel="Тип счетчика"
                     v-model="filterByMeterType"
                     :filter-value="filterByMeterType"
@@ -164,6 +171,10 @@
             <template v-slot:item.work_in_date="{ item }">
                 {{ formatDate(item.work_in_date) }}
             </template>
+            <template v-slot:item.in_pyramid="{ item }">
+                <v-icon v-if="item.in_pyramid === 0" :color="colorRed">mdi-minus-circle</v-icon>
+                <v-icon v-else :color="colorGreen">mdi-check-circle</v-icon>
+            </template>
             <template v-slot:item.lastEvents="{ item }">
                 <div v-if="item.status !== AssignmentStatus.RE_REGISTERED" class="last-event">
                     <span
@@ -251,10 +262,13 @@
     import DialogCustom from "../utils-components/dialog/DialogCustom"
     import { AssignmentStatus } from "../../const"
     import saveAssignmentsByOwnerToExcelFile from "./excel/saveAssignmentsDataToExcel"
+    import ComboboxDataTableFilterWithSelectAll from "../utils-components/filter/ComboboxDataTableFilterWithSelectAll"
+    import ButtonWithTooltip from "../utils-components/button/ButtonWithTooltip"
 
-	export default {
+    export default {
 		name: "Service",
         components: {
+	        ButtonWithTooltip,
 	        ServiceEventList,
 			ActionMenu,
 	        ServiceMenu: Menu,
@@ -264,7 +278,8 @@
 	        EditContactsDialog,
 	        ComboboxFilter: ComboboxDataTableFilter,
 	        InputFilter: InputDataTableFilter,
-	        DialogCustom
+	        DialogCustom,
+	        ComboboxDataTableFilterWithSelectAll
         },
         data: () => ({
             module: 'service',
@@ -278,7 +293,8 @@
                 { title: 'ФЛ', value: 'ФЛ' },
                 { title: 'ЮЛ', value: 'ЮЛ' },
                 { title: 'отсутствует', value: null },
-            ]
+            ],
+            onFilter: true
         }),
 		mixins: [ DictionaryMixin, ColumnVisibilityMixin, FavoriteModuleMixin, ServiceMixin, ServiceFilterMixin ],
         watch: {
@@ -379,6 +395,23 @@
 				} catch (e) {
 					this.showNotificationRequestError(e)
 				}
+            },
+
+			async fixFilter() {
+				try {
+					const updatedAssignment = await this.markAssignmentProblem({
+						assignmentId: this.selectedAssignment.id,
+						isProblem: this.selectedAssignment.is_problem === 0 ? 1: 0
+					})
+					this.updateAssignment(updatedAssignment)
+					this.showNotificationSuccess('Поручение отредактировано')
+				} catch (e) {
+					this.showNotificationRequestError(e)
+				}
+			},
+
+			filterOnClick() {
+				this.onFilter = !this.onFilter
             }
         }
 	}

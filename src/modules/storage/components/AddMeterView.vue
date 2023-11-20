@@ -457,14 +457,14 @@
 			        this.availableByTypeMeters = await this.getAllAvailableMetersByTypeFromRepair(this.type.value)
                     this.availableByTypeSerials = this.availableByTypeMeters
                         .filter(this.checkMeterValid).map(({ serial_number }) => serial_number)
-			        console.log(this.availableByTypeSerials)
+
                     this.$emit('meterTypeChanged', this.type.value)
 			        this.serialNumberLoading = false
                 }
             },
 
 	        async addAllMetersByTypeOnClick() {
-		        console.log(this.availableByTypeMeters)
+
                 for (const { meter_type, serial_number, guid, isSetWorkStatus } of this.availableByTypeMeters) {
 			        if (!this.meters.find((meter) => meter.guid === guid) && !isSetWorkStatus) {
                         this.meters.push({

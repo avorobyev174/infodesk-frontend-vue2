@@ -20,7 +20,13 @@
 				isLogin: 'getIsLogin',
 			}),
 			...mapState('service', [ 'loading' ]),
-			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue', 'colorGold', 'colorOrange' ]),
+			...mapState([ 'colorGreen', 'colorGrey', 'colorBlue', 'colorGold', 'colorOrange', 'colorRed' ]),
+            filterOn() {
+				return this.onFilter ? 'mdi-filter-settings' : 'mdi-filter-settings-outline'
+            },
+			filterTooltipOn() {
+				return this.onFilter ? 'Выключить сброс фильтров при обновлении' : 'Включить сброс фильтров при обновлении'
+			}
 		},
 		inject: [
 			'showNotificationSuccess',
@@ -39,6 +45,7 @@
 				getAssignmentStatusTitle: this.getAssignmentStatusTitle,
 			}
 		},
+
 		mounted() {
 			document.onkeydown = (evt) => {
 				if (this.$route.name === 'Service' && evt.key === 'Alt') {

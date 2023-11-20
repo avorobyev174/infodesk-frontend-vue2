@@ -92,14 +92,16 @@
             },
 
 	        resetFilters() {
-		        this.filterByOwner = []
-		        this.filterByStatus = []
-		        this.filterByBuilding = []
-		        this.filterByAddress = []
-		        this.filterByMeterType = []
-		        this.filterByCloseReason = []
-		        this.filterByCustomerType = []
-		        this.filterBySerialNumber = ''
+				if (this.onFilter) {
+					this.filterByOwner = []
+					this.filterByStatus = []
+					this.filterByBuilding = []
+					this.filterByAddress = []
+					this.filterByMeterType = []
+					this.filterByCloseReason = []
+					this.filterByCustomerType = []
+					this.filterBySerialNumber = ''
+				}
 	        },
 
 	        checkAllFilters() {
